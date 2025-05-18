@@ -1,30 +1,27 @@
-// src/app/layout.tsx
-import { AuthProvider } from "@/providers/auth-provider";
-import { QueryProvider } from "@/providers/query-provider";
-import { ToastProvider } from "@/providers/toast-providder";
-import "./globals.css";
-import { Metadata } from "next";
+import type React from "react"
+import { Providers } from "@/providers"
+import { ToastProvider } from "@/providers/toast-provider"
+import type { Metadata } from "next"
+import "@/app/globals.css"
 
 export const metadata: Metadata = {
   title: "Service Desk FIK",
-  description: "Fakultas Ilmu Komputer - UPNVJ",
-};
+  description: "Sistem Layanan Terpadu Fakultas Ilmu Komputer",
+}
 
 export default function RootLayout({
   children,
 }: {
-  children: React.ReactNode;
+  children: React.ReactNode
 }) {
   return (
     <html lang="id" suppressHydrationWarning>
-      <body>
-        <AuthProvider>
-          <QueryProvider>
-            <ToastProvider />
-            {children}
-          </QueryProvider>
-        </AuthProvider>
+      <body className="min-h-screen bg-background font-sans antialiased">
+        <Providers>
+          {children}
+          <ToastProvider />
+        </Providers>
       </body>
     </html>
-  );
+  )
 }
