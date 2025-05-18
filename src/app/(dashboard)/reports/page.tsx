@@ -2,10 +2,10 @@
 
 import { Suspense } from "react"
 import { motion } from "framer-motion"
-import { SettingsForm } from "@/components/settings/settings-form"
+import { ReportsDashboard } from "@/components/reports/reports-dashboard"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 
-// Animation variants
+// Stagger animation for dashboard elements
 const containerVariants = {
   hidden: { opacity: 0 },
   visible: {
@@ -17,16 +17,11 @@ const containerVariants = {
   },
 }
 
-export default function SettingsPage() {
+export default function ReportsPage() {
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold">Pengaturan Sistem</h1>
-        <p className="text-muted-foreground">Konfigurasi Service Desk FIK sesuai kebutuhan Anda</p>
-      </div>
-      
       <Suspense fallback={<LoadingSpinner />}>
-        <SettingsForm />
+        <ReportsDashboard />
       </Suspense>
     </motion.div>
   )

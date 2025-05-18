@@ -1,7 +1,7 @@
 "use client"
 
 import { motion } from "framer-motion"
-import { useNotification } from "@/providers/notification-provider"
+import { useNotifications } from "@/hooks/use-notification"
 import { Button } from "@/components/ui/button"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { formatRelativeTime } from "@/lib/utils"

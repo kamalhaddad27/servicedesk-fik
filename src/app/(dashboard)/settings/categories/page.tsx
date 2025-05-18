@@ -1,17 +1,33 @@
-import { PageTitle } from "@/components/ui/page-title"
-import { CategoriesForm } from "@/components/settings/categories-form"
-import type { Metadata } from "next"
+"use client"
 
-export const metadata: Metadata = {
-  title: "Kategori Tiket - Service Desk FIK",
-  description: "Kelola kategori tiket dalam sistem Service Desk FIK",
+import { Suspense } from "react"
+import { motion } from "framer-motion"
+import { CategoriesForm } from "@/components/settings/categories-form"
+import { LoadingSpinner } from "@/components/ui/loading-spinner"
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      when: "beforeChildren",
+      staggerChildren: 0.1,
+    },
+  },
 }
 
 export default function CategoriesPage() {
   return (
-    <div className="space-y-6">
-      <PageTitle title="Kategori Tiket" description="Kelola kategori dan subkategori tiket dalam sistem." />
-      <CategoriesForm />
-    </div>
+    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold">Kategori Tiket</h1>
+        <p className="text-muted-foreground">Kelola kategori dan subkategori tiket</p>
+      </div>
+      
+      <Suspense fallback={<LoadingSpinner />}>
+        <CategoriesForm />
+      </Suspense>
+    </motion.div>
   )
 }
