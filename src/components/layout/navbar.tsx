@@ -1,5 +1,7 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
@@ -10,7 +12,6 @@ import { useNotifications } from "@/hooks/use-notification"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { Badge } from "@/components/ui/badge"
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -21,9 +22,22 @@ import {
 } from "@/components/ui/dropdown-menu"
 import { NotificationList } from "@/components/notifications/notification-list"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Bell, Menu, LogOut, Settings, User, Search, HelpCircle, Calendar, PlusCircle, Home, FileText, ChevronDown, BarChart3 } from 'lucide-react'
+import {
+  Bell,
+  LogOut,
+  Settings,
+  User,
+  Search,
+  HelpCircle,
+  Calendar,
+  PlusCircle,
+  Home,
+  FileText,
+  ChevronDown,
+  BarChart3,
+  Ticket,
+} from "lucide-react"
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
-import { Ticket } from 'lucide-react';
 
 interface NavbarProps {
   className?: string
@@ -94,33 +108,31 @@ export function Navbar({ className }: NavbarProps) {
     },
   ]
 
-  const filteredQuickActions = quickActions.filter(
-    (action) => userRole && action.roles.includes(userRole)
-  )
+  const filteredQuickActions = quickActions.filter((action) => userRole && action.roles.includes(userRole))
 
   return (
-    <header className={cn("sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6 shadow-sm", className)}>
+    <header className={cn("flex h-16 items-center gap-4 border-b px-4 md:px-6", className)}>
       <div className="flex items-center gap-2 md:gap-4 lg:gap-6">
-        <SidebarTrigger className="md:hidden" />
+        <SidebarTrigger className="md:hidden text-primary" />
 
         <Link href="/dashboard" className="flex items-center gap-2">
           <Image src="/logo-upnvj.png" alt="UPNVJ Logo" width={32} height={32} className="h-8 w-auto" />
-          <span className="hidden font-bold md:inline-block">Service Desk FIK</span>
+          <span className="hidden font-bold md:inline-block text-primary">Service Desk FIK</span>
         </Link>
       </div>
 
       {/* Main Navigation */}
       <nav className="hidden md:flex items-center space-x-1">
-        <Button variant="ghost" size="sm" asChild>
+        <Button variant="ghost" size="sm" asChild className="text-primary hover:bg-primary-50 hover:text-primary-700">
           <Link href="/dashboard">
             <Home className="h-4 w-4 mr-2" />
             Dashboard
           </Link>
         </Button>
-        
+
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm">
+            <Button variant="ghost" size="sm" className="text-primary hover:bg-primary-50 hover:text-primary-700">
               <Ticket className="h-4 w-4 mr-2" />
               Tiket
               <ChevronDown className="h-4 w-4 ml-1" />
@@ -142,17 +154,17 @@ export function Navbar({ className }: NavbarProps) {
             )}
           </DropdownMenuContent>
         </DropdownMenu>
-        
+
         {(userRole === "admin" || userRole === "executive") && (
-          <Button variant="ghost" size="sm" asChild>
+          <Button variant="ghost" size="sm" asChild className="text-primary hover:bg-primary-50 hover:text-primary-700">
             <Link href="/reports">
               <BarChart3 className="h-4 w-4 mr-2" />
               Laporan
             </Link>
           </Button>
         )}
-        
-        <Button variant="ghost" size="sm" asChild>
+
+        <Button variant="ghost" size="sm" asChild className="text-primary hover:bg-primary-50 hover:text-primary-700">
           <Link href="/help">
             <HelpCircle className="h-4 w-4 mr-2" />
             Bantuan
@@ -167,7 +179,7 @@ export function Navbar({ className }: NavbarProps) {
             variant="ghost"
             size="icon"
             onClick={() => setSearchOpen(!searchOpen)}
-            className="relative"
+            className="relative text-primary hover:bg-primary-50 hover:text-primary-700"
             aria-label="Search"
           >
             <Search className="h-5 w-5" />
@@ -192,7 +204,7 @@ export function Navbar({ className }: NavbarProps) {
                       className="flex-1"
                       autoFocus
                     />
-                    <Button type="submit" size="sm" className="ml-2">
+                    <Button type="submit" size="sm" className="ml-2 bg-primary hover:bg-primary-600">
                       Cari
                     </Button>
                   </div>
@@ -208,7 +220,7 @@ export function Navbar({ className }: NavbarProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="relative"
+              className="relative text-primary hover:bg-primary-50 hover:text-primary-700"
               aria-label="Quick Actions"
             >
               <PlusCircle className="h-5 w-5" />
@@ -234,7 +246,7 @@ export function Navbar({ className }: NavbarProps) {
             variant="ghost"
             size="icon"
             onClick={() => setNotificationsOpen(!notificationsOpen)}
-            className="relative"
+            className="relative text-primary hover:bg-primary-50 hover:text-primary-700"
             aria-label="Notifications"
           >
             <Bell className="h-5 w-5" />
@@ -244,7 +256,7 @@ export function Navbar({ className }: NavbarProps) {
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
                   exit={{ scale: 0 }}
-                  className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-red-500 text-[10px] font-medium text-white"
+                  className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-white"
                 >
                   {unreadCount > 9 ? "9+" : unreadCount}
                 </motion.span>
@@ -271,8 +283,10 @@ export function Navbar({ className }: NavbarProps) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full">
-              <Avatar className="h-8 w-8">
-                <AvatarFallback>{user?.name?.charAt(0) || "U"}</AvatarFallback>
+              <Avatar className="h-8 w-8 border-2 border-primary-100">
+                <AvatarFallback className="bg-primary-50 text-primary-700">
+                  {user?.name?.charAt(0) || "U"}
+                </AvatarFallback>
                 {user?.profileImage && (
                   <AvatarImage src={user.profileImage || "/placeholder.svg"} alt={user.name || "User"} />
                 )}
@@ -300,7 +314,7 @@ export function Navbar({ className }: NavbarProps) {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => logout()} className="text-red-500 focus:text-red-500">
+            <DropdownMenuItem onClick={() => logout()} className="text-primary-700 focus:text-primary-700">
               <LogOut className="mr-2 h-4 w-4" />
               <span>Logout</span>
             </DropdownMenuItem>

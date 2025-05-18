@@ -8,7 +8,7 @@ import { MobileNav } from "./mobile-nav"
 import { useMobile } from "@/hooks/use-mobile"
 import { ToastProvider } from "@/components/ui/toast"
 import { SidebarProvider } from "@/components/ui/sidebar"
-import { motion } from "framer-motion"
+import { motion, AnimatePresence } from "framer-motion"
 
 export function MainLayout({ children }: { children: React.ReactNode }) {
   const { isMobile } = useMobile()
@@ -21,21 +21,32 @@ export function MainLayout({ children }: { children: React.ReactNode }) {
     return sidebarCookie ? sidebarCookie.split("=")[1] === "true" : true
   }
 
+  // Page transition variants
+  const pageVariants = {
+    initial: { opacity: 0, y: 8 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: -8 },
+  }
+
   return (
     <SidebarProvider defaultOpen={getSidebarState()}>
-      <div className="min-h-screen flex flex-col bg-background">
-        <Navbar />
-        <div className="flex flex-1 overflow-hidden">
+      <div className="layout-container">
+        <Navbar className="navbar glass-navbar" />
+        <div className="layout-content">
           <AppSidebar />
-          <motion.main
-            key={pathname}
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-            className="flex-1 overflow-y-auto p-4 md:p-6 transition-all duration-300 bg-background"
-          >
-            {children}
-          </motion.main>
+          <AnimatePresence mode="wait">
+            <motion.main
+              key={pathname}
+              initial="initial"
+              animate="animate"
+              exit="exit"
+              variants={pageVariants}
+              transition={{ duration: 0.25, ease: "easeInOut" }}
+              className="layout-main"
+            >
+              {children}
+            </motion.main>
+          </AnimatePresence>
         </div>
         {isMobile && <MobileNav className="fixed bottom-0 left-0 right-0 z-10" />}
         <ToastProvider />

@@ -5,7 +5,7 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import { useAuth } from "@/hooks/use-auth"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, Ticket, FileText, User, BarChart3, PlusCircle, HelpCircle } from 'lucide-react'
+import { LayoutDashboard, Ticket, FileText, User, BarChart3, PlusCircle, HelpCircle } from "lucide-react"
 
 interface MobileNavProps {
   className?: string
@@ -69,7 +69,7 @@ export function MobileNav({ className }: MobileNavProps) {
 
   return (
     <motion.nav
-      className={cn("py-2 px-4 bg-background border-t flex items-center justify-around", className)}
+      className={cn("py-2 px-4 bg-background border-t flex items-center justify-around glass-navbar", className)}
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -95,7 +95,7 @@ export function MobileNav({ className }: MobileNavProps) {
               <span
                 className={cn(
                   "text-xs transition-colors",
-                  isActive ? "text-foreground font-medium" : "text-muted-foreground",
+                  isActive ? "text-primary font-medium" : "text-muted-foreground",
                 )}
               >
                 {item.name}
