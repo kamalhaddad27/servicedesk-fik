@@ -5,7 +5,7 @@ import Link from "next/link"
 import { motion } from "framer-motion"
 import { useAuth } from "@/hooks/use-auth"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, Ticket, FileText, User, BarChart3 } from "lucide-react"
+import { LayoutDashboard, Ticket, FileText, User, BarChart3, PlusCircle, HelpCircle } from 'lucide-react'
 
 interface MobileNavProps {
   className?: string
@@ -30,6 +30,12 @@ export function MobileNav({ className }: MobileNavProps) {
       roles: ["mahasiswa", "dosen", "admin", "executive"],
     },
     {
+      name: "Buat",
+      href: "/tickets/create",
+      icon: <PlusCircle className="h-5 w-5" />,
+      roles: ["mahasiswa", "dosen", "admin"],
+    },
+    {
       name: "Ditugaskan",
       href: "/tickets/assigned",
       icon: <FileText className="h-5 w-5" />,
@@ -42,6 +48,12 @@ export function MobileNav({ className }: MobileNavProps) {
       roles: ["admin", "executive"],
     },
     {
+      name: "Bantuan",
+      href: "/help",
+      icon: <HelpCircle className="h-5 w-5" />,
+      roles: ["mahasiswa", "dosen", "admin", "executive"],
+    },
+    {
       name: "Profil",
       href: "/profile",
       icon: <User className="h-5 w-5" />,
@@ -52,7 +64,7 @@ export function MobileNav({ className }: MobileNavProps) {
   // Filter nav items based on user role
   const filteredNavItems = navItems.filter((item) => userRole && item.roles.includes(userRole))
 
-  // Only show the most important 4-5 nav items on mobile
+  // Only show the most important 5 nav items on mobile
   const mobileNavItems = filteredNavItems.slice(0, 5)
 
   return (
@@ -69,13 +81,23 @@ export function MobileNav({ className }: MobileNavProps) {
           <Link key={item.href} href={item.href} className="block w-16 text-center">
             <motion.div
               className="flex flex-col items-center"
-              whileHover={{ scale: 1.1, y: -5 }}
+              whileHover={{ scale: 1.1, y: -2 }}
               whileTap={{ scale: 0.95 }}
             >
-              <div className={cn("p-1 rounded-full mb-1", isActive ? "text-primary" : "text-muted-foreground")}>
+              <div
+                className={cn(
+                  "p-1.5 rounded-full mb-1 transition-colors",
+                  isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground",
+                )}
+              >
                 {item.icon}
               </div>
-              <span className={cn("text-xs", isActive ? "text-foreground font-medium" : "text-muted-foreground")}>
+              <span
+                className={cn(
+                  "text-xs transition-colors",
+                  isActive ? "text-foreground font-medium" : "text-muted-foreground",
+                )}
+              >
                 {item.name}
               </span>
             </motion.div>

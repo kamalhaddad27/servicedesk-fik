@@ -1,22 +1,89 @@
-import { LoginForm } from "@/components/auth/login-form"
-import type { Metadata } from "next"
-import Image from "next/image"
+"use client"
 
-export const metadata: Metadata = {
-  title: "Login - Service Desk FIK",
-  description: "Login ke Service Desk FIK",
-}
+import { LoginForm } from "@/components/auth/login-form"
+import Image from "next/image"
+import Link from "next/link"
+import { motion } from "framer-motion"
 
 export default function LoginPage() {
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-b from-blue-50 to-white p-4 md:p-8">
-      <div className="w-full max-w-md space-y-8">
-        <div className="flex flex-col items-center space-y-2 text-center">
-          <Image src="/logo-upnvj.png" width={80} height={80} alt="Logo UPNVJ" className="h-20 w-20" />
-          <h1 className="text-3xl font-bold tracking-tight">Service Desk FIK</h1>
-          <p className="text-sm text-muted-foreground">Sistem Layanan Terpadu Fakultas Ilmu Komputer</p>
-        </div>
-        <LoginForm />
+    <div className="min-h-screen flex flex-col lg:flex-row bg-background">
+      {/* Hero Section - Logo Centered */}
+      <motion.div 
+        className="flex-1 flex flex-col justify-center items-center p-8 lg:p-12 bg-gradient-to-br from-primary-700 to-primary-900 order-first lg:order-last"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ duration: 0.8 }}
+      >
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          transition={{ delay: 0.3, duration: 0.6 }}
+          className="relative w-full max-w-md aspect-square flex items-center justify-center"
+        >
+          <div className="absolute inset-0 bg-white/10 rounded-full blur-3xl opacity-30"></div>
+          <Image 
+            src="/logo-upnvj.png" 
+            alt="UPNVJ Logo" 
+            width={240} 
+            height={240} 
+            className="relative z-10"
+            priority
+          />
+        </motion.div>
+        
+        <motion.div
+          initial={{ y: 20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ delay: 0.6, duration: 0.6 }}
+          className="text-center mt-8 text-white max-w-md"
+        >
+          <h2 className="text-3xl font-serif font-bold mb-4">Universitas Pembangunan Nasional Veteran Jakarta</h2>
+          <p className="text-white/80 text-lg">
+            Fakultas Ilmu Komputer - Sistem Layanan Terpadu
+          </p>
+        </motion.div>
+      </motion.div>
+
+      {/* Login Section */}
+      <div className="flex-1 flex flex-col justify-center p-6 lg:p-12">
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6 }}
+          className="w-full max-w-md mx-auto"
+        >
+          <div className="text-center mb-8">
+            <div className="lg:hidden flex justify-center mb-6">
+              <Image 
+                src="/logo-upnvj.png" 
+                alt="UPNVJ Logo" 
+                width={80} 
+                height={80} 
+                priority
+              />
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold font-serif">Service Desk FIK</h1>
+            <p className="mt-2 text-muted-foreground">
+              Sistem Layanan Terpadu Fakultas Ilmu Komputer
+            </p>
+          </div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.6 }}
+            className="bg-card rounded-xl shadow-lg p-6 border border-border/50"
+          >
+            <LoginForm />
+            <div className="mt-6 text-center text-sm">
+              <span className="text-muted-foreground">Belum punya akun?</span>{" "}
+              <Link href="/register" className="font-medium text-primary hover:text-primary/80 transition-colors">
+                Hubungi administrator
+              </Link>
+            </div>
+          </motion.div>
+        </motion.div>
       </div>
     </div>
   )

@@ -1,185 +1,116 @@
-'use client';
+"use client"
 
-import { useState } from 'react';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
-import { motion } from 'framer-motion';
-import { useAuth } from '@/hooks/use-auth';
-import { Button } from '@/components/ui/button';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { AlertCircle } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-
-// Email login schema
-const emailLoginSchema = z.object({
-  email: z.string().email({ message: 'Email tidak valid' }),
-  password: z.string().min(6, { message: 'Password minimal 6 karakter' }),
-});
-
-// NIM login schema
-const nimLoginSchema = z.object({
-  nim: z.string().min(8, { message: 'NIM tidak valid' }),
-  password: z.string().min(6, { message: 'Password minimal 6 karakter' }),
-});
-
-type EmailLoginValues = z.infer<typeof emailLoginSchema>;
-type NIMLoginValues = z.infer<typeof nimLoginSchema>;
-
-const formVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: {
-    opacity: 1,
-    y: 0,
-    transition: {
-      duration: 0.3,
-      ease: "easeOut",
-    },
-  },
-};
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { motion } from "framer-motion"
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+import { Checkbox } from "@/components/ui/checkbox"
+import { AtSign, Lock, Loader2 } from 'lucide-react'
 
 export function LoginForm() {
-  const { login, error } = useAuth();
-  const [activeTab, setActiveTab] = useState<'email' | 'nim'>('email');
+  const router = useRouter()
+  const [isLoading, setIsLoading] = useState(false)
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    rememberMe: false,
+  })
 
-  // Email login form
-  const emailForm = useForm<EmailLoginValues>({
-    resolver: zodResolver(emailLoginSchema),
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+    setIsLoading(true)
+    
+    // Simulate login - replace with actual authentication
+    try {
+      // Mock API call
+      await new Promise(resolve => setTimeout(resolve, 1500))
+      router.push("/dashboard")
+    } catch (error) {
+      console.error("Login failed", error)
+    } finally {
+      setIsLoading(false)
+    }
+  }
 
-  // NIM login form
-  const nimForm = useForm<NIMLoginValues>({
-    resolver: zodResolver(nimLoginSchema),
-    defaultValues: {
-      nim: '',
-      password: '',
-    },
-  });
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({ ...prev, [name]: value }))
+  }
 
-  // Handle email login submit
-  const onEmailSubmit = async (values: EmailLoginValues) => {
-    await login({ email: values.email, password: values.password });
-  };
-
-  // Handle NIM login submit
-  const onNIMSubmit = async (values: NIMLoginValues) => {
-    await login({ nim: values.nim, password: values.password });
-  };
+  const handleCheckboxChange = (checked: boolean) => {
+    setFormData(prev => ({ ...prev, rememberMe: checked }))
+  }
 
   return (
-    <motion.div
-      variants={formVariants}
-      initial="hidden"
-      animate="visible"
-      className="space-y-6"
-    >
-      <Tabs
-        defaultValue="email"
-        value={activeTab}
-        onValueChange={(value) => setActiveTab(value as 'email' | 'nim')}
-        className="w-full"
-      >
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="email">Login dengan Email</TabsTrigger>
-          <TabsTrigger value="nim">Login dengan NIM</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="email" className="mt-4">
-          <Form {...emailForm}>
-            <form onSubmit={emailForm.handleSubmit(onEmailSubmit)} className="space-y-4">
-              <FormField
-                control={emailForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input placeholder="email@example.com" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={emailForm.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="******" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <Button type="submit" className="w-full" disabled={emailForm.formState.isSubmitting}>
-                {emailForm.formState.isSubmitting ? 'Logging in...' : 'Login'}
-              </Button>
-            </form>
-          </Form>
-        </TabsContent>
-        
-        <TabsContent value="nim" className="mt-4">
-          <Form {...nimForm}>
-            <form onSubmit={nimForm.handleSubmit(onNIMSubmit)} className="space-y-4">
-              <FormField
-                control={nimForm.control}
-                name="nim"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>NIM</FormLabel>
-                    <FormControl>
-                      <Input placeholder="21105101001" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <FormField
-                control={nimForm.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Password</FormLabel>
-                    <FormControl>
-                      <Input type="password" placeholder="******" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              
-              <Button type="submit" className="w-full" disabled={nimForm.formState.isSubmitting}>
-                {nimForm.formState.isSubmitting ? 'Logging in...' : 'Login'}
-              </Button>
-            </form>
-          </Form>
-        </TabsContent>
-      </Tabs>
+    <form onSubmit={handleSubmit} className="space-y-5">
+      <div className="space-y-2">
+        <Label htmlFor="email">Email</Label>
+        <div className="relative">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+            <AtSign className="h-4 w-4" />
+          </div>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            placeholder="nama@upnvj.ac.id"
+            value={formData.email}
+            onChange={handleChange}
+            className="pl-10"
+            required
+            autoComplete="email"
+          />
+        </div>
+      </div>
       
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-    </motion.div>
-  );
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label htmlFor="password">Password</Label>
+          <Button variant="link" size="sm" className="h-auto p-0 text-xs" asChild>
+            <a href="/forgot-password">Lupa password?</a>
+          </Button>
+        </div>
+        <div className="relative">
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
+            <Lock className="h-4 w-4" />
+          </div>
+          <Input
+            id="password"
+            name="password"
+            type="password"
+            placeholder="••••••••"
+            value={formData.password}
+            onChange={handleChange}
+            className="pl-10"
+            required
+            autoComplete="current-password"
+          />
+        </div>
+      </div>
+      
+      <div className="flex items-center space-x-2">
+        <Checkbox 
+          id="remember" 
+          checked={formData.rememberMe}
+          onCheckedChange={handleCheckboxChange}
+        />
+        <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">
+          Ingat saya
+        </Label>
+      </div>
+      
+      <Button type="submit" className="w-full" disabled={isLoading}>
+        {isLoading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Memproses...
+          </>
+        ) : (
+          "Masuk"
+        )}
+      </Button>
+    </form>
+  )
 }
