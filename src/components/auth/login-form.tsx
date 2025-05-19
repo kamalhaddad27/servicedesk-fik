@@ -6,12 +6,14 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Checkbox } from "@/components/ui/checkbox"
-import { AtSign, Lock, Loader2, Eye, EyeOff } from "lucide-react"
+import { AtSign, Lock, Loader2, Eye, EyeOff, AlertCircle } from "lucide-react"
+import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useAuth } from "@/hooks/use-auth"
 import React from "react"
 
 export function LoginForm() {
   const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
+  const { login, isLoading, error } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [formData, setFormData] = useState({
     email: "",
@@ -21,25 +23,24 @@ export function LoginForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)
 
-    // Simulate login - replace with actual authentication
     try {
-      // Mock API call
-      await new Promise((resolve) => setTimeout(resolve, 1500))
+      // Use the actual login function from the useAuth hook
+      const success = await login({
+        email: formData.email,
+        password: formData.password,
+      })
 
       // If remember me is checked, store in localStorage
-      if (formData.rememberMe) {
+      if (success && formData.rememberMe) {
         localStorage.setItem("rememberedEmail", formData.email)
-      } else {
+      } else if (!formData.rememberMe) {
         localStorage.removeItem("rememberedEmail")
       }
-
-      router.push("/dashboard")
+      
+      // No need to manually redirect - the login function handles this
     } catch (error) {
       console.error("Login failed", error)
-    } finally {
-      setIsLoading(false)
     }
   }
 
@@ -70,6 +71,13 @@ export function LoginForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
+      {error && (
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>{error}</AlertDescription>
+        </Alert>
+      )}
+      
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <div className="relative">
@@ -86,6 +94,7 @@ export function LoginForm() {
             className="pl-10"
             required
             autoComplete="email"
+            disabled={isLoading}
           />
         </div>
       </div>
@@ -111,6 +120,7 @@ export function LoginForm() {
             className="pl-10 pr-10"
             required
             autoComplete="current-password"
+            disabled={isLoading}
           />
           <Button
             type="button"
@@ -119,6 +129,7 @@ export function LoginForm() {
             className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
             onClick={togglePasswordVisibility}
             aria-label={showPassword ? "Hide password" : "Show password"}
+            disabled={isLoading}
           >
             {showPassword ? (
               <EyeOff className="h-4 w-4 text-muted-foreground" />
@@ -130,7 +141,12 @@ export function LoginForm() {
       </div>
 
       <div className="flex items-center space-x-2">
-        <Checkbox id="remember" checked={formData.rememberMe} onCheckedChange={handleCheckboxChange} />
+        <Checkbox 
+          id="remember" 
+          checked={formData.rememberMe} 
+          onCheckedChange={handleCheckboxChange}
+          disabled={isLoading}
+        />
         <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">
           Ingat saya
         </Label>

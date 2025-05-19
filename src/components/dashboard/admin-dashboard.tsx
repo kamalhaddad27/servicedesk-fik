@@ -15,7 +15,7 @@ import { Progress } from "@/components/ui/progress"
 import { formatDate, getTicketStatusColor, getTicketPriorityColor, getSLAStatusColor } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { PlusCircle, Clock, CheckCircle, AlertCircle, BarChart3, FileText, AlertTriangle, Users, Settings } from 'lucide-react'
-import { Ticket, TicketStats, TicketType } from "@/types"
+import { Ticket, TicketStats } from "@/types"
 
 // Animation variants
 const containerVariants = {
@@ -46,16 +46,28 @@ export function AdminDashboard() {
   const { user } = useAuth()
   const [activeTab, setActiveTab] = useState("all")
 
-  // Fetch ticket stats
+  const { data: ticketTypes = [] } = useQuery<string[]>({
+    queryKey: ["ticket-types"],
+    queryFn: async () => {
+      const tickets = await ApiService.getAssignedTickets()
+      return [...new Set(tickets.map((t) => t.type))] as string[]
+    },
+  })
+  
+
+  
+  
+  
   const {
     data: ticketStats,
     isLoading: isLoadingStats,
     isError: isErrorStats,
   } = useQuery<TicketStats>({
-    queryKey: ["ticketStats"],
+    queryKey: ["ticket-stats"],
     queryFn: () => ApiService.getTicketStats(),
   })
-
+  
+  
   // Fetch all tickets
   const {
     data: allTickets = [],
@@ -76,6 +88,9 @@ export function AdminDashboard() {
     queryFn: () => ApiService.getAssignedTickets(),
   })
 
+
+
+  
   // Filter tickets based on active tab
   const displayedTickets = activeTab === "all" ? allTickets : activeTab === "assigned" ? assignedTickets : allTickets
 

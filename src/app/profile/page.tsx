@@ -16,6 +16,7 @@ import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "@/components/ui/use-toast"
 import { ApiService } from "@/lib/api"
+import { User } from "@/types"
 
 export default function ProfilePage() {
   const { data: session, update } = useSession()
@@ -59,8 +60,10 @@ export default function ProfilePage() {
 
     try {
       // Use the PUT endpoint to update user
-      const userId = Number.parseInt(session.user.id || "0")
-      await ApiService.updateUser(userId, formData)
+      const userId = typeof session.user.id === "string"
+      ? Number.parseInt(session.user.id)
+      : session.user.id ?? 0
+          await ApiService.updateUser(userId, formData)
 
       // Update the session with new user data
       await update({
@@ -177,9 +180,6 @@ export default function ProfilePage() {
                     <AvatarFallback className="bg-primary-50 text-primary-700 text-4xl">
                       {user?.name?.charAt(0) || "U"}
                     </AvatarFallback>
-                    {user?.profileImage && (
-                      <AvatarImage src={user.profileImage || "/placeholder.svg"} alt={user.name || "User"} />
-                    )}
                   </Avatar>
                   <Button
                     size="icon"

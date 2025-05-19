@@ -12,7 +12,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { AlertCircle, CheckCircle, Plus, X } from 'lucide-react'
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import { a } from "@/types"
+import { Badge } from "../ui/badge"
 
 // Form schema
 const categorySchema = z.object({
@@ -154,8 +154,8 @@ export function CategoriesForm() {
   return (
     <div className="space-y-6">
       {success && (
-        <Alert variant="success" className="bg-green-50 text-green-800 border-green-200">
-          <CheckCircle className="h-4 w-4" />
+        <Alert variant="default" className="bg-green-50 text-green-800 border-green-200">
+        <CheckCircle className="h-4 w-4" />
           <AlertDescription>{success}</AlertDescription>
         </Alert>
       )}

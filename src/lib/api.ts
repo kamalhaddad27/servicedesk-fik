@@ -15,6 +15,7 @@ import {
   UserPerformance
 } from '@/types';
 
+
 // API base URL - from environment variables
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'https://service-desk-fik-backend-production.up.railway.app/';
 
@@ -30,23 +31,60 @@ export const apiClient = axios.create({
 // Request interceptor to add authentication token
 apiClient.interceptors.request.use(
   async (config) => {
-    const session = await getSession();
-    if (session?.accessToken) {
-      config.headers.Authorization = `Bearer ${session.accessToken}`;
+    try {
+      const session = await getSession();
+      
+      // Debug log to check if session and token exists
+      console.debug('Session in interceptor:', session ? 'exists' : 'null');
+      
+      if (session?.accessToken) {
+        config.headers.Authorization = `Bearer ${session.accessToken}`;
+        // Debug log token (only first few characters for security)
+        console.debug(`Token applied: ${session.accessToken.substring(0, 10)}...`);
+      } else {
+        console.warn('No access token available in session');
+        
+        // Try to get token from localStorage as fallback (if your app uses it)
+        const localToken = typeof window !== 'undefined' ? localStorage.getItem('auth_token') : null;
+        if (localToken) {
+          config.headers.Authorization = `Bearer ${localToken}`;
+          console.debug('Using token from localStorage');
+        }
+      }
+    } catch (error) {
+      console.error('Error in request interceptor:', error);
     }
+    
     return config;
-  },
-  (error) => Promise.reject(error)
+},
+(error) => {
+    console.error('Request interceptor error:', error);
+    return Promise.reject(error);
+  }
 );
 
 // Response interceptor to handle common error scenarios
 apiClient.interceptors.response.use(
   (response) => response,
   async (error: AxiosError) => {
+    console.error('API Response Error:', error.response?.status, error.response?.data);
+    
     if (error.response?.status === 401) {
-      // Unauthorized - sign out user
-      await signOut({ redirect: false });
-      window.location.href = '/login';
+      console.warn('Unauthorized response detected, signing out...');
+      
+      // Clear any stored tokens
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('auth_token');
+      }
+      
+      // Try to get a new token or redirect to login
+      try {
+        await signOut({ redirect: false });
+        window.location.href = '/login';
+      } catch (signOutError) {
+        console.error('Error during sign out:', signOutError);
+        window.location.href = '/login';
+      }
     }
     
     return Promise.reject(error);
@@ -62,10 +100,36 @@ export interface ApiError {
 
 // Base API service class
 export class ApiService {
-  // GET request
-  static async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
-    const response = await apiClient.get<T>(url, config);
-    return response.data;
+  // GET request with retry mechanism
+  static async get<T>(url: string, config?: AxiosRequestConfig, retryCount = 0): Promise<T> {
+    try {
+      const response = await apiClient.get<T>(url, config);
+      return response.data;
+    } catch (error) {
+      // If unauthorized and first retry, try to refresh session and retry once
+      if (axios.isAxiosError(error) && error.response?.status === 401 && retryCount === 0) {
+        console.log('Attempting to refresh session and retry...');
+        
+        // Wait a moment and try to refresh the session
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
+        try {
+          // Try to get a fresh session
+          const freshSession = await getSession();
+          
+          if (freshSession?.accessToken) {
+            console.log('Got fresh token, retrying request');
+            // Retry with fresh token (incremented retry count)
+            return this.get<T>(url, config, retryCount + 1);
+          }
+        } catch (refreshError) {
+          console.error('Error refreshing session:', refreshError);
+        }
+      }
+      
+      // Re-throw the original error if we couldn't recover
+      throw error;
+    }
   }
 
   // POST request
@@ -87,7 +151,7 @@ export class ApiService {
   }
 
   // Helper for multipart form data (file uploads)
-  static async postMultipart<T>(url: string, formData: FormData, config?: AxiosRequestConfig): Promise<T> {
+ static async postMultipart<T>(url: string, formData: FormData, config?: AxiosRequestConfig): Promise<T> {
     const response = await apiClient.post<T>(url, formData, {
       ...config,
       headers: {
@@ -113,6 +177,10 @@ export class ApiService {
       
       if (error.response?.status === 403) {
         return 'Anda tidak memiliki akses untuk melakukan tindakan ini.';
+      }
+      
+      if (error.response?.status === 401) {
+        return 'Sesi Anda telah berakhir. Silakan login kembali.';
       }
       
       return 'Terjadi kesalahan saat berkomunikasi dengan server.';
@@ -503,12 +571,31 @@ export class ApiService {
   
   // Get notifications
   static async getNotifications(unread?: boolean): Promise<Notification[]> {
-    const params = new URLSearchParams();
-    if (unread !== undefined) {
-      params.append('unread', String(unread));
+    try {
+      const params = new URLSearchParams();
+      if (unread !== undefined) {
+        params.append('unread', String(unread));
+      }
+      
+      // Explicitly get new session before making this request
+      const session = await getSession();
+      if (!session?.accessToken) {
+        console.warn('No valid session for notifications request');
+        return [];
+      }
+      
+      const config = {
+        headers: {
+          Authorization: `Bearer ${session.accessToken}`
+        }
+      };
+      
+      return this.get<Notification[]>(`/notifications${params.toString() ? `?${params.toString()}` : ''}`, config);
+    } catch (error) {
+      console.error('Error fetching notifications:', error);
+      // Return empty array instead of throwing on this non-critical feature
+      return [];
     }
-    
-    return this.get<Notification[]>(`/notifications${params.toString() ? `?${params.toString()}` : ''}`);
   }
   
   // Mark notification as read

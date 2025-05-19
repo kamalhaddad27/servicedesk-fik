@@ -3,17 +3,16 @@
 import { usePathname } from "next/navigation"
 import Link from "next/link"
 import { motion } from "framer-motion"
-import { useAuth } from "@/hooks/use-auth"
 import { cn } from "@/lib/utils"
-import { LayoutDashboard, Ticket, FileText, User, BarChart3, PlusCircle, HelpCircle } from "lucide-react"
+import { LayoutDashboard, Ticket, FileText, User, HelpCircle, PlusCircle } from "lucide-react"
 
 interface MobileNavProps {
   className?: string
+  userRole?: string
 }
 
-export function MobileNav({ className }: MobileNavProps) {
+export function MobileNav({ className, userRole }: MobileNavProps) {
   const pathname = usePathname()
-  const { userRole } = useAuth()
 
   // Define navigation items based on user role
   const navItems = [
@@ -42,12 +41,6 @@ export function MobileNav({ className }: MobileNavProps) {
       roles: ["dosen", "admin"],
     },
     {
-      name: "Laporan",
-      href: "/reports",
-      icon: <BarChart3 className="h-5 w-5" />,
-      roles: ["admin", "executive"],
-    },
-    {
       name: "Bantuan",
       href: "/help",
       icon: <HelpCircle className="h-5 w-5" />,
@@ -69,7 +62,10 @@ export function MobileNav({ className }: MobileNavProps) {
 
   return (
     <motion.nav
-      className={cn("py-2 px-4 bg-background border-t flex items-center justify-around glass-navbar", className)}
+      className={cn(
+        "fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background py-2 px-4 flex items-center justify-around h-[var(--mobile-nav-height)]", 
+        className
+      )}
       initial={{ y: 100, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
@@ -78,7 +74,7 @@ export function MobileNav({ className }: MobileNavProps) {
         const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
 
         return (
-          <Link key={item.href} href={item.href} className="block w-16 text-center">
+          <Link key={item.href} href={item.href} className="block text-center">
             <motion.div
               className="flex flex-col items-center"
               whileHover={{ scale: 1.1, y: -2 }}

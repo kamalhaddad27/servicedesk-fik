@@ -1,174 +1,173 @@
 "use client"
 
-import type React from "react"
-
 import { useState } from "react"
 import { useForm } from "react-hook-form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { z } from "zod"
-import { motion } from "framer-motion"
-import { useQuery } from "@tanstack/react-query"
-import { useRouter } from "next/navigation"
-import { ApiService } from "@/lib/api"
-import { useTickets } from "@/hooks/use-ticket"
 import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { LoadingSpinner } from "@/components/ui/loading-spinner"
-import { AlertCircle, Upload, X } from "lucide-react"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
+import { useSettings } from "@/hooks/use-settings"
+import { useTickets } from "@/hooks/use-ticket"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import type { TicketCategories, TicketFormValues } from "@/types"
+import { AlertCircle, Loader2, Upload } from "lucide-react"
+import { Card, CardContent } from "@/components/ui/card"
 
-// Form schema
 const ticketFormSchema = z.object({
-  subject: z
-    .string()
-    .min(5, { message: "Subjek minimal 5 karakter" })
-    .max(100, { message: "Subjek maksimal 100 karakter" }),
-  description: z.string().min(10, { message: "Deskripsi minimal 10 karakter" }),
-  category: z.string().min(1, { message: "Kategori harus dipilih" }),
+  subject: z.string().min(5, {
+    message: "Judul tiket harus minimal 5 karakter",
+  }),
+  description: z.string().min(10, {
+    message: "Deskripsi tiket harus minimal 10 karakter",
+  }),
+  category: z.string().min(1, {
+    message: "Kategori harus dipilih",
+  }),
   subcategory: z.string().optional(),
-  type: z.string().optional(),
-  department: z.string().optional(),
-  priority: z.string().min(1, { message: "Prioritas harus dipilih" }),
+  type: z.string({
+    required_error: "Tipe tiket harus dipilih",
+  }),
+  department: z.string().min(1, {
+    message: "Departemen harus dipilih",
+  }),
+  priority: z.string().min(1, {
+    message: "Prioritas harus dipilih",
+  }),
 })
 
 export function TicketForm() {
-  const router = useRouter()
+  const { categories } = useSettings()
   const { createTicket } = useTickets()
-  const [files, setFiles] = useState<File[]>([])
+  const [attachments, setAttachments] = useState<File[]>([])
+  const [subcategoryList, setSubcategoryList] = useState<string[]>([])
 
-  // Fetch ticket categories
-  const {
-    data: categories,
-    isLoading: isLoadingCategories,
-    isError: isErrorCategories,
-  } = useQuery<TicketCategories>({
-    queryKey: ["settings", "ticket-categories"],
-    queryFn: () => ApiService.getTicketCategories(),
-  })
-
-  // Form definition
-  const form = useForm<TicketFormValues>({
+  const form = useForm<z.infer<typeof ticketFormSchema>>({
     resolver: zodResolver(ticketFormSchema),
     defaultValues: {
       subject: "",
       description: "",
       category: "",
       subcategory: "",
-      type: "",
+      type: "permintaan", // Set a default value for type
       department: "",
-      priority: "",
+      priority: "medium",
     },
   })
 
-  // Selected category
+  // Watch for category changes to update subcategories
   const selectedCategory = form.watch("category")
-  const subcategories = selectedCategory && categories ? categories[selectedCategory]?.subcategories || [] : []
-
-  // Handle file selection
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files)
-      setFiles((prev) => [...prev, ...newFiles])
+  useState(() => {
+    if (selectedCategory && categories?.[selectedCategory]?.subcategories) {
+      setSubcategoryList(categories[selectedCategory].subcategories)
+    } else {
+      setSubcategoryList([])
     }
-  }
+  })
 
-  // Remove file
-  const removeFile = (index: number) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index))
-  }
-
-  // Form submission
-  const onSubmit = async (values: TicketFormValues) => {
-    const formData = new FormData()
-
-    // Add form values to FormData
-    Object.entries(values).forEach(([key, value]) => {
-      if (value) {
-        formData.append(key, value)
-      }
-    })
-
-    // Add files to FormData
-    files.forEach((file) => {
-      formData.append("attachments", file)
-    })
-
+  const onSubmit = async (values: z.infer<typeof ticketFormSchema>) => {
     try {
+      const formData = new FormData()
+
+      // Add form fields to FormData
+      Object.entries(values).forEach(([key, value]) => {
+        if (value) {
+          formData.append(key, value)
+        }
+      })
+
+      // Add attachments to FormData
+      attachments.forEach((file) => {
+        formData.append("attachments", file)
+      })
+
+      // Submit the form
       await createTicket.mutateAsync(formData)
-      router.push("/tickets")
+
+      // Reset form
+      form.reset()
+      setAttachments([])
     } catch (error) {
       console.error("Error creating ticket:", error)
     }
   }
 
-  if (isLoadingCategories) {
-    return <LoadingSpinner />
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files)
+      setAttachments((prev) => [...prev, ...newFiles])
+    }
   }
 
-  if (isErrorCategories) {
-    return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>Gagal memuat kategori tiket. Silakan coba lagi nanti.</AlertDescription>
-      </Alert>
-    )
+  const removeAttachment = (index: number) => {
+    setAttachments((prev) => prev.filter((_, i) => i !== index))
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="space-y-6"
-    >
+    <div className="mx-auto w-full max-w-3xl">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {createTicket.isError && (
+            <Alert variant="destructive">
+              <AlertCircle className="h-4 w-4" />
+              <AlertDescription>
+                {createTicket.error?.message || "Terjadi kesalahan saat membuat tiket"}
+              </AlertDescription>
+            </Alert>
+          )}
+
           <FormField
             control={form.control}
             name="subject"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Subjek</FormLabel>
+                <FormLabel>Judul</FormLabel>
                 <FormControl>
-                  <Input placeholder="Masukkan subjek tiket" {...field} />
+                  <Input placeholder="Masukkan judul tiket" {...field} />
                 </FormControl>
-                <FormDescription>Berikan judul yang jelas dan singkat untuk tiket Anda.</FormDescription>
+                <FormDescription>
+                  Masukkan judul singkat dan jelas untuk tiket Anda
+                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="description"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Deskripsi</FormLabel>
-                <FormControl>
-                  <Textarea
-                    placeholder="Jelaskan masalah atau permintaan Anda secara detail"
-                    className="min-h-32"
-                    {...field}
-                  />
-                </FormControl>
-                <FormDescription>Berikan detail yang cukup untuk membantu kami memahami masalah Anda.</FormDescription>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <div className="grid gap-6 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2">
             <FormField
               control={form.control}
               name="category"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Kategori</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={(value) => {
+                      field.onChange(value)
+                      // Update subcategories when category changes
+                      if (categories?.[value]?.subcategories) {
+                        setSubcategoryList(categories[value].subcategories)
+                        form.setValue("subcategory", "") // Reset subcategory
+                      } else {
+                        setSubcategoryList([])
+                      }
+                    }}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Pilih kategori" />
@@ -176,9 +175,9 @@ export function TicketForm() {
                     </FormControl>
                     <SelectContent>
                       {categories &&
-                        Object.keys(categories).map((category) => (
-                          <SelectItem key={category} value={category}>
-                            {categories[category].name}
+                        Object.entries(categories).map(([key, category]) => (
+                          <SelectItem key={key} value={key}>
+                            {category.name}
                           </SelectItem>
                         ))}
                     </SelectContent>
@@ -197,19 +196,81 @@ export function TicketForm() {
                   <Select
                     onValueChange={field.onChange}
                     defaultValue={field.value}
-                    disabled={!selectedCategory || subcategories.length === 0}
+                    disabled={subcategoryList.length === 0}
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder="Pilih subkategori" />
+                        <SelectValue placeholder={
+                          subcategoryList.length === 0
+                            ? "Pilih kategori terlebih dahulu"
+                            : "Pilih subkategori"
+                        } />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {subcategories.map((subcategory) => (
-                        <SelectItem key={subcategory} value={subcategory}>
-                          {subcategory}
+                      {subcategoryList.map((subcat) => (
+                        <SelectItem key={subcat} value={subcat}>
+                          {subcat}
                         </SelectItem>
                       ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-3">
+            <FormField
+              control={form.control}
+              name="type"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Tipe Tiket</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pilih tipe tiket" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="pengajuan">Pengajuan</SelectItem>
+                      <SelectItem value="laporan">Laporan</SelectItem>
+                      <SelectItem value="permintaan">Permintaan</SelectItem>
+                      <SelectItem value="lainnya">Lainnya</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="department"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Departemen</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pilih departemen" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="Akademik">Akademik</SelectItem>
+                      <SelectItem value="Fasilitas">Fasilitas</SelectItem>
+                      <SelectItem value="Keuangan">Keuangan</SelectItem>
+                      <SelectItem value="Kemahasiswaan">Kemahasiswaan</SelectItem>
+                      <SelectItem value="IT">IT</SelectItem>
+                      <SelectItem value="Umum">Umum</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -223,100 +284,107 @@ export function TicketForm() {
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Prioritas</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue placeholder="Pilih prioritas" />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      <SelectItem value="low">Low</SelectItem>
-                      <SelectItem value="medium">Medium</SelectItem>
-                      <SelectItem value="high">High</SelectItem>
+                      <SelectItem value="low">Rendah</SelectItem>
+                      <SelectItem value="medium">Sedang</SelectItem>
+                      <SelectItem value="high">Tinggi</SelectItem>
                       <SelectItem value="urgent">Urgent</SelectItem>
                     </SelectContent>
                   </Select>
-                  <FormDescription>Pilih prioritas sesuai dengan tingkat urgensi masalah Anda.</FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="department"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Departemen (Opsional)</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Pilih departemen" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="akademik">Akademik</SelectItem>
-                      <SelectItem value="keuangan">Keuangan</SelectItem>
-                      <SelectItem value="kemahasiswaan">Kemahasiswaan</SelectItem>
-                      <SelectItem value="umum">Umum</SelectItem>
-                      <SelectItem value="laboratorium">Laboratorium</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>Pilih departemen yang terkait dengan masalah Anda.</FormDescription>
                   <FormMessage />
                 </FormItem>
               )}
             />
           </div>
 
+          <FormField
+            control={form.control}
+            name="description"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Deskripsi</FormLabel>
+                <FormControl>
+                  <Textarea
+                    placeholder="Jelaskan masalah/permintaan Anda secara detail"
+                    className="h-32 resize-none"
+                    {...field}
+                  />
+                </FormControl>
+                <FormDescription>
+                  Berikan informasi selengkap mungkin tentang tiket ini
+                </FormDescription>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           <div>
-            <FormLabel>Lampiran (Opsional)</FormLabel>
+            <FormLabel>Lampiran</FormLabel>
             <div className="mt-2">
-              <div className="flex items-center justify-center w-full">
-                <label
-                  htmlFor="file-upload"
-                  className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-muted/30 hover:bg-muted/50"
-                >
-                  <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                    <Upload className="w-8 h-8 mb-2 text-muted-foreground" />
-                    <p className="mb-2 text-sm text-muted-foreground">
-                      <span className="font-semibold">Klik untuk upload</span> atau drag and drop
-                    </p>
-                    <p className="text-xs text-muted-foreground">PDF, Word, Excel, Image (Maks. 10MB)</p>
-                  </div>
-                  <input id="file-upload" type="file" className="hidden" multiple onChange={handleFileChange} />
-                </label>
-              </div>
+              <label
+                htmlFor="file-upload"
+                className="flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              >
+                <Upload className="h-4 w-4" />
+                <span>Pilih File</span>
+                <input
+                  id="file-upload"
+                  type="file"
+                  multiple
+                  className="sr-only"
+                  onChange={handleFileChange}
+                />
+              </label>
             </div>
 
-            {files.length > 0 && (
-              <div className="mt-4 space-y-2">
-                <p className="text-sm font-medium">File yang dipilih:</p>
-                <div className="space-y-2">
-                  {files.map((file, index) => (
-                    <div key={index} className="flex items-center justify-between p-2 text-sm bg-muted rounded-md">
-                      <span className="truncate max-w-[250px]">{file.name}</span>
-                      <Button type="button" variant="ghost" size="icon" onClick={() => removeFile(index)}>
-                        <X className="h-4 w-4" />
-                        <span className="sr-only">Remove file</span>
-                      </Button>
-                    </div>
-                  ))}
-                </div>
-              </div>
+            {attachments.length > 0 && (
+              <Card className="mt-4">
+                <CardContent className="p-4">
+                  <div className="text-sm font-medium">Lampiran</div>
+                  <ul className="mt-2 space-y-2">
+                    {attachments.map((file, index) => (
+                      <li
+                        key={index}
+                        className="flex items-center justify-between rounded-md border p-2 text-sm"
+                      >
+                        <span className="truncate">{file.name}</span>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => removeAttachment(index)}
+                        >
+                          Hapus
+                        </Button>
+                      </li>
+                    ))}
+                  </ul>
+                </CardContent>
+              </Card>
             )}
           </div>
 
-          <div className="flex justify-end gap-4">
-            <Button type="button" variant="outline" onClick={() => router.back()}>
-              Batal
-            </Button>
-            <Button type="submit" disabled={createTicket.isPending}>
-              {createTicket.isPending ? "Membuat Tiket..." : "Buat Tiket"}
-            </Button>
-          </div>
+          <Button type="submit" disabled={createTicket.isPending} className="w-full">
+            {createTicket.isPending ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Membuat Tiket...
+              </>
+            ) : (
+              "Buat Tiket"
+            )}
+          </Button>
         </form>
       </Form>
-    </motion.div>
+    </div>
   )
 }

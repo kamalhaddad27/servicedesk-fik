@@ -35,7 +35,7 @@ import {
 } from "@/components/ui/dialog"
 import { Textarea } from "@/components/ui/textarea"
 import { Alert, AlertDescription } from "@/components/ui/alert"
-import type { Ticket } from "@/types"
+import { TicketStatus } from "@/types"
 
 interface TicketDetailProps {
   ticketId: number
@@ -98,7 +98,7 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
     try {
       await updateTicket.mutateAsync({
         id: ticketId,
-        data: { status },
+        data: { status: status as TicketStatus }, // FIX DI SINI
       })
     } catch (error) {
       console.error("Error updating ticket status:", error)

@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback, useMemo } from "react"
 import Link from "next/link"
 import { motion } from "framer-motion"
 import { useTickets } from "@/hooks/use-ticket"
@@ -20,9 +20,7 @@ import { Progress } from "@/components/ui/progress"
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { formatDate, getTicketStatusColor, getTicketPriorityColor, getSLAStatusColor } from "@/lib/utils"
 import { PlusCircle, Search, Filter, AlertCircle, Ticket } from 'lucide-react'
-
-
-
+import { useAuth } from "@/hooks/use-auth"
 
 // Animation variants
 const containerVariants = {
@@ -54,6 +52,7 @@ type TicketListProps = {
 }
 
 export function TicketList({ filter }: TicketListProps) {
+  const { user } = useAuth();
   const {
     tickets,
     totalItems,
@@ -68,13 +67,74 @@ export function TicketList({ filter }: TicketListProps) {
     prevPage,
   } = useTickets()
 
-  const [searchTerm, setSearchTerm] = useState(filters.search)
+  // Input text search state
+  const [searchTerm, setSearchTerm] = useState(filters.search || "")
   const debouncedSearchTerm = useDebounce(searchTerm, 500)
+  
+  // Memoize the filter function to prevent recreation on every render
+  const applyFilterByType = useCallback((filterType: string | undefined) => {
+    if (!filterType) return;
+    
+    // Implementasikan logika filter sesuai dengan tipe yang didukung oleh updateFilters
+    if (filterType === "assigned") {
+      // Karena tidak ada assignedTo, gunakan status sebagai filter alternatif
+      // dan tambahkan logika khusus di hook useTickets atau komponen lain
+      updateFilters({ 
+        status: "all",  // Gunakan filter yang didukung
+        search: user?.name || "" // Gunakan search untuk filter tambahan jika perlu
+      });
+      console.log("Filter assigned applied - using status and search filters");
+    } else if (filterType === "created") {
+      // Gunakan filter yang tersedia
+      updateFilters({ status: "all" });
+      console.log("Filter created applied - using status filter");
+    } else if (["pending", "completed", "in-progress", "disposisi", "cancelled"].includes(filterType)) {
+      // Filter berdasarkan status yang valid
+      updateFilters({ status: filterType });
+      console.log(`Filter by status: ${filterType}`);
+    } else {
+      // Filter lainnya, gunakan sebagai category jika cocok
+      updateFilters({ category: filterType });
+      console.log(`Applied filter as category: ${filterType}`);
+    }
+  }, [updateFilters, user?.name]);
 
-  // Update search filter when debounced search term changes
-  useState(() => {
-    updateFilters({ search: debouncedSearchTerm })
-  }, [debouncedSearchTerm, updateFilters])
+  // Handler for search input change
+  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value);
+  }, []);
+
+  // Handle filter changes - only run once on mount or when filter/user changes
+  // Using a ref to prevent repeated executions
+  const filterApplied = useMemo(() => ({}), []);
+  
+  useEffect(() => {
+    // Only apply filter if it hasn't been applied yet or if it changed
+    if (filter && !filterApplied[filter]) {
+      applyFilterByType(filter);
+      filterApplied[filter] = true;
+    }
+  }, [filter, applyFilterByType, filterApplied]);
+
+  // Effect for search term - separated from the filter effect
+  useEffect(() => {
+    if (debouncedSearchTerm !== filters.search) {
+      updateFilters({ search: debouncedSearchTerm });
+    }
+  }, [debouncedSearchTerm, updateFilters, filters.search]);
+
+  // Handlers for filter changes
+  const handleStatusChange = useCallback((value: string) => {
+    updateFilters({ status: value });
+  }, [updateFilters]);
+
+  const handlePriorityChange = useCallback((value: string) => {
+    updateFilters({ priority: value });
+  }, [updateFilters]);
+
+  const handleCategoryChange = useCallback((value: string) => {
+    updateFilters({ category: value });
+  }, [updateFilters]);
 
   if (isLoading) {
     return <LoadingSpinner />
@@ -103,7 +163,7 @@ export function TicketList({ filter }: TicketListProps) {
               placeholder="Cari tiket..."
               className="pl-8"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={handleSearchChange}
             />
           </div>
           <Button variant="outline" size="icon" className="shrink-0">
@@ -115,7 +175,7 @@ export function TicketList({ filter }: TicketListProps) {
         <div className="flex flex-wrap items-center gap-2">
           <Select
             value={filters.status}
-            onValueChange={(value) => updateFilters({ status: value })}
+            onValueChange={handleStatusChange}
           >
             <SelectTrigger className="h-9 w-[130px]">
               <SelectValue placeholder="Status" />
@@ -132,7 +192,7 @@ export function TicketList({ filter }: TicketListProps) {
 
           <Select
             value={filters.priority}
-            onValueChange={(value) => updateFilters({ priority: value })}
+            onValueChange={handlePriorityChange}
           >
             <SelectTrigger className="h-9 w-[130px]">
               <SelectValue placeholder="Prioritas" />
@@ -148,7 +208,7 @@ export function TicketList({ filter }: TicketListProps) {
 
           <Select
             value={filters.category}
-            onValueChange={(value) => updateFilters({ category: value })}
+            onValueChange={handleCategoryChange}
           >
             <SelectTrigger className="h-9 w-[150px]">
               <SelectValue placeholder="Kategori" />

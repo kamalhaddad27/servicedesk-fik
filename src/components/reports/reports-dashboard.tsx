@@ -84,8 +84,11 @@ export function ReportsDashboard() {
     )
   }
 
-  const { overallMetrics, departmentPerformance, categoryBreakdown, userPerformance, trendsOverTime } = dashboardData
+  if (!dashboardData) return <LoadingSpinner />
 
+  const { overallMetrics, departmentPerformance, categoryBreakdown, userPerformance, trendsOverTime } = dashboardData
+  
+  
   return (
     <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -97,12 +100,13 @@ export function ReportsDashboard() {
         <div className="flex flex-wrap items-center gap-2">
           <DatePicker
             placeholder="Dari Tanggal"
-            onChange={(date) => setDateRange((prev) => ({ ...prev, dateFrom: date?.toISOString() }))}
+            onDateChange={(date) => setDateRange((prev) => ({ ...prev, dateFrom: date?.toISOString() }))}
           />
-          <DatePicker
+         <DatePicker
             placeholder="Sampai Tanggal"
-            onChange={(date) => setDateRange((prev) => ({ ...prev, dateTo: date?.toISOString() }))}
+            onDateChange={(date) => setDateRange((prev) => ({ ...prev, dateTo: date?.toISOString() }))}
           />
+
           <Select value={department} onValueChange={setDepartment}>
             <SelectTrigger className="w-[150px]">
               <SelectValue placeholder="Departemen" />

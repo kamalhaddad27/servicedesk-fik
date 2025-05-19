@@ -15,7 +15,7 @@ import { Progress } from "@/components/ui/progress"
 import { formatDate, getTicketStatusColor, getTicketPriorityColor, getSLAStatusColor } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { PlusCircle, Clock, CheckCircle, AlertCircle, BarChart3, FileText, AlertTriangle } from 'lucide-react'
-import type { TicketType } from "@/types"
+import type { Ticket } from "@/types"
 
 // Animation variants
 const containerVariants = {
@@ -46,26 +46,23 @@ export function DosenDashboard() {
   const { user } = useAuth()
   const [activeTab, setActiveTab] = useState("assigned")
 
-  // Fetch assigned tickets
   const {
     data: assignedTickets = [],
     isLoading: isLoadingAssigned,
     isError: isErrorAssigned,
-  } = useQuery<TicketType[]>({
+  } = useQuery<Ticket[]>({
     queryKey: ["tickets", "assigned"],
     queryFn: () => ApiService.getAssignedTickets(),
   })
-
-  // Fetch my tickets
+  
   const {
     data: myTickets = [],
     isLoading: isLoadingMy,
     isError: isErrorMy,
-  } = useQuery<TicketType[]>({
+  } = useQuery<Ticket[]>({
     queryKey: ["tickets", "my"],
     queryFn: () => ApiService.getMyTickets(),
   })
-
   // Filter tickets based on active tab
   const displayedTickets = activeTab === "assigned" ? assignedTickets : myTickets
 

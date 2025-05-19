@@ -12,7 +12,7 @@ import { useAuth } from "@/hooks/use-auth"
 import { Button } from "@/components/ui/button"
 import { Form, FormControl, FormField, FormItem, FormMessage } from "@/components/ui/form"
 import { Textarea } from "@/components/ui/textarea"
-import { CheckboxItem } from "@radix-ui/react-dropdown-menu"
+import { Checkbox } from "@/components/ui/checkbox" // Import the proper Checkbox component
 import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { formatDate, formatRelativeTime } from "@/lib/utils"
 import { AlertCircle, Paperclip, Send, Upload, X } from "lucide-react"
@@ -185,11 +185,18 @@ export function TicketMessages({ ticketId }: TicketMessagesProps) {
                 control={form.control}
                 name="isInternal"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-center space-x-2 space-y-0">
+                  <FormItem className="flex flex-row items-start space-x-2 space-y-0">
                     <FormControl>
-                      <CheckboxItem checked={field.value} onCheckedChange={field.onChange} />
+                      <Checkbox 
+                        checked={field.value} 
+                        onCheckedChange={field.onChange} 
+                        id="isInternal" 
+                      />
                     </FormControl>
-                    <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    <label 
+                      htmlFor="isInternal"
+                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                    >
                       Pesan internal (hanya dapat dilihat oleh staf)
                     </label>
                   </FormItem>

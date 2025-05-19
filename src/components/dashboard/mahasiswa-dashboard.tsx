@@ -14,7 +14,8 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { formatDate, getTicketStatusColor, getTicketPriorityColor } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { PlusCircle, Clock, CheckCircle, AlertCircle, BarChart3 } from 'lucide-react'
-import Ticket from "@/components/ui/ticket-icon" // Import the Ticket component
+import TicketIconProps from "@/components/ui/ticket-icon" // Import the Ticket component
+import { Ticket } from "@/types"
 
 // Animation variants
 const containerVariants = {
@@ -144,7 +145,7 @@ export function MahasiswaDashboard() {
               <Card>
                 <CardContent className="flex flex-col items-center justify-center py-10">
                   <div className="rounded-full bg-muted p-3">
-                    <Ticket className="h-6 w-6 text-muted-foreground" />
+                    <TicketIconProps className="h-6 w-6 text-muted-foreground" />
                   </div>
                   <h3 className="mt-4 text-lg font-medium">Tidak ada tiket</h3>
                   <p className="mt-2 text-center text-sm text-muted-foreground">

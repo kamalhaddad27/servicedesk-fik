@@ -1,7 +1,5 @@
 "use client"
 
-import type React from "react"
-
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import Image from "next/image"
@@ -21,7 +19,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { NotificationList } from "@/components/notifications/notification-list"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import {
   Bell,
   LogOut,
@@ -31,30 +29,31 @@ import {
   HelpCircle,
   Calendar,
   PlusCircle,
-  Home,
+  Menu,
+  X,
   FileText,
-  ChevronDown,
   BarChart3,
   Ticket,
 } from "lucide-react"
-import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar"
 
 interface NavbarProps {
   className?: string
+  toggleSidebar?: () => void
+  userRole?: string
+  isMobile?: boolean
 }
 
-export function Navbar({ className }: NavbarProps) {
+export function Navbar({ className, toggleSidebar, userRole, isMobile }: NavbarProps) {
   const router = useRouter()
-  const { user, logout, userRole } = useAuth()
+  const { user, logout } = useAuth()
   const { unreadCount } = useNotifications()
-  const { toggleSidebar } = useSidebar()
   const [notificationsOpen, setNotificationsOpen] = useState(false)
   const [searchQuery, setSearchQuery] = useState("")
   const notificationRef = useRef<HTMLDivElement>(null)
   const searchRef = useRef<HTMLDivElement>(null)
   const [searchOpen, setSearchOpen] = useState(false)
 
-  // Close notifications when clicking outside
+  // Close notifications and search when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
@@ -89,16 +88,28 @@ export function Navbar({ className }: NavbarProps) {
       roles: ["mahasiswa", "dosen", "admin"],
     },
     {
-      name: "Lihat Kalender",
-      href: "/calendar",
-      icon: <Calendar className="h-4 w-4" />,
-      roles: ["dosen", "admin", "executive"],
+      name: "Lihat Tiket Saya",
+      href: "/tickets/my-tickets",
+      icon: <Ticket className="h-4 w-4" />,
+      roles: ["mahasiswa"],
+    },
+    {
+      name: "Tiket Ditugaskan",
+      href: "/tickets/assigned",
+      icon: <FileText className="h-4 w-4" />,
+      roles: ["dosen", "admin"],
     },
     {
       name: "Laporan",
       href: "/reports",
-      icon: <FileText className="h-4 w-4" />,
+      icon: <BarChart3 className="h-4 w-4" />,
       roles: ["admin", "executive"],
+    },
+    {
+      name: "Kalender",
+      href: "/calendar",
+      icon: <Calendar className="h-4 w-4" />,
+      roles: ["dosen", "admin", "executive"],
     },
     {
       name: "Bantuan",
@@ -108,79 +119,56 @@ export function Navbar({ className }: NavbarProps) {
     },
   ]
 
-  const filteredQuickActions = quickActions.filter((action) => userRole && action.roles.includes(userRole))
+  const filteredQuickActions = quickActions.filter(
+    (action) => userRole && action.roles.includes(userRole)
+  ).slice(0, 5) // Only show top 5
 
   return (
-    <header className={cn("flex h-16 items-center gap-4 border-b px-4 md:px-6", className)}>
-      <div className="flex items-center gap-2 md:gap-4 lg:gap-6">
-        <SidebarTrigger className="md:hidden text-primary" />
+    <header className={cn("navbar flex h-[var(--header-height)] items-center gap-4 border-b px-4", className)}>
+      {/* Mobile menu trigger and Logo section */}
+      <div className="flex items-center gap-3 md:gap-4">
+        <Button 
+          variant="ghost" 
+          size="icon" 
+          onClick={toggleSidebar}
+        >
+          <Menu className="h-5 w-5" />
+        </Button>
 
         <Link href="/dashboard" className="flex items-center gap-2">
-          <Image src="/logo-upnvj.png" alt="UPNVJ Logo" width={32} height={32} className="h-8 w-auto" />
-          <span className="hidden font-bold md:inline-block text-primary">Service Desk FIK</span>
+          <Image src="/logo-upnvj.png" alt="UPNVJ Logo" width={28} height={28} className="h-8 w-auto" />
+          <div className="hidden md:block">
+            <span className="font-semibold text-sm text-primary-600">Service Desk</span>
+          </div>
         </Link>
       </div>
 
-      {/* Main Navigation */}
-      <nav className="hidden md:flex items-center space-x-1">
-        <Button variant="ghost" size="sm" asChild className="text-primary hover:bg-primary-50 hover:text-primary-700">
-          <Link href="/dashboard">
-            <Home className="h-4 w-4 mr-2" />
-            Dashboard
-          </Link>
+      {/* Desktop Navigation */}
+      <nav className="hidden md:flex items-center space-x-1 mx-4">
+        <Button variant="ghost" size="sm" asChild className="text-foreground hover:bg-muted">
+          <Link href="/dashboard">Dashboard</Link>
         </Button>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm" className="text-primary hover:bg-primary-50 hover:text-primary-700">
-              <Ticket className="h-4 w-4 mr-2" />
-              Tiket
-              <ChevronDown className="h-4 w-4 ml-1" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
-            <DropdownMenuItem asChild>
-              <Link href="/tickets">Semua Tiket</Link>
-            </DropdownMenuItem>
-            {(userRole === "mahasiswa" || userRole === "dosen" || userRole === "admin") && (
-              <DropdownMenuItem asChild>
-                <Link href="/tickets/create">Buat Tiket</Link>
-              </DropdownMenuItem>
-            )}
-            {(userRole === "dosen" || userRole === "admin") && (
-              <DropdownMenuItem asChild>
-                <Link href="/tickets/assigned">Tiket Ditugaskan</Link>
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
+        
+        <Button variant="ghost" size="sm" asChild className="text-foreground hover:bg-muted">
+          <Link href="/tickets">Tiket</Link>
+        </Button>
+        
         {(userRole === "admin" || userRole === "executive") && (
-          <Button variant="ghost" size="sm" asChild className="text-primary hover:bg-primary-50 hover:text-primary-700">
-            <Link href="/reports">
-              <BarChart3 className="h-4 w-4 mr-2" />
-              Laporan
-            </Link>
+          <Button variant="ghost" size="sm" asChild className="text-foreground hover:bg-muted">
+            <Link href="/reports">Laporan</Link>
           </Button>
         )}
-
-        <Button variant="ghost" size="sm" asChild className="text-primary hover:bg-primary-50 hover:text-primary-700">
-          <Link href="/help">
-            <HelpCircle className="h-4 w-4 mr-2" />
-            Bantuan
-          </Link>
-        </Button>
       </nav>
 
-      <div className="ml-auto flex items-center gap-4">
+      {/* Right side actions */}
+      <div className="ml-auto flex items-center gap-2">
         {/* Search */}
         <div className="relative" ref={searchRef}>
           <Button
             variant="ghost"
             size="icon"
             onClick={() => setSearchOpen(!searchOpen)}
-            className="relative text-primary hover:bg-primary-50 hover:text-primary-700"
-            aria-label="Search"
+            className="text-muted-foreground hover:text-foreground"
           >
             <Search className="h-5 w-5" />
           </Button>
@@ -188,26 +176,27 @@ export function Navbar({ className }: NavbarProps) {
           <AnimatePresence>
             {searchOpen && (
               <motion.div
-                initial={{ opacity: 0, y: 10, width: "16rem" }}
-                animate={{ opacity: 1, y: 0, width: "20rem" }}
-                exit={{ opacity: 0, y: 10, width: "16rem" }}
+                initial={{ opacity: 0, y: 10, width: isMobile ? "calc(100vw - 2rem)" : "20rem" }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: 10 }}
                 transition={{ duration: 0.2 }}
-                className="absolute right-0 mt-2 origin-top-right rounded-md bg-background shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                className={cn(
+                  "fixed top-[var(--header-height)] right-0 p-3 bg-background border border-border shadow-lg rounded-md z-50",
+                  isMobile ? "left-0 mx-4 mt-2" : "mt-1 right-3 w-80"
+                )}
               >
-                <form onSubmit={handleSearchSubmit} className="p-2">
-                  <div className="flex items-center">
-                    <Input
-                      type="search"
-                      placeholder="Cari tiket, pengguna, atau dokumen..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="flex-1"
-                      autoFocus
-                    />
-                    <Button type="submit" size="sm" className="ml-2 bg-primary hover:bg-primary-600">
-                      Cari
-                    </Button>
-                  </div>
+                <form onSubmit={handleSearchSubmit} className="flex w-full">
+                  <Input
+                    type="search"
+                    placeholder="Cari tiket, pengguna, atau dokumen..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="flex-1"
+                    autoFocus
+                  />
+                  <Button type="submit" className="ml-2">
+                    Cari
+                  </Button>
                 </form>
               </motion.div>
             )}
@@ -220,20 +209,20 @@ export function Navbar({ className }: NavbarProps) {
             <Button
               variant="ghost"
               size="icon"
-              className="relative text-primary hover:bg-primary-50 hover:text-primary-700"
+              className="relative text-muted-foreground hover:text-foreground"
               aria-label="Quick Actions"
             >
               <PlusCircle className="h-5 w-5" />
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuContent align="end" className="w-56 bg-background">
             <DropdownMenuLabel>Aksi Cepat</DropdownMenuLabel>
             <DropdownMenuSeparator />
             {filteredQuickActions.map((action) => (
               <DropdownMenuItem key={action.href} asChild>
                 <Link href={action.href} className="flex items-center">
-                  {action.icon}
-                  <span className="ml-2">{action.name}</span>
+                  <span className="text-primary-500 mr-2">{action.icon}</span>
+                  <span>{action.name}</span>
                 </Link>
               </DropdownMenuItem>
             ))}
@@ -246,7 +235,7 @@ export function Navbar({ className }: NavbarProps) {
             variant="ghost"
             size="icon"
             onClick={() => setNotificationsOpen(!notificationsOpen)}
-            className="relative text-primary hover:bg-primary-50 hover:text-primary-700"
+            className="relative text-muted-foreground hover:text-foreground"
             aria-label="Notifications"
           >
             <Bell className="h-5 w-5" />
@@ -271,7 +260,12 @@ export function Navbar({ className }: NavbarProps) {
                 animate={{ opacity: 1, y: 0 }}
                 exit={{ opacity: 0, y: 10 }}
                 transition={{ duration: 0.2 }}
-                className="absolute right-0 mt-2 w-80 origin-top-right rounded-md bg-background shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
+                className={cn(
+                  "fixed z-50 bg-background border border-border shadow-lg rounded-md overflow-hidden",
+                  isMobile 
+                    ? "top-[var(--header-height)] left-0 right-0 mx-4 mt-2 max-h-[80vh]" 
+                    : "top-[var(--header-height)] right-4 mt-1 w-80 max-h-[calc(100vh-var(--header-height)-2rem)]"
+                )}
               >
                 <NotificationList onClose={() => setNotificationsOpen(false)} />
               </motion.div>
@@ -283,17 +277,14 @@ export function Navbar({ className }: NavbarProps) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full">
-              <Avatar className="h-8 w-8 border-2 border-primary-100">
+              <Avatar className="h-8 w-8 border border-primary-100">
                 <AvatarFallback className="bg-primary-50 text-primary-700">
                   {user?.name?.charAt(0) || "U"}
                 </AvatarFallback>
-                {user?.profileImage && (
-                  <AvatarImage src={user.profileImage || "/placeholder.svg"} alt={user.name || "User"} />
-                )}
               </Avatar>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56">
+          <DropdownMenuContent align="end" className="w-56 bg-background">
             <DropdownMenuLabel>
               <div className="flex flex-col">
                 <span className="font-medium">{user?.name}</span>
@@ -314,7 +305,7 @@ export function Navbar({ className }: NavbarProps) {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => logout()} className="text-primary-700 focus:text-primary-700">
+            <DropdownMenuItem onClick={() => logout()} className="text-destructive focus:text-destructive">
               <LogOut className="mr-2 h-4 w-4" />
               <span>Logout</span>
             </DropdownMenuItem>

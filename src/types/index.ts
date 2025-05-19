@@ -1,4 +1,35 @@
 // User Types
+
+export type User = {
+  id: number
+  name: string
+  email: string
+  nim?: string
+  nip?: string
+  role: UserRole
+  department: string
+  position?: string
+  programStudi?: string
+  fakultas?: string
+  angkatan?: string
+  status?: string
+  phone?: string // ✅ Tambahin ini
+}
+
+export interface Notification {
+  id: number
+  type: string
+  title: string
+  message: string
+  isRead: boolean
+  createdAt: string
+  relatedId?: number
+  relatedType?: string
+  actionUrl?: string // ✅ Tambahin ini
+}
+
+
+
 export type UserRole = "mahasiswa" | "dosen" | "admin" | "executive"
 
 
@@ -9,7 +40,7 @@ export interface AuthResponse {
 
 // Ticket Types
 export type TicketStatus = "pending" | "disposisi" | "in-progress" | "completed" | "cancelled"
-export type TicketPriority = "low" | "medium" | "high" | "urgent"
+export const TICKET_PRIORITY = ["low", "medium", "high", "urgent"] as const;
 export type SLAStatus = "on-time" | "at-risk" | "breached"
 
 export interface Ticket {
@@ -68,7 +99,7 @@ export interface DisposisiPayload {
   actionType: "forward" | "escalate" | "return"
 }
 
-export type DisposisiHistory {
+export type DisposisiHistory = {
   id: number
   ticketId: number
   fromUserId: number
@@ -91,7 +122,7 @@ export type TicketStats = {
   byCategory: { category: string; count: number }[]
 }
 
-export type TicketType = string
+export type TicketType = "pengajuan" | "laporan" | "permintaan" | "lainnya"
 
 
 // Notification Types

@@ -1,11 +1,12 @@
 "use client"
 
-import { useEffect, useState, useMemo } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import Image from "next/image"
 import { usePathname } from "next/navigation"
 import { motion, AnimatePresence } from "framer-motion"
 import { useAuth } from "@/hooks/use-auth"
+import { UserRole } from "@/types"
 import {
   LayoutDashboard,
   Ticket,
@@ -19,347 +20,479 @@ import {
   HelpCircle,
   LogOut,
   ChevronDown,
+  ClipboardList,
+  Book,
+  GraduationCap,
+  School,
+  Bell,
+  Home,
+  Database,
+  Layers,
+  BookOpen
 } from "lucide-react"
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-  SidebarRail,
-  SidebarSeparator,
-  useSidebar,
-} from "@/components/ui/sidebar"
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 
 // Animation variants
 const itemVariants = {
   open: {
     opacity: 1,
     x: 0,
-    transition: { type: "spring", stiffness: 300, damping: 24 },
+    transition: { type: "spring", stiffness: 300, damping: 24 }
   },
   closed: {
     opacity: 0,
-    x: -20,
-    transition: { duration: 0.2 },
-  },
+    x: -10,
+    transition: { duration: 0.2 }
+  }
 }
 
 const iconVariants = {
   open: {
     rotate: 0,
-    transition: { duration: 0.2 },
+    transition: { duration: 0.2 }
   },
   closed: {
     rotate: -90,
-    transition: { duration: 0.2 },
-  },
+    transition: { duration: 0.2 }
+  }
 }
 
-export function AppSidebar() {
-  const { user, userRole, logout } = useAuth()
+interface SidebarProps {
+  isOpen: boolean
+  userRole?: UserRole
+}
+
+export function Sidebar({ isOpen, userRole }: SidebarProps) {
+  const { user, logout } = useAuth()
   const pathname = usePathname()
-  const { state } = useSidebar()
-  const [openGroups, setOpenGroups] = useState<Record<string, boolean>>({
+  // Use useRef to avoid the infinite re-renders
+  const openGroupsRef = useRef<Record<string, boolean>>({
     tickets: true,
-    help: false,
+    help: false
   })
-
-  // Reset open groups when sidebar collapses
-  useEffect(() => {
-    if (state === "collapsed") {
-      setOpenGroups({})
-    }
-  }, [state])
-
+  
+  // Use this state only for re-rendering the component when groups toggle
+  const [, setTriggerRender] = useState(0)
+  
+  // Function to toggle a group
   const toggleGroup = (group: string) => {
-    setOpenGroups((prev) => ({
-      ...prev,
-      [group]: !prev[group],
-    }))
-  }
-
-  // Navigation items definitions
-  const navItems = useMemo(() => {
-    // Main navigation items
-    const mainNavItems = [
-      {
-        name: "Dashboard",
-        href: "/dashboard",
-        icon: <LayoutDashboard className="h-4 w-4" />,
-        roles: ["mahasiswa", "dosen", "admin", "executive"],
-      },
-    ]
-
-    // Ticket navigation items
-    const ticketNavItems = [
-      {
-        name: "Semua Tiket",
-        href: "/tickets",
-        icon: <Ticket className="h-4 w-4" />,
-        roles: ["mahasiswa", "dosen", "admin", "executive"],
-      },
-      {
-        name: "Buat Tiket",
-        href: "/tickets/create",
-        icon: <PlusCircle className="h-4 w-4" />,
-        roles: ["mahasiswa", "dosen", "admin"],
-      },
-      {
-        name: "Tiket Ditugaskan",
-        href: "/tickets/assigned",
-        icon: <FileText className="h-4 w-4" />,
-        roles: ["dosen", "admin"],
-      },
-    ]
-
-    // Admin navigation items
-    const adminNavItems = [
-      {
-        name: "Pengguna",
-        href: "/users",
-        icon: <Users className="h-4 w-4" />,
-        roles: ["admin", "executive"],
-      },
-      {
-        name: "Laporan",
-        href: "/reports",
-        icon: <BarChart3 className="h-4 w-4" />,
-        roles: ["admin", "executive"],
-      },
-      {
-        name: "Kalender",
-        href: "/calendar",
-        icon: <Calendar className="h-4 w-4" />,
-        roles: ["admin", "executive", "dosen"],
-      },
-      {
-        name: "Pengaturan",
-        href: "/settings",
-        icon: <Settings className="h-4 w-4" />,
-        roles: ["admin", "executive"],
-      },
-    ]
-
-    // Help navigation items
-    const helpNavItems = [
-      {
-        name: "Panduan Pengguna",
-        href: "/help/guide",
-        icon: <FileText className="h-4 w-4" />,
-        roles: ["mahasiswa", "dosen", "admin", "executive"],
-      },
-      {
-        name: "FAQ",
-        href: "/help/faq",
-        icon: <HelpCircle className="h-4 w-4" />,
-        roles: ["mahasiswa", "dosen", "admin", "executive"],
-      },
-      {
-        name: "Kontak Support",
-        href: "/help/contact",
-        icon: <User className="h-4 w-4" />,
-        roles: ["mahasiswa", "dosen", "admin", "executive"],
-      },
-    ]
-
-    return {
-      mainNavItems,
-      ticketNavItems,
-      adminNavItems,
-      helpNavItems,
+    if (!isOpen) return
+    
+    // Update the ref directly
+    openGroupsRef.current = {
+      ...openGroupsRef.current,
+      [group]: !openGroupsRef.current[group]
     }
-  }, [])
+    
+    // Trigger re-render
+    setTriggerRender(prev => prev + 1)
+  }
+  
+  // Reset open groups when sidebar collapses - without causing infinite loops
+  useEffect(() => {
+    if (!isOpen) {
+      openGroupsRef.current = {}
+      setTriggerRender(prev => prev + 1)
+    }
+  }, [isOpen])
 
-  // Filter items based on user role
-  const filteredMainNavItems = navItems.mainNavItems.filter((item) => userRole && item.roles.includes(userRole))
-  const filteredTicketNavItems = navItems.ticketNavItems.filter((item) => userRole && item.roles.includes(userRole))
-  const filteredAdminNavItems = navItems.adminNavItems.filter((item) => userRole && item.roles.includes(userRole))
-  const filteredHelpNavItems = navItems.helpNavItems.filter((item) => userRole && item.roles.includes(userRole))
+  // Define navigation items based on role with different visual hierarchies
+  const getNav = () => {
+    // Common items for all roles
+    const common = {
+      // Dashboard varies by role for different views
+      dashboard: {
+        name: userRole === 'executive' ? "Executive Dashboard" : "Dashboard",
+        href: userRole === 'executive' ? "/executive-dashboard" : "/dashboard",
+        icon: <LayoutDashboard className="h-4 w-4" />,
+        color: "text-blue-500"
+      },
+      
+      // Tickets section with sub-items
+      tickets: {
+        name: "Tiket",
+        icon: <Ticket className="h-4 w-4" />,
+        color: "text-primary-500",
+        subItems: [
+          ...(userRole === 'mahasiswa' || userRole === 'dosen' || userRole === 'admin' ? [
+            {
+              name: "Buat Tiket",
+              href: "/tickets/create",
+              icon: <PlusCircle className="h-4 w-4" />,
+              color: "text-primary-400"
+            }
+          ] : []),
+          {
+            name: "Semua Tiket",
+            href: "/tickets",
+            icon: <FileText className="h-4 w-4" />,
+            color: "text-primary-600"
+          },
+          ...(userRole === 'dosen' || userRole === 'admin' ? [
+            {
+              name: "Tiket Ditugaskan",
+              href: "/tickets/assigned",
+              icon: <ClipboardList className="h-4 w-4" />,
+              color: "text-primary-500"
+            }
+          ] : []),
+          ...(userRole === 'mahasiswa' ? [
+            {
+              name: "Tiket Saya",
+              href: "/tickets/my-tickets",
+              icon: <ClipboardList className="h-4 w-4" />,
+              color: "text-primary-500"
+            }
+          ] : [])
+        ]
+      },
+      
+      // Help & Support section
+      help: {
+        name: "Bantuan",
+        icon: <HelpCircle className="h-4 w-4" />,
+        color: "text-amber-500",
+        subItems: [
+          {
+            name: "Panduan Pengguna",
+            href: "/help/guide",
+            icon: <BookOpen className="h-4 w-4" />,
+            color: "text-amber-400"
+          },
+          {
+            name: "FAQ",
+            href: "/help/faq",
+            icon: <HelpCircle className="h-4 w-4" />,
+            color: "text-amber-500"
+          }
+        ]
+      }
+    }
+    
+    // Role-specific items
+    switch(userRole) {
+      case 'mahasiswa':
+        return {
+          main: [common.dashboard],
+          groups: [
+            common.tickets,
+            {
+              name: "Layanan",
+              icon: <Layers className="h-4 w-4" />,
+              color: "text-green-500",
+              subItems: [
+                {
+                  name: "Panduan Layanan",
+                  href: "/help/guides",
+                  icon: <Book className="h-4 w-4" />,
+                  color: "text-green-500"
+                },
+                {
+                  name: "Status Layanan",
+                  href: "/service-status",
+                  icon: <Bell className="h-4 w-4" />,
+                  color: "text-green-600"
+                }
+              ]
+            },
+            common.help
+          ]
+        }
+      
+      case 'dosen':
+        return {
+          main: [common.dashboard],
+          groups: [
+            common.tickets,
+            {
+              name: "Akademik",
+              icon: <GraduationCap className="h-4 w-4" />,
+              color: "text-indigo-500",
+              subItems: [
+                {
+                  name: "Tugas Layanan",
+                  href: "/assignments",
+                  icon: <FileText className="h-4 w-4" />,
+                  color: "text-indigo-400"
+                },
+                {
+                  name: "Jadwal Piket",
+                  href: "/schedule",
+                  icon: <Calendar className="h-4 w-4" />,
+                  color: "text-indigo-500"
+                }
+              ]
+            },
+            common.help
+          ]
+        }
+        
+      case 'admin':
+        return {
+          main: [common.dashboard],
+          groups: [
+            common.tickets,
+            {
+              name: "Administrasi",
+              icon: <Database className="h-4 w-4" />,
+              color: "text-violet-500",
+              subItems: [
+                {
+                  name: "Pengguna",
+                  href: "/users",
+                  icon: <Users className="h-4 w-4" />,
+                  color: "text-violet-400"
+                },
+                {
+                  name: "Laporan",
+                  href: "/reports",
+                  icon: <BarChart3 className="h-4 w-4" />,
+                  color: "text-violet-500"
+                },
+                {
+                  name: "Pengaturan",
+                  href: "/settings",
+                  icon: <Settings className="h-4 w-4" />,
+                  color: "text-violet-600"
+                }
+              ]
+            },
+            common.help
+          ]
+        }
+        
+      case 'executive':
+        return {
+          main: [common.dashboard],
+          groups: [
+            common.tickets,
+            {
+              name: "Manajemen",
+              icon: <BarChart3 className="h-4 w-4" />,
+              color: "text-rose-500",
+              subItems: [
+                {
+                  name: "Kinerja",
+                  href: "/performance",
+                  icon: <BarChart3 className="h-4 w-4" />,
+                  color: "text-rose-400"
+                },
+                {
+                  name: "Pengguna",
+                  href: "/users",
+                  icon: <Users className="h-4 w-4" />,
+                  color: "text-rose-500"
+                },
+                {
+                  name: "Laporan",
+                  href: "/reports",
+                  icon: <FileText className="h-4 w-4" />,
+                  color: "text-rose-600"
+                }
+              ]
+            },
+            common.help
+          ]
+        }
+        
+      default:
+        return {
+          main: [common.dashboard],
+          groups: [common.tickets, common.help]
+        }
+    }
+  }
+  
+  const nav = getNav()
 
-  // Render menu item helper function
-  const renderMenuItem = (item: any, isActive: boolean) => (
-    <SidebarMenuItem key={item.href}>
-      <SidebarMenuButton
-        asChild
-        isActive={isActive}
-        tooltip={item.name}
-        className="text-foreground hover:bg-primary-50 hover:text-primary-700 data-[active=true]:bg-primary-50 data-[active=true]:text-primary-700"
-      >
-        <Link href={item.href}>
-          <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="mr-2 text-primary-500">
-            {item.icon}
-          </motion.div>
-          <AnimatePresence>
-            {state === "expanded" && (
-              <motion.span initial="closed" animate="open" exit="closed" variants={itemVariants}>
-                {item.name}
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </Link>
-      </SidebarMenuButton>
-    </SidebarMenuItem>
+  // Sidebar Link component
+  const SidebarLink = ({ item, isActive }: { item: any, isActive: boolean }) => (
+    <Link 
+      href={item.href} 
+      className={cn(
+        "flex items-center rounded-md p-2 text-sm transition-colors",
+        isActive 
+          ? "bg-primary-50 font-medium" 
+          : "text-muted-foreground hover:bg-muted hover:text-foreground"
+      )}
+    >
+      <span className={cn("mr-2", item.color || "text-primary-500")}>{item.icon}</span>
+      <AnimatePresence>
+        {isOpen && (
+          <motion.span 
+            initial="closed" 
+            animate="open" 
+            exit="closed" 
+            variants={itemVariants}
+            className={cn("truncate", isActive ? item.color : "")}
+          >
+            {item.name}
+          </motion.span>
+        )}
+      </AnimatePresence>
+    </Link>
   )
 
+  // Get a theme color class based on role
+  const getRoleThemeClass = () => {
+    switch(userRole) {
+      case 'mahasiswa': return 'from-blue-500/5 to-green-500/5 border-blue-500/10';
+      case 'dosen': return 'from-indigo-500/5 to-sky-500/5 border-indigo-500/10';
+      case 'admin': return 'from-violet-500/5 to-fuchsia-500/5 border-violet-500/10';
+      case 'executive': return 'from-amber-500/5 to-red-500/5 border-amber-500/10';
+      default: return 'from-gray-500/5 to-gray-500/5 border-gray-500/10';
+    }
+  }
+
   return (
-    <Sidebar className="sidebar glass-sidebar">
-      <SidebarHeader>
-        <div className="flex items-center gap-2 px-2 py-3">
-          <Image src="/logo-upnvj.png" alt="UPNVJ Logo" width={32} height={32} className="h-8 w-auto" />
+    <aside 
+      className={cn(
+        "sidebar h-full flex flex-col border-r bg-gradient-to-b",
+        getRoleThemeClass(),
+        isOpen ? "w-[var(--sidebar-width)]" : "w-[var(--sidebar-collapsed-width)]",
+        "transition-all duration-200 ease-in-out"
+      )}
+    >
+      {/* Sidebar header with role-based styling */}
+      <div className={cn(
+        "flex items-center h-14 px-3 border-b",
+        getRoleThemeClass()
+      )}>
+        <Link href="/dashboard" className="flex items-center gap-2">
+          <Image src="/logo-upnvj.png" alt="UPNVJ Logo" width={28} height={28} className="h-8 w-auto" />
           <AnimatePresence>
-            {state === "expanded" && (
-              <motion.div
-                initial="closed"
-                animate="open"
-                exit="closed"
+            {isOpen && (
+              <motion.div 
+                initial="closed" 
+                animate="open" 
+                exit="closed" 
                 variants={itemVariants}
                 className="flex flex-col"
               >
-                <span className="font-bold text-sm text-primary">Service Desk</span>
+                <span className="font-semibold text-sm text-primary-600">Service Desk</span>
                 <span className="text-xs text-muted-foreground">FIK UPNVJ</span>
               </motion.div>
             )}
           </AnimatePresence>
+        </Link>
+      </div>
+
+      {/* Sidebar content */}
+      <div className="flex-1 overflow-auto py-2 px-2 space-y-2">
+        {/* Main items */}
+        <div className="mb-2">
+          {nav.main.map((item: any) => {
+            const isActive = pathname === item.href
+            return (
+              <SidebarLink 
+                key={item.name} 
+                item={item} 
+                isActive={isActive} 
+              />
+            )
+          })}
         </div>
-      </SidebarHeader>
 
-      <SidebarSeparator className="bg-primary-100" />
+        {/* Groups with collapsible sections */}
+        {nav.groups.map((group: any) => (
+          <div key={group.name} className="space-y-1">
+            {/* Group header */}
+            <button
+              className={cn(
+                "flex w-full items-center justify-between p-2 text-sm rounded-md",
+                "hover:bg-muted font-medium",
+                !isOpen && "justify-center"
+              )}
+              onClick={() => toggleGroup(group.name)}
+            >
+              <div className="flex items-center gap-2">
+                <span className={group.color}>{group.icon}</span>
+                {isOpen && <span>{group.name}</span>}
+              </div>
+              {isOpen && (
+                <motion.div 
+                  animate={openGroupsRef.current[group.name] ? "open" : "closed"} 
+                  variants={iconVariants}
+                >
+                  <ChevronDown className="h-4 w-4" />
+                </motion.div>
+              )}
+            </button>
 
-      <SidebarContent>
-        {/* Main Navigation */}
-        <SidebarGroup>
-          <SidebarMenu>
-            {filteredMainNavItems.map((item) => {
-              const isActive = pathname === item.href
-              return renderMenuItem(item, isActive)
-            })}
-          </SidebarMenu>
-        </SidebarGroup>
-
-        {/* Tickets Group */}
-        <SidebarGroup>
-          <Collapsible
-            open={state === "expanded" && openGroups.tickets}
-            onOpenChange={
-              state === "expanded" ? (open) => setOpenGroups((prev) => ({ ...prev, tickets: open })) : undefined
-            }
-            className="w-full"
-          >
-            <SidebarGroupLabel asChild className="text-primary-700">
-              <CollapsibleTrigger
-                className="w-full flex justify-between items-center"
-                onClick={() => state === "expanded" && toggleGroup("tickets")}
-              >
-                <span>Tiket</span>
-                {state === "expanded" && (
-                  <motion.div animate={openGroups.tickets ? "open" : "closed"} variants={iconVariants}>
-                    <ChevronDown className="h-4 w-4" />
-                  </motion.div>
-                )}
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent className="data-[state=closed]:hidden">
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {filteredTicketNavItems.map((item) => {
-                    const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
-                    return renderMenuItem(item, isActive)
-                  })}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </Collapsible>
-        </SidebarGroup>
-
-        {/* Admin Group */}
-        {filteredAdminNavItems.length > 0 && (
-          <SidebarGroup>
-            <SidebarGroupLabel className="text-primary-700">Admin</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {filteredAdminNavItems.map((item) => {
+            {/* Group items - only show when sidebar is open and group is expanded */}
+            {(isOpen && openGroupsRef.current[group.name]) && (
+              <div className="ml-1 mt-1 space-y-1 border-l-2 border-muted pl-2">
+                {group.subItems.map((item: any) => {
                   const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
-                  return renderMenuItem(item, isActive)
+                  return (
+                    <SidebarLink 
+                      key={item.href} 
+                      item={item} 
+                      isActive={isActive} 
+                    />
+                  )
                 })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+              </div>
+            )}
+          </div>
+        ))}
+      </div>
 
-        {/* Help Group */}
-        <SidebarGroup>
-          <Collapsible
-            open={state === "expanded" && openGroups.help}
-            onOpenChange={
-              state === "expanded" ? (open) => setOpenGroups((prev) => ({ ...prev, help: open })) : undefined
-            }
-            className="w-full"
-          >
-            <SidebarGroupLabel asChild className="text-primary-700">
-              <CollapsibleTrigger
-                className="w-full flex justify-between items-center"
-                onClick={() => state === "expanded" && toggleGroup("help")}
-              >
-                <span>Bantuan</span>
-                {state === "expanded" && (
-                  <motion.div animate={openGroups.help ? "open" : "closed"} variants={iconVariants}>
-                    <ChevronDown className="h-4 w-4" />
-                  </motion.div>
-                )}
-              </CollapsibleTrigger>
-            </SidebarGroupLabel>
-            <CollapsibleContent className="data-[state=closed]:hidden">
-              <SidebarGroupContent>
-                <SidebarMenu>
-                  {filteredHelpNavItems.map((item) => {
-                    const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
-                    return renderMenuItem(item, isActive)
-                  })}
-                </SidebarMenu>
-              </SidebarGroupContent>
-            </CollapsibleContent>
-          </Collapsible>
-        </SidebarGroup>
-      </SidebarContent>
-
-      <SidebarFooter>
-        <SidebarSeparator className="bg-primary-100" />
+      {/* Profile section with role-specific styling */}
+      <div className={cn(
+        "border-t p-2 mt-auto",
+        getRoleThemeClass()
+      )}>
         <AnimatePresence mode="wait">
-          {state === "expanded" ? (
+          {isOpen ? (
             <motion.div
               key="expanded"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: 10 }}
               transition={{ duration: 0.2 }}
-              className="p-2"
             >
-              <div className="flex items-center gap-3 rounded-md bg-primary-50 p-2">
-                <Avatar className="h-8 w-8 border-2 border-primary-200">
-                  <AvatarFallback className="bg-primary-100 text-primary-700">
+              <div className={cn(
+                "flex items-center gap-3 rounded-md p-2",
+                "bg-white/50 backdrop-blur-sm"
+              )}>
+                <Avatar className={cn(
+                  "h-8 w-8 border",
+                  userRole === 'mahasiswa' ? "border-blue-200 bg-blue-50" :
+                  userRole === 'dosen' ? "border-indigo-200 bg-indigo-50" :
+                  userRole === 'admin' ? "border-violet-200 bg-violet-50" :
+                  userRole === 'executive' ? "border-amber-200 bg-amber-50" :
+                  "border-gray-200 bg-gray-50"
+                )}>
+                  <AvatarFallback className={cn(
+                    userRole === 'mahasiswa' ? "text-blue-700" :
+                    userRole === 'dosen' ? "text-indigo-700" :
+                    userRole === 'admin' ? "text-violet-700" :
+                    userRole === 'executive' ? "text-amber-700" :
+                    "text-gray-700"
+                  )}>
                     {user?.name?.charAt(0) || "U"}
                   </AvatarFallback>
-                  {user?.profileImage && (
-                    <AvatarImage src={user.profileImage || "/placeholder.svg"} alt={user.name || "User"} />
-                  )}
                 </Avatar>
                 <div className="flex flex-col overflow-hidden">
                   <span className="text-sm font-medium truncate">{user?.name}</span>
-                  <span className="text-xs text-muted-foreground truncate">{user?.role}</span>
+                  <span className={cn(
+                    "text-xs capitalize truncate",
+                    userRole === 'mahasiswa' ? "text-blue-600" :
+                    userRole === 'dosen' ? "text-indigo-600" :
+                    userRole === 'admin' ? "text-violet-600" :
+                    userRole === 'executive' ? "text-amber-600" :
+                    "text-gray-600"
+                  )}>
+                    {user?.role}
+                  </span>
                 </div>
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="ml-auto h-7 w-7 rounded-full text-primary-700 hover:bg-primary-100"
+                  className="ml-auto h-7 w-7 rounded-full text-muted-foreground hover:bg-primary-100 hover:text-primary-700"
                   onClick={() => logout()}
                 >
                   <LogOut className="h-4 w-4" />
@@ -374,22 +507,33 @@ export function AppSidebar() {
               animate={{ opacity: 1, scale: 1 }}
               exit={{ opacity: 0, scale: 0.8 }}
               transition={{ duration: 0.2 }}
-              className="flex justify-center p-2"
+              className="flex justify-center"
             >
-              <Avatar className="h-8 w-8 border-2 border-primary-200">
-                <AvatarFallback className="bg-primary-100 text-primary-700">
+              <Avatar 
+                className={cn(
+                  "h-8 w-8 border cursor-pointer",
+                  userRole === 'mahasiswa' ? "border-blue-200 bg-blue-50" :
+                  userRole === 'dosen' ? "border-indigo-200 bg-indigo-50" :
+                  userRole === 'admin' ? "border-violet-200 bg-violet-50" :
+                  userRole === 'executive' ? "border-amber-200 bg-amber-50" :
+                  "border-gray-200 bg-gray-50"
+                )}
+                onClick={() => logout()}
+              >
+                <AvatarFallback className={cn(
+                  userRole === 'mahasiswa' ? "text-blue-700" :
+                  userRole === 'dosen' ? "text-indigo-700" :
+                  userRole === 'admin' ? "text-violet-700" :
+                  userRole === 'executive' ? "text-amber-700" :
+                  "text-gray-700"
+                )}>
                   {user?.name?.charAt(0) || "U"}
                 </AvatarFallback>
-                {user?.profileImage && (
-                  <AvatarImage src={user.profileImage || "/placeholder.svg"} alt={user.name || "User"} />
-                )}
               </Avatar>
             </motion.div>
           )}
         </AnimatePresence>
-      </SidebarFooter>
-
-      <SidebarRail />
-    </Sidebar>
+      </div>
+    </aside>
   )
 }

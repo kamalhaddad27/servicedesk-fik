@@ -18,39 +18,39 @@ import { AlertCircle, CheckCircle } from 'lucide-react'
 import { Alert, AlertDescription } from "@/components/ui/alert"
 
 
-// Form schema
+// Form schema - Fixed all boolean fields to not use default()
 const generalSettingsSchema = z.object({
   siteName: z.string().min(1, { message: "Nama situs harus diisi" }),
   siteDescription: z.string().optional(),
   contactEmail: z.string().email({ message: "Email tidak valid" }),
   maxAttachmentSize: z.string().min(1, { message: "Ukuran maksimal lampiran harus diisi" }),
-  allowRegistration: z.boolean().default(false),
+  allowRegistration: z.boolean(),
 })
 
 const ticketSettingsSchema = z.object({
-  defaultPriority: z.string().min(1, { message: "Prioritas default harus dipilih" }),
-  autoAssignTickets: z.boolean().default(true),
-  requireApproval: z.boolean().default(false),
-  allowAnonymousTickets: z.boolean().default(false),
-  ticketPrefix: z.string().min(1, { message: "Prefix tiket harus diisi" }),
-})
+  defaultPriority: z.string(),
+  ticketPrefix: z.string(),
+  autoAssignTickets: z.boolean(),
+  requireApproval: z.boolean(),
+  allowAnonymousTickets: z.boolean(),
+});
 
 const slaSettingsSchema = z.object({
-  enableSLA: z.boolean().default(true),
+  enableSLA: z.boolean(),
   lowPrioritySLA: z.string().min(1, { message: "SLA untuk prioritas rendah harus diisi" }),
   mediumPrioritySLA: z.string().min(1, { message: "SLA untuk prioritas sedang harus diisi" }),
   highPrioritySLA: z.string().min(1, { message: "SLA untuk prioritas tinggi harus diisi" }),
   urgentPrioritySLA: z.string().min(1, { message: "SLA untuk prioritas urgent harus diisi" }),
-  sendSLANotifications: z.boolean().default(true),
+  sendSLANotifications: z.boolean(),
 })
 
 const notificationSettingsSchema = z.object({
-  emailNotifications: z.boolean().default(true),
-  inAppNotifications: z.boolean().default(true),
-  notifyOnNewTicket: z.boolean().default(true),
-  notifyOnTicketUpdate: z.boolean().default(true),
-  notifyOnTicketAssignment: z.boolean().default(true),
-  notifyOnSLABreach: z.boolean().default(true),
+  emailNotifications: z.boolean(),
+  inAppNotifications: z.boolean(),
+  notifyOnNewTicket: z.boolean(),
+  notifyOnTicketUpdate: z.boolean(),
+  notifyOnTicketAssignment: z.boolean(),
+  notifyOnSLABreach: z.boolean(),
   digestFrequency: z.string().min(1, { message: "Frekuensi digest harus dipilih" }),
 })
 
@@ -161,7 +161,7 @@ export function SettingsForm() {
   return (
     <div className="space-y-4">
       {success && (
-        <Alert variant="success" className="bg-green-50 text-green-800 border-green-200">
+        <Alert variant="default" className="bg-green-50 text-green-800 border-green-200">
           <CheckCircle className="h-4 w-4" />
           <AlertDescription>{success}</AlertDescription>
         </Alert>
@@ -660,5 +660,5 @@ export function SettingsForm() {
         </TabsContent>
       </Tabs>
     </div>
-  )
+  ) 
 }
