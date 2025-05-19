@@ -1,10 +1,12 @@
 "use client"
 
+import type React from "react"
+
 import { useState, useEffect } from "react"
+import { useSession } from "next-auth/react"
 import { useRouter } from "next/navigation"
-import { useAuth } from "@/hooks/use-auth"
 import { motion } from "framer-motion"
-import { Camera, CheckCircle, Edit, Mail, UserIcon, Building, BookOpen, Calendar, Award, Loader2 } from 'lucide-react'
+import { Camera, CheckCircle, Edit, Mail, UserIcon, Building, BookOpen, Calendar, Award, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
@@ -13,9 +15,10 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "@/components/ui/use-toast"
+import { ApiService } from "@/lib/api"
 
 export default function ProfilePage() {
-  const { user, updateUser } = useAuth()
+  const { data: session, update } = useSession()
   const router = useRouter()
   const [isEditing, setIsEditing] = useState(false)
   const [isLoading, setIsLoading] = useState(false)
@@ -27,17 +30,17 @@ export default function ProfilePage() {
   })
 
   useEffect(() => {
-    if (user) {
+    if (session?.user) {
       setFormData({
-        name: user.name || "",
-        email: user.email || "",
-        phone: user.phone || "",
-        department: user.department || "",
+        name: session.user.name || "",
+        email: session.user.email || "",
+        phone: session.user.phone || "",
+        department: session.user.department || "",
       })
     }
-  }, [user])
+  }, [session])
 
-  if (!user) {
+  if (!session?.user) {
     return (
       <div className="flex h-[80vh] w-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
@@ -53,31 +56,84 @@ export default function ProfilePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setIsLoading(true)
-    
+
     try {
-      // In a real implementation, this would call the API
-      // await ApiService.updateUser(user.id, formData)
-      
-      // For now, we'll simulate an API call
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      
-      // Update the user in auth context
-      updateUser({ ...user, ...formData })
-      
+      // Use the PUT endpoint to update user
+      const userId = Number.parseInt(session.user.id || "0")
+      await ApiService.updateUser(userId, formData)
+
+      // Update the session with new user data
+      await update({
+        ...session,
+        user: {
+          ...session.user,
+          ...formData,
+        },
+      })
+
       toast({
         title: "Profil berhasil diperbarui",
         description: "Informasi profil Anda telah diperbarui dengan sukses.",
       })
-      
+
       setIsEditing(false)
     } catch (error) {
+      console.error("Error updating profile:", error)
       toast({
         title: "Gagal memperbarui profil",
-        description: "Terjadi kesalahan saat memperbarui profil. Silakan coba lagi.",
+        description: ApiService.handleError(error) || "Terjadi kesalahan saat memperbarui profil. Silakan coba lagi.",
         variant: "destructive",
       })
     } finally {
       setIsLoading(false)
+    }
+  }
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault()
+    const form = e.target as HTMLFormElement
+    const currentPassword = (form.elements.namedItem("current-password") as HTMLInputElement).value
+    const newPassword = (form.elements.namedItem("new-password") as HTMLInputElement).value
+    const confirmPassword = (form.elements.namedItem("confirm-password") as HTMLInputElement).value
+
+    if (!currentPassword || !newPassword || !confirmPassword) {
+      toast({
+        title: "Validasi gagal",
+        description: "Semua field harus diisi",
+        variant: "destructive",
+      })
+      return
+    }
+
+    if (newPassword !== confirmPassword) {
+      toast({
+        title: "Validasi gagal",
+        description: "Password baru dan konfirmasi password tidak cocok",
+        variant: "destructive",
+      })
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      // This endpoint doesn't exist in the API service you shared
+      // You would need to implement it or use a different approach
+      // await ApiService.changePassword(currentPassword, newPassword)
+
+      toast({
+        title: "Fitur dalam pengembangan",
+        description: "Fitur ubah password akan segera tersedia",
+      })
+    } catch (error) {
+      toast({
+        title: "Gagal mengubah password",
+        description: ApiService.handleError(error) || "Terjadi kesalahan saat mengubah password. Silakan coba lagi.",
+        variant: "destructive",
+      })
+    } finally {
+      setIsLoading(false)
+      form.reset()
     }
   }
 
@@ -88,13 +144,13 @@ export default function ProfilePage() {
     executive: "Executive",
   }
 
+  const user = session.user
+
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex flex-col space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">Profil Pengguna</h1>
-        <p className="text-muted-foreground">
-          Lihat dan kelola informasi profil Anda
-        </p>
+        <p className="text-muted-foreground">Lihat dan kelola informasi profil Anda</p>
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
@@ -125,8 +181,8 @@ export default function ProfilePage() {
                       <AvatarImage src={user.profileImage || "/placeholder.svg"} alt={user.name || "User"} />
                     )}
                   </Avatar>
-                  <Button 
-                    size="icon" 
+                  <Button
+                    size="icon"
                     className="absolute bottom-0 right-0 rounded-full bg-primary hover:bg-primary-600"
                     disabled
                   >
@@ -140,7 +196,11 @@ export default function ProfilePage() {
                 </div>
               </CardContent>
               <CardFooter className="flex justify-center border-t border-primary-100 bg-primary-50/50 p-3">
-                <Button variant="outline" className="w-full border-primary-200 text-primary hover:bg-primary-50" disabled>
+                <Button
+                  variant="outline"
+                  className="w-full border-primary-200 text-primary hover:bg-primary-50"
+                  disabled
+                >
                   Ganti Foto
                 </Button>
               </CardFooter>
@@ -150,9 +210,9 @@ export default function ProfilePage() {
               <CardHeader className="bg-primary-50 border-b border-primary-100">
                 <div className="flex items-center justify-between">
                   <CardTitle className="text-lg">Informasi Pribadi</CardTitle>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
+                  <Button
+                    variant="ghost"
+                    size="sm"
                     onClick={() => setIsEditing(!isEditing)}
                     className="text-primary hover:bg-primary-50 hover:text-primary-700"
                   >
@@ -178,22 +238,22 @@ export default function ProfilePage() {
                   <form onSubmit={handleSubmit} className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="name">Nama Lengkap</Label>
-                      <Input 
-                        id="name" 
-                        name="name" 
-                        value={formData.name} 
-                        onChange={handleInputChange} 
+                      <Input
+                        id="name"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
                         placeholder="Masukkan nama lengkap"
                       />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="email">Email</Label>
-                      <Input 
-                        id="email" 
-                        name="email" 
-                        type="email" 
-                        value={formData.email} 
-                        onChange={handleInputChange} 
+                      <Input
+                        id="email"
+                        name="email"
+                        type="email"
+                        value={formData.email}
+                        onChange={handleInputChange}
                         placeholder="Masukkan email"
                         disabled
                       />
@@ -202,21 +262,21 @@ export default function ProfilePage() {
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-2">
                         <Label htmlFor="phone">Nomor Telepon</Label>
-                        <Input 
-                          id="phone" 
-                          name="phone" 
-                          value={formData.phone} 
-                          onChange={handleInputChange} 
+                        <Input
+                          id="phone"
+                          name="phone"
+                          value={formData.phone}
+                          onChange={handleInputChange}
                           placeholder="Masukkan nomor telepon"
                         />
                       </div>
                       <div className="space-y-2">
                         <Label htmlFor="department">Departemen</Label>
-                        <Input 
-                          id="department" 
-                          name="department" 
-                          value={formData.department} 
-                          onChange={handleInputChange} 
+                        <Input
+                          id="department"
+                          name="department"
+                          value={formData.department}
+                          onChange={handleInputChange}
                           placeholder="Masukkan departemen"
                           disabled
                         />
@@ -224,11 +284,7 @@ export default function ProfilePage() {
                       </div>
                     </div>
                     <div className="pt-2">
-                      <Button 
-                        type="submit" 
-                        className="bg-primary hover:bg-primary-600"
-                        disabled={isLoading}
-                      >
+                      <Button type="submit" className="bg-primary hover:bg-primary-600" disabled={isLoading}>
                         {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                         Simpan Perubahan
                       </Button>
@@ -325,7 +381,7 @@ export default function ProfilePage() {
             <CardContent className="pt-6">
               <div className="space-y-4">
                 {[1, 2, 3].map((_, index) => (
-                  <motion.div 
+                  <motion.div
                     key={index}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -344,9 +400,7 @@ export default function ProfilePage() {
               </div>
             </CardContent>
             <CardFooter className="border-t border-primary-100 bg-primary-50/50 p-3 flex justify-center">
-              <p className="text-sm text-muted-foreground">
-                Fitur aktivitas terbaru akan segera tersedia
-              </p>
+              <p className="text-sm text-muted-foreground">Fitur aktivitas terbaru akan segera tersedia</p>
             </CardFooter>
           </Card>
         </TabsContent>
@@ -358,21 +412,32 @@ export default function ProfilePage() {
               <CardDescription>Perbarui password akun Anda</CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
-              <form className="space-y-4">
+              <form onSubmit={handlePasswordChange} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="current-password">Password Saat Ini</Label>
-                  <Input id="current-password" type="password" placeholder="Masukkan password saat ini" />
+                  <Input
+                    id="current-password"
+                    name="current-password"
+                    type="password"
+                    placeholder="Masukkan password saat ini"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="new-password">Password Baru</Label>
-                  <Input id="new-password" type="password" placeholder="Masukkan password baru" />
+                  <Input id="new-password" name="new-password" type="password" placeholder="Masukkan password baru" />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="confirm-password">Konfirmasi Password</Label>
-                  <Input id="confirm-password" type="password" placeholder="Konfirmasi password baru" />
+                  <Input
+                    id="confirm-password"
+                    name="confirm-password"
+                    type="password"
+                    placeholder="Konfirmasi password baru"
+                  />
                 </div>
                 <div className="pt-2">
-                  <Button className="bg-primary hover:bg-primary-600">
+                  <Button type="submit" className="bg-primary hover:bg-primary-600" disabled={isLoading}>
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                     Ubah Password
                   </Button>
                 </div>
@@ -401,9 +466,7 @@ export default function ProfilePage() {
                 <div className="flex items-center justify-between border-b border-muted pb-4">
                   <div>
                     <h4 className="font-medium">Sesi Aktif</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Kelola perangkat yang saat ini login ke akun Anda
-                    </p>
+                    <p className="text-sm text-muted-foreground">Kelola perangkat yang saat ini login ke akun Anda</p>
                   </div>
                   <Button variant="outline" className="border-primary-200 text-primary hover:bg-primary-50" disabled>
                     Kelola
@@ -412,9 +475,7 @@ export default function ProfilePage() {
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="font-medium">Riwayat Login</h4>
-                    <p className="text-sm text-muted-foreground">
-                      Lihat riwayat login ke akun Anda
-                    </p>
+                    <p className="text-sm text-muted-foreground">Lihat riwayat login ke akun Anda</p>
                   </div>
                   <Button variant="outline" className="border-primary-200 text-primary hover:bg-primary-50" disabled>
                     Lihat
@@ -423,9 +484,7 @@ export default function ProfilePage() {
               </div>
             </CardContent>
             <CardFooter className="border-t border-primary-100 bg-primary-50/50 p-3 flex justify-center">
-              <p className="text-sm text-muted-foreground">
-                Fitur keamanan lanjutan akan segera tersedia
-              </p>
+              <p className="text-sm text-muted-foreground">Fitur keamanan lanjutan akan segera tersedia</p>
             </CardFooter>
           </Card>
         </TabsContent>

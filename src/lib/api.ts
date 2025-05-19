@@ -248,6 +248,21 @@ export class ApiService {
   static async getTicketById(id: number): Promise<Ticket> {
     return this.get<Ticket>(`/tickets/${id}`);
   }
+
+  static async getTickets(filters: { 
+    dateFrom: string; 
+    dateTo: string; 
+    department?: string; 
+  }): Promise<Ticket[]> {
+    const params = new URLSearchParams()
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== undefined && value !== null && value !== '') {
+        params.append(key, String(value))
+      }
+    })
+  
+    return this.get<Ticket[]>(`/tickets${params.toString() ? `?${params.toString()}` : ''}`)
+  }
   
   // Create ticket
   static async createTicket(formData: FormData): Promise<Ticket> {

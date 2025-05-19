@@ -138,29 +138,31 @@ export default function CalendarPage() {
                   className="rounded-md border"
                   components={{
                     Day: ({ day, ...props }) => {
-                      const dayTickets = getTicketsForDate(day)
-                      const isSelected = selectedDate && isSameDay(day, selectedDate)
-                      const isCurrentMonth = isSameMonth(day, currentDate)
-
-                      return (
-                        <div
-                          {...props}
-                          className={cn(
-                            "relative p-0",
-                            props.className,
-                            !isCurrentMonth && "text-muted-foreground opacity-50",
-                          )}
-                        >
-                          <time
-                            dateTime={format(day, "yyyy-MM-dd")}
+                        const date = new Date(day as unknown as string); // 👈 ini konversinya
+                      
+                        const dayTickets = getTicketsForDate(date);
+                        const isSelected = selectedDate && isSameDay(date, selectedDate);
+                        const isCurrentMonth = isSameMonth(date, currentDate);
+                      
+                        return (
+                          <div
+                            {...props}
                             className={cn(
-                              "flex h-9 w-9 items-center justify-center rounded-md",
-                              isSelected && "bg-primary text-primary-foreground",
-                              isToday(day) && !isSelected && "border border-primary text-primary",
+                              "relative p-0",
+                              props.className,
+                              !isCurrentMonth && "text-muted-foreground opacity-50",
                             )}
                           >
-                            {format(day, "d")}
-                          </time>
+                            <time
+                              dateTime={format(date, "yyyy-MM-dd")}
+                              className={cn(
+                                "flex h-9 w-9 items-center justify-center rounded-md",
+                                isSelected && "bg-primary text-primary-foreground",
+                                isToday(date) && !isSelected && "border border-primary text-primary",
+                              )}
+                            >
+                              {format(date, "d")}
+                            </time>
                           {dayTickets.length > 0 && (
                             <div className="absolute -bottom-1 left-1/2 -translate-x-1/2">
                               <Badge

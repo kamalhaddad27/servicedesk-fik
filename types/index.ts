@@ -1,20 +1,13 @@
 // User Types
 export type UserRole = "mahasiswa" | "dosen" | "admin" | "executive"
 
-export interface User {
-  id: number
-  name: string
-  email: string
-  nim?: string
-  nip?: string
-  role: UserRole
-  department: string
-  position?: string
-  programStudi?: string
-  fakultas?: string
-  angkatan?: string
-  status?: string
-}
+try {
+  61 |       // Use the PUT endpoint to update user
+> 62 |       const userId = Number.parseInt(session.user.id)
+     |                                      ^
+  63 |       await ApiService.updateUser(userId, formData)
+  64 |
+  65 |       // Update the session with new user data
 
 export interface AuthResponse {
   access_token: string
@@ -82,7 +75,7 @@ export interface DisposisiPayload {
   actionType: "forward" | "escalate" | "return"
 }
 
-export interface DisposisiHistory {
+export type DisposisiHistory {
   id: number
   ticketId: number
   fromUserId: number
@@ -98,7 +91,7 @@ export interface DisposisiHistory {
   toUser?: User
 }
 
-export interface TicketStats {
+export type TicketStats = { 
   total: number
   byStatus: { status: TicketStatus; count: number }[]
   byPriority: { priority: TicketPriority; count: number }[]

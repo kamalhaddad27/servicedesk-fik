@@ -21,6 +21,9 @@ import { LoadingSpinner } from "@/components/ui/loading-spinner"
 import { formatDate, getTicketStatusColor, getTicketPriorityColor, getSLAStatusColor } from "@/lib/utils"
 import { PlusCircle, Search, Filter, AlertCircle, Ticket } from 'lucide-react'
 
+
+
+
 // Animation variants
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -46,7 +49,11 @@ const itemVariants = {
   },
 }
 
-export function TicketList() {
+type TicketListProps = {
+  filter?: string
+}
+
+export function TicketList({ filter }: TicketListProps) {
   const {
     tickets,
     totalItems,

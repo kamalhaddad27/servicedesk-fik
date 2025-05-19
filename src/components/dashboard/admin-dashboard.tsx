@@ -15,7 +15,7 @@ import { Progress } from "@/components/ui/progress"
 import { formatDate, getTicketStatusColor, getTicketPriorityColor, getSLAStatusColor } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { PlusCircle, Clock, CheckCircle, AlertCircle, BarChart3, FileText, AlertTriangle, Users, Settings } from 'lucide-react'
-import type { TicketStats, Ticket } from "@/types"
+import type { TicketStats } from "@/"
 
 // Animation variants
 const containerVariants = {
