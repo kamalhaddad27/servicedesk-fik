@@ -15,7 +15,7 @@ import { Progress } from "@/components/ui/progress"
 import { formatDate } from "@/lib/utils"
 import { Badge } from "@/components/ui/badge"
 import { BarChart3, Clock, Users, Building, FileText, AlertCircle, TrendingUp, TrendingDown, Percent, Star } from 'lucide-react'
-import type { ExecutiveDashboardData } from "../../../types/index"
+import type { ExecutiveDashboardData } from "../../types/index"
 
 // Animation variants
 const containerVariants = {

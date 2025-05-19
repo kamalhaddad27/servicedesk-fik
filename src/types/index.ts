@@ -1,13 +1,6 @@
 // User Types
 export type UserRole = "mahasiswa" | "dosen" | "admin" | "executive"
 
-try {
-  61 |       // Use the PUT endpoint to update user
-> 62 |       const userId = Number.parseInt(session.user.id)
-     |                                      ^
-  63 |       await ApiService.updateUser(userId, formData)
-  64 |
-  65 |       // Update the session with new user data
 
 export interface AuthResponse {
   access_token: string
@@ -97,6 +90,9 @@ export type TicketStats = {
   byPriority: { priority: TicketPriority; count: number }[]
   byCategory: { category: string; count: number }[]
 }
+
+export type TicketType = string
+
 
 // Notification Types
 export interface Notification {

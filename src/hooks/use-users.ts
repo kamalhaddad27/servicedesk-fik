@@ -5,7 +5,7 @@ import { ApiService } from '@/lib/api';
 import { useToast } from '@/components/ui/use-toast';
 import { useState } from 'react';
 import { useDebounce } from './use-debounce';
-import { UserPerformance, User } from '../../types';
+import { UserPerformance, User } from '../types';
 
 export function useUsers() {
   const queryClient = useQueryClient();
