@@ -5,6 +5,7 @@ import type React from "react"
 import { useState } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
+import { useRouter } from 'next/navigation';
 import { ArrowLeft, Mail, Phone, MapPin, Send, MessageSquare, Clock } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
@@ -17,6 +18,7 @@ import { useToast } from "@/components/ui/use-toast"
 
 export default function ContactPage() {
   const { toast } = useToast()
+  const { back } = useRouter()
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -58,18 +60,19 @@ export default function ContactPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-2">
-        <Button variant="outline" size="sm" asChild>
-          <Link href="/help">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Kembali
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold">Kontak Support</h1>
-          <p className="text-sm text-muted-foreground">Hubungi tim support kami untuk bantuan</p>
-        </div>
-      </div>
+      <div className="flex items-center gap-4">
+  <Button variant="outline" size="sm" onClick={() => back()}>
+    <ArrowLeft className="mr-2 h-4 w-4" />
+    Kembali
+  </Button>
+  <div>
+    <h1 className="text-2xl font-bold">Kontak Support</h1>
+    <p className="text-sm text-muted-foreground">
+      Hubungi tim support kami untuk bantuan
+    </p>
+  </div>
+</div>
+
 
       <div className="grid gap-6 md:grid-cols-3">
         <motion.div
@@ -125,7 +128,7 @@ export default function ContactPage() {
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="category">Kategori</Label>
-                    <Select value={formData.category} onValueChange={handleSelectChange} required>
+                    <Select value={formData.category} onValueChange={handleSelectChange} required >
                       <SelectTrigger id="category">
                         <SelectValue placeholder="Pilih kategori" />
                       </SelectTrigger>

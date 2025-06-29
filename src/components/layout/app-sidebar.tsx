@@ -206,25 +206,25 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
           main: [common.dashboard],
           groups: [
             common.tickets,
-            {
-              name: "Akademik",
-              icon: <GraduationCap className="h-4 w-4" />,
-              color: "text-indigo-500",
-              subItems: [
-                {
-                  name: "Tugas Layanan",
-                  href: "/assignments",
-                  icon: <FileText className="h-4 w-4" />,
-                  color: "text-indigo-400"
-                },
-                {
-                  name: "Jadwal Piket",
-                  href: "/schedule",
-                  icon: <Calendar className="h-4 w-4" />,
-                  color: "text-indigo-500"
-                }
-              ]
-            },
+            // {
+            //   name: "Akademik",
+            //   icon: <GraduationCap className="h-4 w-4" />,
+            //   color: "text-indigo-500",
+            //   subItems: [
+            //     {
+            //       name: "Tugas Layanan",
+            //       href: "/assignments",
+            //       icon: <FileText className="h-4 w-4" />,
+            //       color: "text-indigo-400"
+            //     },
+            //     {
+            //       name: "Jadwal Piket",
+            //       href: "/schedule",
+            //       icon: <Calendar className="h-4 w-4" />,
+            //       color: "text-indigo-500"
+            //     }
+            //   ]
+            // },
             common.help
           ]
         }

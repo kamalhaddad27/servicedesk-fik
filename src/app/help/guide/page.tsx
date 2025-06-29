@@ -300,7 +300,7 @@ export default function GuidePage() {
             <p className="text-muted-foreground">Hubungi tim dukungan kami untuk bantuan lebih lanjut</p>
           </div>
           <Button asChild className="bg-primary hover:bg-primary-600">
-            <Link href="/help/contact">Hubungi Kami</Link>
+            <Link href="/help">Hubungi Kami</Link>
           </Button>
         </div>
       </div>

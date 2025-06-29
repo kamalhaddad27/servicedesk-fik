@@ -3,7 +3,7 @@
 import { useState } from "react"
 import { motion } from "framer-motion"
 import Link from "next/link"
-import { Search, HelpCircle, FileText, MessageSquare, ExternalLink, ChevronRight } from "lucide-react"
+import { Search, HelpCircle, FileText, MessageSquare, ExternalLink, ChevronRight, ArrowLeft } from "lucide-react"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
@@ -11,9 +11,11 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
 import { Badge } from "@/components/ui/badge"
 import { cn } from "@/lib/utils"
+import { useRouter } from "next/navigation"
 
 export default function HelpPage() {
   const [searchQuery, setSearchQuery] = useState("")
+  const { back } = useRouter()
 
   // FAQ data
   const faqItems = [
@@ -101,12 +103,18 @@ export default function HelpPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div>
-          <h1 className="text-2xl font-bold">Pusat Bantuan</h1>
-          <p className="text-sm text-muted-foreground">Temukan jawaban untuk pertanyaan Anda</p>
-        </div>
-      </div>
+      <div className="flex items-center gap-4">
+  <Button variant="outline" size="sm" onClick={() => back()}>
+    <ArrowLeft className="mr-2 h-4 w-4" />
+    Kembali
+  </Button>
+  <div>
+    <h1 className="text-2xl font-bold">Pusat Bantuan</h1>
+    <p className="text-sm text-muted-foreground">
+      Temukan jawaban untuk pertanyaan Anda
+    </p>
+  </div>
+</div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}

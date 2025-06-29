@@ -173,7 +173,7 @@ export function TicketForm() {
                         <SelectValue placeholder="Pilih kategori" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="bg-white">
                       {categories &&
                         Object.entries(categories).map(([key, category]) => (
                           <SelectItem key={key} value={key}>
@@ -207,7 +207,7 @@ export function TicketForm() {
                         } />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="bg-white">
                       {subcategoryList.map((subcat) => (
                         <SelectItem key={subcat} value={subcat}>
                           {subcat}
@@ -237,7 +237,7 @@ export function TicketForm() {
                         <SelectValue placeholder="Pilih tipe tiket" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="bg-white">
                       <SelectItem value="pengajuan">Pengajuan</SelectItem>
                       <SelectItem value="laporan">Laporan</SelectItem>
                       <SelectItem value="permintaan">Permintaan</SelectItem>
@@ -264,7 +264,7 @@ export function TicketForm() {
                         <SelectValue placeholder="Pilih departemen" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="bg-white">
                       <SelectItem value="Akademik">Akademik</SelectItem>
                       <SelectItem value="Fasilitas">Fasilitas</SelectItem>
                       <SelectItem value="Keuangan">Keuangan</SelectItem>
@@ -293,7 +293,7 @@ export function TicketForm() {
                         <SelectValue placeholder="Pilih prioritas" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent>
+                    <SelectContent className="bg-white">
                       <SelectItem value="low">Rendah</SelectItem>
                       <SelectItem value="medium">Sedang</SelectItem>
                       <SelectItem value="high">Tinggi</SelectItem>
