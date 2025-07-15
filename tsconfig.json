@@ -1,9 +1,6 @@
 {
   "compilerOptions": {
     "baseUrl": ".", // <- ini WAJIB
-    "paths": {
-      "@/*": ["src/*"]
-    },
     "target": "ES2017",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,

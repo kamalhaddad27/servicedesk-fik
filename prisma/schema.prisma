@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum RoleUser {
+  admin
+  staff
+  user
+}
+
+enum StatusTicket {
+  progress
+  pending
+  done
+}
+
+enum PriorityTicket {
+  low
+  medium
+  hight
+  urgent
+}
+
+enum StaffDepartment {
+  LAB
+  TU
+  REKTORAT
+}
+
+model User {
+  id            String  @id @default(cuid())
+  nim           String? @unique
+  nip           String? @unique
+  name          String  
+  email         String  @unique
+  phone         String  @unique
+  password      String
+  department    StaffDepartment?
+  major         String?
+  college       String?
+  academicYear  String?
+  position      String?
+  image         String?
+  role          RoleUser
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  createdTickets  Ticket[]  @relation("CreatedTickets")
+  message         TicketMessage[]
+
+  assignedTickets Ticket[] @relation("AssignedTickets")
+}
+
+model Ticket {
+  id            String    @id @default(cuid())
+  status        StatusTicket
+  priority      PriorityTicket
+  subject       String
+  description   String    @db.Text
+  department    String
+  category      String
+  subcategory   String
+  type          String
+  userId        String
+  assignedToId  String? 
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  assignedTo    User?     @relation("AssignedTickets", fields: [assignedToId], references: [id])
+  user          User      @relation("CreatedTickets", fields: [userId], references: [id])
+
+  message       TicketMessage[]
+}
+
+model TicketMessage {
+  id            String    @id @default(cuid())
+  ticketId      String
+  userId        String
+  message       String    @db.Text
+  isInternal    Boolean
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  ticket        Ticket    @relation(fields: [ticketId], references: [id])
+  user          User      @relation(fields: [userId], references: [id])
+}
+
+model Setting {
+  id            String @id @default(cuid())
+  key           String
+  value         String
+  type          String
+  category      String
+  description   String    @db.Text
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+}
