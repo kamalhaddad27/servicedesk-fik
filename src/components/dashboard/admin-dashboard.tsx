@@ -1,21 +1,42 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { useQuery } from "@tanstack/react-query"
-import { ApiService } from "@/lib/api"
-import { useAuth } from "@/hooks/use-auth"
-import { PageTitle } from "../ui/page-title"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { LoadingSpinner } from "@/components/ui/loading-spinner"
-import { Progress } from "@/components/ui/progress"
-import { formatDate, getTicketStatusColor, getTicketPriorityColor, getSLAStatusColor } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
-import { PlusCircle, Clock, CheckCircle, AlertCircle, BarChart3, FileText, AlertTriangle, Users, Settings } from 'lucide-react'
-import { Ticket, TicketStats } from "@/types"
+import { useState } from "react";
+import Link from "next/link";
+import { motion, Variants } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import { ApiService } from "@/lib/api";
+import { useAuth } from "@/hooks/use-auth";
+import { PageTitle } from "../ui/page-title";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { Progress } from "@/components/ui/progress";
+import {
+  formatDate,
+  getTicketStatusColor,
+  getTicketPriorityColor,
+  getSLAStatusColor,
+} from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import {
+  PlusCircle,
+  CheckCircle,
+  AlertCircle,
+  BarChart3,
+  FileText,
+  AlertTriangle,
+  Users,
+  Settings,
+} from "lucide-react";
+import { Ticket, TicketStats } from "@/types";
 
 // Animation variants
 const containerVariants = {
@@ -27,9 +48,9 @@ const containerVariants = {
       staggerChildren: 0.1,
     },
   },
-}
+};
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { y: 20, opacity: 0 },
   visible: {
     y: 0,
@@ -40,24 +61,12 @@ const itemVariants = {
       damping: 24,
     },
   },
-}
+};
 
 export function AdminDashboard() {
-  const { user } = useAuth()
-  const [activeTab, setActiveTab] = useState("all")
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState("all");
 
-  const { data: ticketTypes = [] } = useQuery<string[]>({
-    queryKey: ["ticket-types"],
-    queryFn: async () => {
-      const tickets = await ApiService.getAssignedTickets()
-      return [...new Set(tickets.map((t) => t.type))] as string[]
-    },
-  })
-  
-
-  
-  
-  
   const {
     data: ticketStats,
     isLoading: isLoadingStats,
@@ -65,9 +74,8 @@ export function AdminDashboard() {
   } = useQuery<TicketStats>({
     queryKey: ["ticket-stats"],
     queryFn: () => ApiService.getTicketStats(),
-  })
-  
-  
+  });
+
   // Fetch all tickets
   const {
     data: allTickets = [],
@@ -76,7 +84,7 @@ export function AdminDashboard() {
   } = useQuery<Ticket[]>({
     queryKey: ["tickets", "all"],
     queryFn: () => ApiService.getAllTickets(),
-  })
+  });
 
   // Fetch assigned tickets
   const {
@@ -86,24 +94,29 @@ export function AdminDashboard() {
   } = useQuery<Ticket[]>({
     queryKey: ["tickets", "assigned"],
     queryFn: () => ApiService.getAssignedTickets(),
-  })
+  });
 
-
-
-  
   // Filter tickets based on active tab
-  const displayedTickets = activeTab === "all" ? allTickets : activeTab === "assigned" ? assignedTickets : allTickets
+  const displayedTickets =
+    activeTab === "all"
+      ? allTickets
+      : activeTab === "assigned"
+      ? assignedTickets
+      : allTickets;
 
   // Count tickets by SLA status
-  const onTimeCount = allTickets.filter((ticket) => ticket.slaStatus === "on-time").length
-  const atRiskCount = allTickets.filter((ticket) => ticket.slaStatus === "at-risk").length
-  const breachedCount = allTickets.filter((ticket) => ticket.slaStatus === "breached").length
+  const atRiskCount = allTickets.filter(
+    (ticket) => ticket.slaStatus === "at-risk"
+  ).length;
+  const breachedCount = allTickets.filter(
+    (ticket) => ticket.slaStatus === "breached"
+  ).length;
 
-  const isLoading = isLoadingStats || isLoadingTickets || isLoadingAssigned
-  const isError = isErrorStats || isErrorTickets || isErrorAssigned
+  const isLoading = isLoadingStats || isLoadingTickets || isLoadingAssigned;
+  const isError = isErrorStats || isErrorTickets || isErrorAssigned;
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return <LoadingSpinner />;
   }
 
   if (isError) {
@@ -111,13 +124,20 @@ export function AdminDashboard() {
       <div className="text-center">
         <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
         <h3 className="mt-2 text-lg font-medium">Gagal memuat data</h3>
-        <p className="text-sm text-muted-foreground">Terjadi kesalahan saat memuat data dashboard.</p>
+        <p className="text-sm text-muted-foreground">
+          Terjadi kesalahan saat memuat data dashboard.
+        </p>
       </div>
-    )
+    );
   }
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-6"
+    >
       <PageTitle
         title={`Selamat datang, ${user?.name}!`}
         description="Pantau dan kelola semua tiket dan pengguna dalam sistem."
@@ -130,7 +150,9 @@ export function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{ticketStats?.total || 0}</div>
-            <p className="text-xs text-muted-foreground">Total tiket dalam sistem</p>
+            <p className="text-xs text-muted-foreground">
+              Total tiket dalam sistem
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -141,10 +163,14 @@ export function AdminDashboard() {
           <CardContent>
             <div className="text-2xl font-bold">
               {ticketStats?.byStatus
-                .filter((s) => ["pending", "disposisi", "in-progress"].includes(s.status))
+                .filter((s) =>
+                  ["pending", "disposisi", "in-progress"].includes(s.status)
+                )
                 .reduce((acc, curr) => acc + curr.count, 0) || 0}
             </div>
-            <p className="text-xs text-muted-foreground">Tiket yang sedang aktif</p>
+            <p className="text-xs text-muted-foreground">
+              Tiket yang sedang aktif
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -154,9 +180,12 @@ export function AdminDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
-              {ticketStats?.byStatus.find((s) => s.status === "completed")?.count || 0}
+              {ticketStats?.byStatus.find((s) => s.status === "completed")
+                ?.count || 0}
             </div>
-            <p className="text-xs text-muted-foreground">Tiket yang telah diselesaikan</p>
+            <p className="text-xs text-muted-foreground">
+              Tiket yang telah diselesaikan
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -165,13 +194,20 @@ export function AdminDashboard() {
             <AlertTriangle className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{atRiskCount + breachedCount}</div>
-            <p className="text-xs text-muted-foreground">Tiket yang berisiko atau melewati SLA</p>
+            <div className="text-2xl font-bold">
+              {atRiskCount + breachedCount}
+            </div>
+            <p className="text-xs text-muted-foreground">
+              Tiket yang berisiko atau melewati SLA
+            </p>
           </CardContent>
         </Card>
       </motion.div>
 
-      <motion.div variants={itemVariants} className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <motion.div
+        variants={itemVariants}
+        className="grid gap-4 md:grid-cols-2 lg:grid-cols-4"
+      >
         <Card className="md:col-span-2">
           <CardHeader>
             <CardTitle className="text-sm font-medium">Status Tiket</CardTitle>
@@ -181,8 +217,12 @@ export function AdminDashboard() {
               {ticketStats?.byStatus.map((statusItem) => (
                 <div key={statusItem.status} className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs capitalize">{statusItem.status.replace("-", " ")}</span>
-                    <span className="text-xs font-medium">{statusItem.count}</span>
+                    <span className="text-xs capitalize">
+                      {statusItem.status.replace("-", " ")}
+                    </span>
+                    <span className="text-xs font-medium">
+                      {statusItem.count}
+                    </span>
                   </div>
                   <Progress
                     value={(statusItem.count / ticketStats.total) * 100}
@@ -196,19 +236,27 @@ export function AdminDashboard() {
 
         <Card className="md:col-span-2">
           <CardHeader>
-            <CardTitle className="text-sm font-medium">Tiket berdasarkan Prioritas</CardTitle>
+            <CardTitle className="text-sm font-medium">
+              Tiket berdasarkan Prioritas
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
               {ticketStats?.byPriority.map((priorityItem) => (
                 <div key={priorityItem.priority} className="space-y-2">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs capitalize">{priorityItem.priority}</span>
-                    <span className="text-xs font-medium">{priorityItem.count}</span>
+                    <span className="text-xs capitalize">
+                      {priorityItem.priority}
+                    </span>
+                    <span className="text-xs font-medium">
+                      {priorityItem.count}
+                    </span>
                   </div>
                   <Progress
                     value={(priorityItem.count / ticketStats.total) * 100}
-                    className={`h-2 ${getTicketPriorityColor(priorityItem.priority)}`}
+                    className={`h-2 ${getTicketPriorityColor(
+                      priorityItem.priority
+                    )}`}
                   />
                 </div>
               ))}
@@ -260,14 +308,22 @@ export function AdminDashboard() {
             {allTickets.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-6">
                 <FileText className="h-8 w-8 text-muted-foreground" />
-                <p className="mt-2 text-sm text-muted-foreground">Tidak ada tiket dalam sistem</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Tidak ada tiket dalam sistem
+                </p>
               </div>
             ) : (
               <div className="space-y-4">
                 {allTickets.slice(0, 5).map((ticket) => (
-                  <div key={ticket.id} className="flex items-center justify-between">
+                  <div
+                    key={ticket.id}
+                    className="flex items-center justify-between"
+                  >
                     <div className="space-y-1">
-                      <Link href={`/tickets/${ticket.id}`} className="font-medium hover:underline">
+                      <Link
+                        href={`/tickets/${ticket.id}`}
+                        className="font-medium hover:underline"
+                      >
                         {ticket.subject}
                       </Link>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -276,13 +332,21 @@ export function AdminDashboard() {
                         <span>{ticket.category}</span>
                         <span>•</span>
                         <span>
-                          {ticket.creator?.name ? `Dari: ${ticket.creator.name}` : ""}
+                          {ticket.creator?.name
+                            ? `Dari: ${ticket.creator.name}`
+                            : ""}
                         </span>
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge className={getTicketStatusColor(ticket.status)}>{ticket.status}</Badge>
-                      {ticket.slaStatus && <Badge className={getSLAStatusColor(ticket.slaStatus)}>{ticket.slaStatus}</Badge>}
+                      <Badge className={getTicketStatusColor(ticket.status)}>
+                        {ticket.status}
+                      </Badge>
+                      {ticket.slaStatus && (
+                        <Badge className={getSLAStatusColor(ticket.slaStatus)}>
+                          {ticket.slaStatus}
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -346,14 +410,33 @@ export function AdminDashboard() {
                     <Card>
                       <CardHeader className="pb-2">
                         <div className="flex items-center justify-between">
-                          <Link href={`/tickets/${ticket.id}`} className="hover:underline">
-                            <CardTitle className="text-base">{ticket.subject}</CardTitle>
+                          <Link
+                            href={`/tickets/${ticket.id}`}
+                            className="hover:underline"
+                          >
+                            <CardTitle className="text-base">
+                              {ticket.subject}
+                            </CardTitle>
                           </Link>
                           <div className="flex gap-2">
-                            <Badge className={getTicketStatusColor(ticket.status)}>{ticket.status}</Badge>
-                            <Badge className={getTicketPriorityColor(ticket.priority)}>{ticket.priority}</Badge>
+                            <Badge
+                              className={getTicketStatusColor(ticket.status)}
+                            >
+                              {ticket.status}
+                            </Badge>
+                            <Badge
+                              className={getTicketPriorityColor(
+                                ticket.priority
+                              )}
+                            >
+                              {ticket.priority}
+                            </Badge>
                             {ticket.slaStatus && (
-                              <Badge className={getSLAStatusColor(ticket.slaStatus)}>{ticket.slaStatus}</Badge>
+                              <Badge
+                                className={getSLAStatusColor(ticket.slaStatus)}
+                              >
+                                {ticket.slaStatus}
+                              </Badge>
                             )}
                           </div>
                         </div>
@@ -363,24 +446,33 @@ export function AdminDashboard() {
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="pb-2">
-                        <p className="line-clamp-2 text-sm text-muted-foreground">{ticket.description}</p>
+                        <p className="line-clamp-2 text-sm text-muted-foreground">
+                          {ticket.description}
+                        </p>
                         {ticket.progress > 0 && (
                           <div className="mt-2">
                             <div className="flex items-center justify-between text-xs">
                               <span>Progress</span>
                               <span>{ticket.progress}%</span>
                             </div>
-                            <Progress value={ticket.progress} className="h-2 mt-1" />
+                            <Progress
+                              value={ticket.progress}
+                              className="h-2 mt-1"
+                            />
                           </div>
                         )}
                       </CardContent>
                       <CardFooter className="flex items-center justify-between pt-0">
                         <p className="text-xs text-muted-foreground">
-                          {ticket.creator?.name ? `Dari: ${ticket.creator.name} • ` : ""}
+                          {ticket.creator?.name
+                            ? `Dari: ${ticket.creator.name} • `
+                            : ""}
                           {formatDate(ticket.createdAt, "dd MMM yyyy")}
                         </p>
                         <Button variant="ghost" size="sm" asChild>
-                          <Link href={`/tickets/${ticket.id}`}>Lihat Detail</Link>
+                          <Link href={`/tickets/${ticket.id}`}>
+                            Lihat Detail
+                          </Link>
                         </Button>
                       </CardFooter>
                     </Card>
@@ -389,7 +481,11 @@ export function AdminDashboard() {
                 {displayedTickets.length > 5 && (
                   <div className="text-center">
                     <Button variant="outline" asChild>
-                      <Link href={activeTab === "all" ? "/tickets" : "/tickets/assigned"}>
+                      <Link
+                        href={
+                          activeTab === "all" ? "/tickets" : "/tickets/assigned"
+                        }
+                      >
                         Lihat Semua Tiket ({displayedTickets.length})
                       </Link>
                     </Button>
@@ -401,5 +497,5 @@ export function AdminDashboard() {
         </Tabs>
       </motion.div>
     </motion.div>
-  )
+  );
 }

@@ -1,31 +1,53 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { useSettings } from "@/hooks/use-settings"
-import { Button } from "@/components/ui/button"
-import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
-import { Switch } from "@/components/ui/switch"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { LoadingSpinner } from "@/components/ui/loading-spinner"
-import { AlertCircle, CheckCircle } from 'lucide-react'
-import { Alert, AlertDescription } from "@/components/ui/alert"
-
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useSettings } from "@/hooks/use-settings";
+import { Button } from "@/components/ui/button";
+import {
+  Form,
+  FormControl,
+  FormDescription,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { CheckCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 // Form schema - Fixed all boolean fields to not use default()
 const generalSettingsSchema = z.object({
   siteName: z.string().min(1, { message: "Nama situs harus diisi" }),
   siteDescription: z.string().optional(),
   contactEmail: z.string().email({ message: "Email tidak valid" }),
-  maxAttachmentSize: z.string().min(1, { message: "Ukuran maksimal lampiran harus diisi" }),
+  maxAttachmentSize: z
+    .string()
+    .min(1, { message: "Ukuran maksimal lampiran harus diisi" }),
   allowRegistration: z.boolean(),
-})
+});
 
 const ticketSettingsSchema = z.object({
   defaultPriority: z.string(),
@@ -37,12 +59,20 @@ const ticketSettingsSchema = z.object({
 
 const slaSettingsSchema = z.object({
   enableSLA: z.boolean(),
-  lowPrioritySLA: z.string().min(1, { message: "SLA untuk prioritas rendah harus diisi" }),
-  mediumPrioritySLA: z.string().min(1, { message: "SLA untuk prioritas sedang harus diisi" }),
-  highPrioritySLA: z.string().min(1, { message: "SLA untuk prioritas tinggi harus diisi" }),
-  urgentPrioritySLA: z.string().min(1, { message: "SLA untuk prioritas urgent harus diisi" }),
+  lowPrioritySLA: z
+    .string()
+    .min(1, { message: "SLA untuk prioritas rendah harus diisi" }),
+  mediumPrioritySLA: z
+    .string()
+    .min(1, { message: "SLA untuk prioritas sedang harus diisi" }),
+  highPrioritySLA: z
+    .string()
+    .min(1, { message: "SLA untuk prioritas tinggi harus diisi" }),
+  urgentPrioritySLA: z
+    .string()
+    .min(1, { message: "SLA untuk prioritas urgent harus diisi" }),
   sendSLANotifications: z.boolean(),
-})
+});
 
 const notificationSettingsSchema = z.object({
   emailNotifications: z.boolean(),
@@ -51,25 +81,29 @@ const notificationSettingsSchema = z.object({
   notifyOnTicketUpdate: z.boolean(),
   notifyOnTicketAssignment: z.boolean(),
   notifyOnSLABreach: z.boolean(),
-  digestFrequency: z.string().min(1, { message: "Frekuensi digest harus dipilih" }),
-})
+  digestFrequency: z
+    .string()
+    .min(1, { message: "Frekuensi digest harus dipilih" }),
+});
 
 export function SettingsForm() {
-  const { settings, isLoading, updateSetting, updateMultipleSettings } = useSettings()
-  const [activeTab, setActiveTab] = useState("general")
-  const [success, setSuccess] = useState<string | null>(null)
+  const { settings, isLoading, updateMultipleSettings } = useSettings();
+  const [activeTab, setActiveTab] = useState("general");
+  const [success, setSuccess] = useState<string | null>(null);
 
   // General settings form
   const generalForm = useForm<z.infer<typeof generalSettingsSchema>>({
     resolver: zodResolver(generalSettingsSchema),
     defaultValues: {
       siteName: settings?.siteName || "Service Desk FIK",
-      siteDescription: settings?.siteDescription || "Sistem Layanan Terpadu Fakultas Ilmu Komputer",
+      siteDescription:
+        settings?.siteDescription ||
+        "Sistem Layanan Terpadu Fakultas Ilmu Komputer",
       contactEmail: settings?.contactEmail || "servicedesk@fik.upnvj.ac.id",
       maxAttachmentSize: settings?.maxAttachmentSize || "10",
       allowRegistration: settings?.allowRegistration || false,
     },
-  })
+  });
 
   // Ticket settings form
   const ticketForm = useForm<z.infer<typeof ticketSettingsSchema>>({
@@ -81,7 +115,7 @@ export function SettingsForm() {
       allowAnonymousTickets: settings?.allowAnonymousTickets || false,
       ticketPrefix: settings?.ticketPrefix || "FIK",
     },
-  })
+  });
 
   // SLA settings form
   const slaForm = useForm<z.infer<typeof slaSettingsSchema>>({
@@ -94,7 +128,7 @@ export function SettingsForm() {
       urgentPrioritySLA: settings?.urgentPrioritySLA || "4",
       sendSLANotifications: settings?.sendSLANotifications || true,
     },
-  })
+  });
 
   // Notification settings form
   const notificationForm = useForm<z.infer<typeof notificationSettingsSchema>>({
@@ -108,66 +142,79 @@ export function SettingsForm() {
       notifyOnSLABreach: settings?.notifyOnSLABreach || true,
       digestFrequency: settings?.digestFrequency || "daily",
     },
-  })
+  });
 
   // Submit general settings
-  const onGeneralSubmit = async (values: z.infer<typeof generalSettingsSchema>) => {
+  const onGeneralSubmit = async (
+    values: z.infer<typeof generalSettingsSchema>
+  ) => {
     try {
-      await updateMultipleSettings.mutateAsync(values)
-      setSuccess("Pengaturan umum berhasil disimpan")
-      setTimeout(() => setSuccess(null), 3000)
+      await updateMultipleSettings.mutateAsync(values);
+      setSuccess("Pengaturan umum berhasil disimpan");
+      setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
-      console.error("Error saving general settings:", error)
+      console.error("Error saving general settings:", error);
     }
-  }
+  };
 
   // Submit ticket settings
-  const onTicketSubmit = async (values: z.infer<typeof ticketSettingsSchema>) => {
+  const onTicketSubmit = async (
+    values: z.infer<typeof ticketSettingsSchema>
+  ) => {
     try {
-      await updateMultipleSettings.mutateAsync(values)
-      setSuccess("Pengaturan tiket berhasil disimpan")
-      setTimeout(() => setSuccess(null), 3000)
+      await updateMultipleSettings.mutateAsync(values);
+      setSuccess("Pengaturan tiket berhasil disimpan");
+      setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
-      console.error("Error saving ticket settings:", error)
+      console.error("Error saving ticket settings:", error);
     }
-  }
+  };
 
   // Submit SLA settings
   const onSLASubmit = async (values: z.infer<typeof slaSettingsSchema>) => {
     try {
-      await updateMultipleSettings.mutateAsync(values)
-      setSuccess("Pengaturan SLA berhasil disimpan")
-      setTimeout(() => setSuccess(null), 3000)
+      await updateMultipleSettings.mutateAsync(values);
+      setSuccess("Pengaturan SLA berhasil disimpan");
+      setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
-      console.error("Error saving SLA settings:", error)
+      console.error("Error saving SLA settings:", error);
     }
-  }
+  };
 
   // Submit notification settings
-  const onNotificationSubmit = async (values: z.infer<typeof notificationSettingsSchema>) => {
+  const onNotificationSubmit = async (
+    values: z.infer<typeof notificationSettingsSchema>
+  ) => {
     try {
-      await updateMultipleSettings.mutateAsync(values)
-      setSuccess("Pengaturan notifikasi berhasil disimpan")
-      setTimeout(() => setSuccess(null), 3000)
+      await updateMultipleSettings.mutateAsync(values);
+      setSuccess("Pengaturan notifikasi berhasil disimpan");
+      setTimeout(() => setSuccess(null), 3000);
     } catch (error) {
-      console.error("Error saving notification settings:", error)
+      console.error("Error saving notification settings:", error);
     }
-  }
+  };
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return <LoadingSpinner />;
   }
 
   return (
     <div className="space-y-4">
       {success && (
-        <Alert variant="default" className="bg-green-50 text-green-800 border-green-200">
+        <Alert
+          variant="default"
+          className="bg-green-50 text-green-800 border-green-200"
+        >
           <CheckCircle className="h-4 w-4" />
           <AlertDescription>{success}</AlertDescription>
         </Alert>
       )}
 
-      <Tabs defaultValue="general" value={activeTab} onValueChange={setActiveTab}>
+      <Tabs
+        defaultValue="general"
+        value={activeTab}
+        onValueChange={setActiveTab}
+      >
         <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="general">Umum</TabsTrigger>
           <TabsTrigger value="tickets">Tiket</TabsTrigger>
@@ -179,11 +226,17 @@ export function SettingsForm() {
           <Card>
             <CardHeader>
               <CardTitle>Pengaturan Umum</CardTitle>
-              <CardDescription>Konfigurasi pengaturan umum sistem Service Desk FIK.</CardDescription>
+              <CardDescription>
+                Konfigurasi pengaturan umum sistem Service Desk FIK.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...generalForm}>
-                <form id="generalForm" onSubmit={generalForm.handleSubmit(onGeneralSubmit)} className="space-y-4">
+                <form
+                  id="generalForm"
+                  onSubmit={generalForm.handleSubmit(onGeneralSubmit)}
+                  className="space-y-4"
+                >
                   <FormField
                     control={generalForm.control}
                     name="siteName"
@@ -193,7 +246,10 @@ export function SettingsForm() {
                         <FormControl>
                           <Input placeholder="Nama situs" {...field} />
                         </FormControl>
-                        <FormDescription>Nama yang akan ditampilkan di judul halaman dan header.</FormDescription>
+                        <FormDescription>
+                          Nama yang akan ditampilkan di judul halaman dan
+                          header.
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -208,7 +264,9 @@ export function SettingsForm() {
                         <FormControl>
                           <Textarea placeholder="Deskripsi situs" {...field} />
                         </FormControl>
-                        <FormDescription>Deskripsi singkat tentang sistem Service Desk FIK.</FormDescription>
+                        <FormDescription>
+                          Deskripsi singkat tentang sistem Service Desk FIK.
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -221,9 +279,15 @@ export function SettingsForm() {
                       <FormItem>
                         <FormLabel>Email Kontak</FormLabel>
                         <FormControl>
-                          <Input placeholder="Email kontak" type="email" {...field} />
+                          <Input
+                            placeholder="Email kontak"
+                            type="email"
+                            {...field}
+                          />
                         </FormControl>
-                        <FormDescription>Email yang akan digunakan untuk kontak dan notifikasi.</FormDescription>
+                        <FormDescription>
+                          Email yang akan digunakan untuk kontak dan notifikasi.
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -236,9 +300,15 @@ export function SettingsForm() {
                       <FormItem>
                         <FormLabel>Ukuran Maksimal Lampiran (MB)</FormLabel>
                         <FormControl>
-                          <Input placeholder="Ukuran maksimal lampiran" type="number" {...field} />
+                          <Input
+                            placeholder="Ukuran maksimal lampiran"
+                            type="number"
+                            {...field}
+                          />
                         </FormControl>
-                        <FormDescription>Ukuran maksimal file lampiran dalam MB.</FormDescription>
+                        <FormDescription>
+                          Ukuran maksimal file lampiran dalam MB.
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -250,13 +320,19 @@ export function SettingsForm() {
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                         <div className="space-y-0.5">
-                          <FormLabel className="text-base">Izinkan Pendaftaran</FormLabel>
+                          <FormLabel className="text-base">
+                            Izinkan Pendaftaran
+                          </FormLabel>
                           <FormDescription>
-                            Izinkan pengguna untuk mendaftar sendiri ke sistem Service Desk FIK.
+                            Izinkan pengguna untuk mendaftar sendiri ke sistem
+                            Service Desk FIK.
                           </FormDescription>
                         </div>
                         <FormControl>
-                          <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
                         </FormControl>
                       </FormItem>
                     )}
@@ -265,8 +341,14 @@ export function SettingsForm() {
               </Form>
             </CardContent>
             <CardFooter>
-              <Button type="submit" form="generalForm" disabled={updateMultipleSettings.isPending}>
-                {updateMultipleSettings.isPending ? "Menyimpan..." : "Simpan Pengaturan"}
+              <Button
+                type="submit"
+                form="generalForm"
+                disabled={updateMultipleSettings.isPending}
+              >
+                {updateMultipleSettings.isPending
+                  ? "Menyimpan..."
+                  : "Simpan Pengaturan"}
               </Button>
             </CardFooter>
           </Card>
@@ -276,18 +358,27 @@ export function SettingsForm() {
           <Card>
             <CardHeader>
               <CardTitle>Pengaturan Tiket</CardTitle>
-              <CardDescription>Konfigurasi pengaturan tiket dan alur kerja.</CardDescription>
+              <CardDescription>
+                Konfigurasi pengaturan tiket dan alur kerja.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...ticketForm}>
-                <form id="ticketForm" onSubmit={ticketForm.handleSubmit(onTicketSubmit)} className="space-y-4">
+                <form
+                  id="ticketForm"
+                  onSubmit={ticketForm.handleSubmit(onTicketSubmit)}
+                  className="space-y-4"
+                >
                   <FormField
                     control={ticketForm.control}
                     name="defaultPriority"
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Prioritas Default</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Pilih prioritas default" />
@@ -300,7 +391,9 @@ export function SettingsForm() {
                             <SelectItem value="urgent">Urgent</SelectItem>
                           </SelectContent>
                         </Select>
-                        <FormDescription>Prioritas default untuk tiket baru.</FormDescription>
+                        <FormDescription>
+                          Prioritas default untuk tiket baru.
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -315,7 +408,10 @@ export function SettingsForm() {
                         <FormControl>
                           <Input placeholder="Prefix tiket" {...field} />
                         </FormControl>
-                        <FormDescription>Prefix yang akan digunakan untuk nomor tiket (contoh: FIK-1234).</FormDescription>
+                        <FormDescription>
+                          Prefix yang akan digunakan untuk nomor tiket (contoh:
+                          FIK-1234).
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -327,13 +423,19 @@ export function SettingsForm() {
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                         <div className="space-y-0.5">
-                          <FormLabel className="text-base">Auto-assign Tiket</FormLabel>
+                          <FormLabel className="text-base">
+                            Auto-assign Tiket
+                          </FormLabel>
                           <FormDescription>
-                            Secara otomatis menetapkan tiket baru ke staf yang tersedia.
+                            Secara otomatis menetapkan tiket baru ke staf yang
+                            tersedia.
                           </FormDescription>
                         </div>
                         <FormControl>
-                          <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
                         </FormControl>
                       </FormItem>
                     )}
@@ -345,13 +447,19 @@ export function SettingsForm() {
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                         <div className="space-y-0.5">
-                          <FormLabel className="text-base">Memerlukan Persetujuan</FormLabel>
+                          <FormLabel className="text-base">
+                            Memerlukan Persetujuan
+                          </FormLabel>
                           <FormDescription>
-                            Tiket memerlukan persetujuan sebelum dapat diselesaikan.
+                            Tiket memerlukan persetujuan sebelum dapat
+                            diselesaikan.
                           </FormDescription>
                         </div>
                         <FormControl>
-                          <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
                         </FormControl>
                       </FormItem>
                     )}
@@ -363,13 +471,19 @@ export function SettingsForm() {
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                         <div className="space-y-0.5">
-                          <FormLabel className="text-base">Izinkan Tiket Anonim</FormLabel>
+                          <FormLabel className="text-base">
+                            Izinkan Tiket Anonim
+                          </FormLabel>
                           <FormDescription>
-                            Izinkan pembuatan tiket tanpa login (tidak direkomendasikan).
+                            Izinkan pembuatan tiket tanpa login (tidak
+                            direkomendasikan).
                           </FormDescription>
                         </div>
                         <FormControl>
-                          <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
                         </FormControl>
                       </FormItem>
                     )}
@@ -378,8 +492,14 @@ export function SettingsForm() {
               </Form>
             </CardContent>
             <CardFooter>
-              <Button type="submit" form="ticketForm" disabled={updateMultipleSettings.isPending}>
-                {updateMultipleSettings.isPending ? "Menyimpan..." : "Simpan Pengaturan"}
+              <Button
+                type="submit"
+                form="ticketForm"
+                disabled={updateMultipleSettings.isPending}
+              >
+                {updateMultipleSettings.isPending
+                  ? "Menyimpan..."
+                  : "Simpan Pengaturan"}
               </Button>
             </CardFooter>
           </Card>
@@ -389,24 +509,36 @@ export function SettingsForm() {
           <Card>
             <CardHeader>
               <CardTitle>Pengaturan SLA</CardTitle>
-              <CardDescription>Konfigurasi Service Level Agreement (SLA) untuk tiket.</CardDescription>
+              <CardDescription>
+                Konfigurasi Service Level Agreement (SLA) untuk tiket.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...slaForm}>
-                <form id="slaForm" onSubmit={slaForm.handleSubmit(onSLASubmit)} className="space-y-4">
+                <form
+                  id="slaForm"
+                  onSubmit={slaForm.handleSubmit(onSLASubmit)}
+                  className="space-y-4"
+                >
                   <FormField
                     control={slaForm.control}
                     name="enableSLA"
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                         <div className="space-y-0.5">
-                          <FormLabel className="text-base">Aktifkan SLA</FormLabel>
+                          <FormLabel className="text-base">
+                            Aktifkan SLA
+                          </FormLabel>
                           <FormDescription>
-                            Aktifkan pelacakan dan penegakan Service Level Agreement.
+                            Aktifkan pelacakan dan penegakan Service Level
+                            Agreement.
                           </FormDescription>
                         </div>
                         <FormControl>
-                          <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
                         </FormControl>
                       </FormItem>
                     )}
@@ -420,9 +552,16 @@ export function SettingsForm() {
                         <FormItem>
                           <FormLabel>SLA Prioritas Rendah (jam)</FormLabel>
                           <FormControl>
-                            <Input placeholder="SLA prioritas rendah" type="number" {...field} />
+                            <Input
+                              placeholder="SLA prioritas rendah"
+                              type="number"
+                              {...field}
+                            />
                           </FormControl>
-                          <FormDescription>Waktu penyelesaian untuk tiket prioritas rendah (jam).</FormDescription>
+                          <FormDescription>
+                            Waktu penyelesaian untuk tiket prioritas rendah
+                            (jam).
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -435,9 +574,16 @@ export function SettingsForm() {
                         <FormItem>
                           <FormLabel>SLA Prioritas Sedang (jam)</FormLabel>
                           <FormControl>
-                            <Input placeholder="SLA prioritas sedang" type="number" {...field} />
+                            <Input
+                              placeholder="SLA prioritas sedang"
+                              type="number"
+                              {...field}
+                            />
                           </FormControl>
-                          <FormDescription>Waktu penyelesaian untuk tiket prioritas sedang (jam).</FormDescription>
+                          <FormDescription>
+                            Waktu penyelesaian untuk tiket prioritas sedang
+                            (jam).
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -450,9 +596,16 @@ export function SettingsForm() {
                         <FormItem>
                           <FormLabel>SLA Prioritas Tinggi (jam)</FormLabel>
                           <FormControl>
-                            <Input placeholder="SLA prioritas tinggi" type="number" {...field} />
+                            <Input
+                              placeholder="SLA prioritas tinggi"
+                              type="number"
+                              {...field}
+                            />
                           </FormControl>
-                          <FormDescription>Waktu penyelesaian untuk tiket prioritas tinggi (jam).</FormDescription>
+                          <FormDescription>
+                            Waktu penyelesaian untuk tiket prioritas tinggi
+                            (jam).
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -465,9 +618,16 @@ export function SettingsForm() {
                         <FormItem>
                           <FormLabel>SLA Prioritas Urgent (jam)</FormLabel>
                           <FormControl>
-                            <Input placeholder="SLA prioritas urgent" type="number" {...field} />
+                            <Input
+                              placeholder="SLA prioritas urgent"
+                              type="number"
+                              {...field}
+                            />
                           </FormControl>
-                          <FormDescription>Waktu penyelesaian untuk tiket prioritas urgent (jam).</FormDescription>
+                          <FormDescription>
+                            Waktu penyelesaian untuk tiket prioritas urgent
+                            (jam).
+                          </FormDescription>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -480,13 +640,19 @@ export function SettingsForm() {
                     render={({ field }) => (
                       <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                         <div className="space-y-0.5">
-                          <FormLabel className="text-base">Kirim Notifikasi SLA</FormLabel>
+                          <FormLabel className="text-base">
+                            Kirim Notifikasi SLA
+                          </FormLabel>
                           <FormDescription>
-                            Kirim notifikasi saat tiket mendekati atau melewati batas waktu SLA.
+                            Kirim notifikasi saat tiket mendekati atau melewati
+                            batas waktu SLA.
                           </FormDescription>
                         </div>
                         <FormControl>
-                          <Switch checked={field.value} onCheckedChange={field.onChange} />
+                          <Switch
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                          />
                         </FormControl>
                       </FormItem>
                     )}
@@ -495,8 +661,14 @@ export function SettingsForm() {
               </Form>
             </CardContent>
             <CardFooter>
-              <Button type="submit" form="slaForm" disabled={updateMultipleSettings.isPending}>
-                {updateMultipleSettings.isPending ? "Menyimpan..." : "Simpan Pengaturan"}
+              <Button
+                type="submit"
+                form="slaForm"
+                disabled={updateMultipleSettings.isPending}
+              >
+                {updateMultipleSettings.isPending
+                  ? "Menyimpan..."
+                  : "Simpan Pengaturan"}
               </Button>
             </CardFooter>
           </Card>
@@ -506,11 +678,17 @@ export function SettingsForm() {
           <Card>
             <CardHeader>
               <CardTitle>Pengaturan Notifikasi</CardTitle>
-              <CardDescription>Konfigurasi notifikasi email dan in-app.</CardDescription>
+              <CardDescription>
+                Konfigurasi notifikasi email dan in-app.
+              </CardDescription>
             </CardHeader>
             <CardContent>
               <Form {...notificationForm}>
-                <form id="notificationForm" onSubmit={notificationForm.handleSubmit(onNotificationSubmit)} className="space-y-4">
+                <form
+                  id="notificationForm"
+                  onSubmit={notificationForm.handleSubmit(onNotificationSubmit)}
+                  className="space-y-4"
+                >
                   <div className="grid gap-4 md:grid-cols-2">
                     <FormField
                       control={notificationForm.control}
@@ -518,13 +696,18 @@ export function SettingsForm() {
                       render={({ field }) => (
                         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                           <div className="space-y-0.5">
-                            <FormLabel className="text-base">Notifikasi Email</FormLabel>
+                            <FormLabel className="text-base">
+                              Notifikasi Email
+                            </FormLabel>
                             <FormDescription>
                               Aktifkan notifikasi melalui email.
                             </FormDescription>
                           </div>
                           <FormControl>
-                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
                           </FormControl>
                         </FormItem>
                       )}
@@ -536,13 +719,18 @@ export function SettingsForm() {
                       render={({ field }) => (
                         <FormItem className="flex flex-row items-center justify-between rounded-lg border p-4">
                           <div className="space-y-0.5">
-                            <FormLabel className="text-base">Notifikasi In-App</FormLabel>
+                            <FormLabel className="text-base">
+                              Notifikasi In-App
+                            </FormLabel>
                             <FormDescription>
                               Aktifkan notifikasi dalam aplikasi.
                             </FormDescription>
                           </div>
                           <FormControl>
-                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
                           </FormControl>
                         </FormItem>
                       )}
@@ -555,7 +743,10 @@ export function SettingsForm() {
                     render={({ field }) => (
                       <FormItem>
                         <FormLabel>Frekuensi Digest</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <Select
+                          onValueChange={field.onChange}
+                          defaultValue={field.value}
+                        >
                           <FormControl>
                             <SelectTrigger>
                               <SelectValue placeholder="Pilih frekuensi digest" />
@@ -567,7 +758,9 @@ export function SettingsForm() {
                             <SelectItem value="weekly">Mingguan</SelectItem>
                           </SelectContent>
                         </Select>
-                        <FormDescription>Frekuensi pengiriman email digest ringkasan.</FormDescription>
+                        <FormDescription>
+                          Frekuensi pengiriman email digest ringkasan.
+                        </FormDescription>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -588,7 +781,10 @@ export function SettingsForm() {
                             </FormDescription>
                           </div>
                           <FormControl>
-                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
                           </FormControl>
                         </FormItem>
                       )}
@@ -606,7 +802,10 @@ export function SettingsForm() {
                             </FormDescription>
                           </div>
                           <FormControl>
-                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
                           </FormControl>
                         </FormItem>
                       )}
@@ -624,7 +823,10 @@ export function SettingsForm() {
                             </FormDescription>
                           </div>
                           <FormControl>
-                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
                           </FormControl>
                         </FormItem>
                       )}
@@ -638,11 +840,15 @@ export function SettingsForm() {
                           <div className="space-y-0.5">
                             <FormLabel>Pelanggaran SLA</FormLabel>
                             <FormDescription className="text-xs">
-                              Notifikasi saat tiket mendekati atau melewati batas waktu SLA.
+                              Notifikasi saat tiket mendekati atau melewati
+                              batas waktu SLA.
                             </FormDescription>
                           </div>
                           <FormControl>
-                            <Switch checked={field.value} onCheckedChange={field.onChange} />
+                            <Switch
+                              checked={field.value}
+                              onCheckedChange={field.onChange}
+                            />
                           </FormControl>
                         </FormItem>
                       )}
@@ -652,13 +858,19 @@ export function SettingsForm() {
               </Form>
             </CardContent>
             <CardFooter>
-              <Button type="submit" form="notificationForm" disabled={updateMultipleSettings.isPending}>
-                {updateMultipleSettings.isPending ? "Menyimpan..." : "Simpan Pengaturan"}
+              <Button
+                type="submit"
+                form="notificationForm"
+                disabled={updateMultipleSettings.isPending}
+              >
+                {updateMultipleSettings.isPending
+                  ? "Menyimpan..."
+                  : "Simpan Pengaturan"}
               </Button>
             </CardFooter>
           </Card>
         </TabsContent>
       </Tabs>
     </div>
-  ) 
+  );
 }

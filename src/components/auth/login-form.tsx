@@ -1,73 +1,71 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Checkbox } from "@/components/ui/checkbox"
-import { AtSign, Lock, Loader2, Eye, EyeOff, AlertCircle } from "lucide-react"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { useAuth } from "@/hooks/use-auth"
-import React from "react"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Checkbox } from "@/components/ui/checkbox";
+import { AtSign, Lock, Loader2, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { useAuth } from "@/hooks/use-auth";
+import React from "react";
 
 export function LoginForm() {
-  const router = useRouter()
-  const { login, isLoading, error } = useAuth()
-  const [showPassword, setShowPassword] = useState(false)
+  const { login, isLoading, error } = useAuth();
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     rememberMe: false,
-  })
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     try {
       // Use the actual login function from the useAuth hook
       const success = await login({
         email: formData.email,
         password: formData.password,
-      })
+      });
 
       // If remember me is checked, store in localStorage
       if (success && formData.rememberMe) {
-        localStorage.setItem("rememberedEmail", formData.email)
+        localStorage.setItem("rememberedEmail", formData.email);
       } else if (!formData.rememberMe) {
-        localStorage.removeItem("rememberedEmail")
+        localStorage.removeItem("rememberedEmail");
       }
-      
+
       // No need to manually redirect - the login function handles this
     } catch (error) {
-      console.error("Login failed", error)
+      console.error("Login failed", error);
     }
-  }
+  };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleCheckboxChange = (checked: boolean) => {
-    setFormData((prev) => ({ ...prev, rememberMe: checked }))
-  }
+    setFormData((prev) => ({ ...prev, rememberMe: checked }));
+  };
 
   // Load remembered email on component mount
   React.useEffect(() => {
-    const rememberedEmail = localStorage.getItem("rememberedEmail")
+    const rememberedEmail = localStorage.getItem("rememberedEmail");
     if (rememberedEmail) {
       setFormData((prev) => ({
         ...prev,
         email: rememberedEmail,
         rememberMe: true,
-      }))
+      }));
     }
-  }, [])
+  }, []);
 
   const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword)
-  }
+    setShowPassword(!showPassword);
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-5">
@@ -77,7 +75,7 @@ export function LoginForm() {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       )}
-      
+
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <div className="relative">
@@ -102,7 +100,12 @@ export function LoginForm() {
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label htmlFor="password">Password</Label>
-          <Button variant="link" size="sm" className="h-auto p-0 text-xs" asChild>
+          <Button
+            variant="link"
+            size="sm"
+            className="h-auto p-0 text-xs"
+            asChild
+          >
             <a href="/forgot-password">Lupa password?</a>
           </Button>
         </div>
@@ -141,13 +144,16 @@ export function LoginForm() {
       </div>
 
       <div className="flex items-center space-x-2">
-        <Checkbox 
-          id="remember" 
-          checked={formData.rememberMe} 
+        <Checkbox
+          id="remember"
+          checked={formData.rememberMe}
           onCheckedChange={handleCheckboxChange}
           disabled={isLoading}
         />
-        <Label htmlFor="remember" className="text-sm font-normal cursor-pointer">
+        <Label
+          htmlFor="remember"
+          className="text-sm font-normal cursor-pointer"
+        >
           Ingat saya
         </Label>
       </div>
@@ -163,5 +169,5 @@ export function LoginForm() {
         )}
       </Button>
     </form>
-  )
+  );
 }
