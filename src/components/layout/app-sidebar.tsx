@@ -3,16 +3,13 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { motion, AnimatePresence, Variants } from "framer-motion";
-import { useAuth } from "@/hooks/use-auth";
-import { UserRole } from "@/types";
 import {
   LayoutDashboard,
   Ticket,
   Users,
   Settings,
-  BarChart3,
   FileText,
   PlusCircle,
   HelpCircle,
@@ -28,6 +25,9 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { UserRole } from "@/types";
+import { useSession } from "@/context/SessionContext";
+import { logout } from "@/lib/action/auth.action";
 
 // Animation variants
 const itemVariants: Variants = {
@@ -60,13 +60,19 @@ interface SidebarProps {
 }
 
 export function Sidebar({ isOpen, userRole }: SidebarProps) {
-  const { user, logout } = useAuth();
+  const { user } = useSession();
+  const router = useRouter();
   const pathname = usePathname();
   // Use useRef to avoid the infinite re-renders
   const openGroupsRef = useRef<Record<string, boolean>>({
     tickets: true,
     help: false,
   });
+
+  const handleLogout = async () => {
+    await logout();
+    router.push("/login");
+  };
 
   // Use this state only for re-rendering the component when groups toggle
   const [, setTriggerRender] = useState(0);
@@ -99,8 +105,8 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
     const common = {
       // Dashboard varies by role for different views
       dashboard: {
-        name: userRole === "executive" ? "Executive Dashboard" : "Dashboard",
-        href: userRole === "executive" ? "/executive-dashboard" : "/dashboard",
+        name: "Dashboard",
+        href: "/dashboard",
         icon: <LayoutDashboard className="h-4 w-4" />,
         color: "text-blue-500",
       },
@@ -111,9 +117,7 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
         icon: <Ticket className="h-4 w-4" />,
         color: "text-primary-500",
         subItems: [
-          ...(userRole === "mahasiswa" ||
-          userRole === "dosen" ||
-          userRole === "admin"
+          ...(userRole === "user" || userRole === "admin"
             ? [
                 {
                   name: "Buat Tiket",
@@ -129,7 +133,7 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
             icon: <FileText className="h-4 w-4" />,
             color: "text-primary-600",
           },
-          ...(userRole === "dosen" || userRole === "admin"
+          ...(userRole === "staff"
             ? [
                 {
                   name: "Tiket Ditugaskan",
@@ -139,7 +143,7 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
                 },
               ]
             : []),
-          ...(userRole === "mahasiswa"
+          ...(userRole === "user"
             ? [
                 {
                   name: "Tiket Saya",
@@ -176,7 +180,7 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
 
     // Role-specific items
     switch (userRole) {
-      case "mahasiswa":
+      case "user":
         return {
           main: [common.dashboard],
           groups: [
@@ -204,12 +208,6 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
           ],
         };
 
-      case "dosen":
-        return {
-          main: [common.dashboard],
-          groups: [common.tickets, common.help],
-        };
-
       case "admin":
         return {
           main: [common.dashboard],
@@ -231,34 +229,6 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
                   href: "/settings",
                   icon: <Settings className="h-4 w-4" />,
                   color: "text-violet-600",
-                },
-              ],
-            },
-            common.help,
-          ],
-        };
-
-      case "executive":
-        return {
-          main: [common.dashboard],
-          groups: [
-            common.tickets,
-            {
-              name: "Manajemen",
-              icon: <BarChart3 className="h-4 w-4" />,
-              color: "text-rose-500",
-              subItems: [
-                {
-                  name: "Kinerja",
-                  href: "/performance",
-                  icon: <BarChart3 className="h-4 w-4" />,
-                  color: "text-rose-400",
-                },
-                {
-                  name: "Pengguna",
-                  href: "/users",
-                  icon: <Users className="h-4 w-4" />,
-                  color: "text-rose-500",
                 },
               ],
             },
@@ -315,13 +285,11 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
   // Get a theme color class based on role
   const getRoleThemeClass = () => {
     switch (userRole) {
-      case "mahasiswa":
+      case "user":
         return "from-blue-500/5 to-green-500/5 border-blue-500/10";
-      case "dosen":
-        return "from-indigo-500/5 to-sky-500/5 border-indigo-500/10";
       case "admin":
         return "from-violet-500/5 to-fuchsia-500/5 border-violet-500/10";
-      case "executive":
+      case "staff":
         return "from-amber-500/5 to-red-500/5 border-amber-500/10";
       default:
         return "from-gray-500/5 to-gray-500/5 border-gray-500/10";
@@ -454,28 +422,24 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
                 <Avatar
                   className={cn(
                     "h-8 w-8 border",
-                    userRole === "mahasiswa"
+                    userRole === "user"
                       ? "border-blue-200 bg-blue-50"
-                      : userRole === "dosen"
+                      : userRole === "staff"
                       ? "border-indigo-200 bg-indigo-50"
                       : userRole === "admin"
                       ? "border-violet-200 bg-violet-50"
-                      : userRole === "executive"
-                      ? "border-amber-200 bg-amber-50"
-                      : "border-gray-200 bg-gray-50"
+                      : "border-amber-200 bg-amber-50"
                   )}
                 >
                   <AvatarFallback
                     className={cn(
-                      userRole === "mahasiswa"
+                      userRole === "user"
                         ? "text-blue-700"
-                        : userRole === "dosen"
+                        : userRole === "staff"
                         ? "text-indigo-700"
                         : userRole === "admin"
                         ? "text-violet-700"
-                        : userRole === "executive"
-                        ? "text-amber-700"
-                        : "text-gray-700"
+                        : "text-amber-700"
                     )}
                   >
                     {user?.name?.charAt(0) || "U"}
@@ -488,15 +452,13 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
                   <span
                     className={cn(
                       "text-xs capitalize truncate",
-                      userRole === "mahasiswa"
+                      userRole === "user"
                         ? "text-blue-600"
-                        : userRole === "dosen"
+                        : userRole === "staff"
                         ? "text-indigo-600"
                         : userRole === "admin"
                         ? "text-violet-600"
-                        : userRole === "executive"
-                        ? "text-amber-600"
-                        : "text-gray-600"
+                        : "text-amber-600"
                     )}
                   >
                     {user?.role}
@@ -525,29 +487,25 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
               <Avatar
                 className={cn(
                   "h-8 w-8 border cursor-pointer",
-                  userRole === "mahasiswa"
+                  userRole === "user"
                     ? "border-blue-200 bg-blue-50"
-                    : userRole === "dosen"
+                    : userRole === "staff"
                     ? "border-indigo-200 bg-indigo-50"
                     : userRole === "admin"
                     ? "border-violet-200 bg-violet-50"
-                    : userRole === "executive"
-                    ? "border-amber-200 bg-amber-50"
-                    : "border-gray-200 bg-gray-50"
+                    : "border-amber-200 bg-amber-50"
                 )}
                 onClick={() => logout()}
               >
                 <AvatarFallback
                   className={cn(
-                    userRole === "mahasiswa"
+                    userRole === "user"
                       ? "text-blue-700"
-                      : userRole === "dosen"
+                      : userRole === "staff"
                       ? "text-indigo-700"
                       : userRole === "admin"
                       ? "text-violet-700"
-                      : userRole === "executive"
-                      ? "text-amber-700"
-                      : "text-gray-700"
+                      : "text-amber-700"
                   )}
                 >
                   {user?.name?.charAt(0) || "U"}

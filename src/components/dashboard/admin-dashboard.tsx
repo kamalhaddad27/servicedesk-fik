@@ -5,7 +5,6 @@ import Link from "next/link";
 import { motion, Variants } from "framer-motion";
 import { useQuery } from "@tanstack/react-query";
 import { ApiService } from "@/lib/api";
-import { useAuth } from "@/hooks/use-auth";
 import { PageTitle } from "../ui/page-title";
 import {
   Card,
@@ -37,6 +36,7 @@ import {
   Settings,
 } from "lucide-react";
 import { Ticket, TicketStats } from "@/types";
+import { useSession } from "@/context/SessionContext";
 
 // Animation variants
 const containerVariants = {
@@ -64,7 +64,7 @@ const itemVariants: Variants = {
 };
 
 export function AdminDashboard() {
-  const { user } = useAuth();
+  const { user } = useSession();
   const [activeTab, setActiveTab] = useState("all");
 
   const {

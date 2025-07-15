@@ -1,9 +1,9 @@
-'use client';
+"use client";
 
-import { useEffect, ReactNode } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/use-auth';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import { useEffect, ReactNode } from "react";
+import { useRouter } from "next/navigation";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { useSession } from "@/context/SessionContext";
 
 interface AuthGuardProps {
   children: ReactNode;
@@ -11,16 +11,21 @@ interface AuthGuardProps {
 }
 
 export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
-  const { isAuthenticated, isLoading, userRole } = useAuth();
+  const { user, isLoading } = useSession();
+  const userRole = user?.role;
   const router = useRouter();
 
   useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      router.push('/login');
-    } else if (!isLoading && isAuthenticated && allowedRoles && !allowedRoles.includes(userRole || '')) {
-      router.push('/dashboard');
+    if (!isLoading) {
+      router.push("/login");
+    } else if (
+      !isLoading &&
+      allowedRoles &&
+      !allowedRoles.includes(userRole || "")
+    ) {
+      router.push("/dashboard");
     }
-  }, [isLoading, isAuthenticated, router, allowedRoles, userRole]);
+  }, [isLoading, router, allowedRoles, userRole]);
 
   if (isLoading) {
     return (
@@ -30,11 +35,7 @@ export function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
     );
   }
 
-  if (!isAuthenticated) {
-    return null;
-  }
-
-  if (allowedRoles && !allowedRoles.includes(userRole || '')) {
+  if (allowedRoles && !allowedRoles.includes(userRole || "")) {
     return null;
   }
 

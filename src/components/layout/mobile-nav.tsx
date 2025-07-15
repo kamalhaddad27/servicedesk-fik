@@ -1,18 +1,25 @@
-"use client"
+"use client";
 
-import { usePathname } from "next/navigation"
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { cn } from "@/lib/utils"
-import { LayoutDashboard, Ticket, FileText, User, HelpCircle, PlusCircle } from "lucide-react"
+import { usePathname } from "next/navigation";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import { cn } from "@/lib/utils";
+import {
+  LayoutDashboard,
+  Ticket,
+  FileText,
+  User,
+  HelpCircle,
+  PlusCircle,
+} from "lucide-react";
 
 interface MobileNavProps {
-  className?: string
-  userRole?: string
+  className?: string;
+  userRole?: string;
 }
 
 export function MobileNav({ className, userRole }: MobileNavProps) {
-  const pathname = usePathname()
+  const pathname = usePathname();
 
   // Define navigation items based on user role
   const navItems = [
@@ -20,50 +27,52 @@ export function MobileNav({ className, userRole }: MobileNavProps) {
       name: "Dashboard",
       href: "/dashboard",
       icon: <LayoutDashboard className="h-5 w-5" />,
-      roles: ["mahasiswa", "dosen", "admin", "executive"],
+      roles: ["mahasiswa", "staff", "admin"],
     },
     {
       name: "Tiket",
       href: "/tickets",
       icon: <Ticket className="h-5 w-5" />,
-      roles: ["mahasiswa", "dosen", "admin", "executive"],
+      roles: ["mahasiswa", "staff", "admin"],
     },
     {
       name: "Buat",
       href: "/tickets/create",
       icon: <PlusCircle className="h-5 w-5" />,
-      roles: ["mahasiswa", "dosen", "admin"],
+      roles: ["mahasiswa", "staff", "admin"],
     },
     {
       name: "Ditugaskan",
       href: "/tickets/assigned",
       icon: <FileText className="h-5 w-5" />,
-      roles: ["dosen", "admin"],
+      roles: ["staff"],
     },
     {
       name: "Bantuan",
       href: "/help",
       icon: <HelpCircle className="h-5 w-5" />,
-      roles: ["mahasiswa", "dosen", "admin", "executive"],
+      roles: ["mahasiswa", "staff", "admin"],
     },
     {
       name: "Profil",
       href: "/profile",
       icon: <User className="h-5 w-5" />,
-      roles: ["mahasiswa", "dosen", "admin", "executive"],
+      roles: ["mahasiswa", "staff", "admin"],
     },
-  ]
+  ];
 
   // Filter nav items based on user role
-  const filteredNavItems = navItems.filter((item) => userRole && item.roles.includes(userRole))
+  const filteredNavItems = navItems.filter(
+    (item) => userRole && item.roles.includes(userRole)
+  );
 
   // Only show the most important 5 nav items on mobile
-  const mobileNavItems = filteredNavItems.slice(0, 5)
+  const mobileNavItems = filteredNavItems.slice(0, 5);
 
   return (
     <motion.nav
       className={cn(
-        "fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background py-2 px-4 flex items-center justify-around h-[var(--mobile-nav-height)]", 
+        "fixed bottom-0 left-0 right-0 z-50 border-t border-border bg-background py-2 px-4 flex items-center justify-around h-[var(--mobile-nav-height)]",
         className
       )}
       initial={{ y: 100, opacity: 0 }}
@@ -71,7 +80,8 @@ export function MobileNav({ className, userRole }: MobileNavProps) {
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
     >
       {mobileNavItems.map((item) => {
-        const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`)
+        const isActive =
+          pathname === item.href || pathname.startsWith(`${item.href}/`);
 
         return (
           <Link key={item.href} href={item.href} className="block text-center">
@@ -83,7 +93,9 @@ export function MobileNav({ className, userRole }: MobileNavProps) {
               <div
                 className={cn(
                   "p-1.5 rounded-full mb-1 transition-colors",
-                  isActive ? "bg-primary text-primary-foreground" : "text-muted-foreground",
+                  isActive
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground"
                 )}
               >
                 {item.icon}
@@ -91,15 +103,17 @@ export function MobileNav({ className, userRole }: MobileNavProps) {
               <span
                 className={cn(
                   "text-xs transition-colors",
-                  isActive ? "text-primary font-medium" : "text-muted-foreground",
+                  isActive
+                    ? "text-primary font-medium"
+                    : "text-muted-foreground"
                 )}
               >
                 {item.name}
               </span>
             </motion.div>
           </Link>
-        )
+        );
       })}
     </motion.nav>
-  )
+  );
 }

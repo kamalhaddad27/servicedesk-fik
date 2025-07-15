@@ -1,26 +1,38 @@
-"use client"
+"use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react"
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { useTickets } from "@/hooks/use-ticket"
-import { useDebounce } from "@/hooks/use-debounce"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "../ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useState, useEffect, useCallback, useMemo } from "react";
+import Link from "next/link";
+import { motion, Variants } from "framer-motion";
+import { useTickets } from "@/hooks/use-ticket";
+import { useDebounce } from "@/hooks/use-debounce";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "../ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { Progress } from "@/components/ui/progress"
-import { LoadingSpinner } from "@/components/ui/loading-spinner"
-import { formatDate, getTicketStatusColor, getTicketPriorityColor, getSLAStatusColor } from "@/lib/utils"
-import { PlusCircle, Search, Filter, AlertCircle, Ticket } from 'lucide-react'
-import { useAuth } from "@/hooks/use-auth"
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { Progress } from "@/components/ui/progress";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import {
+  formatDate,
+  getTicketStatusColor,
+  getTicketPriorityColor,
+  getSLAStatusColor,
+} from "@/lib/utils";
+import { PlusCircle, Search, Filter, AlertCircle, Ticket } from "lucide-react";
+import { useSession } from "@/context/SessionContext";
 
 // Animation variants
 const containerVariants = {
@@ -32,9 +44,9 @@ const containerVariants = {
       staggerChildren: 0.05,
     },
   },
-}
+};
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { y: 20, opacity: 0 },
   visible: {
     y: 0,
@@ -45,14 +57,14 @@ const itemVariants = {
       damping: 24,
     },
   },
-}
+};
 
 type TicketListProps = {
-  filter?: string
-}
+  filter?: string;
+};
 
 export function TicketList({ filter }: TicketListProps) {
-  const { user } = useAuth();
+  const { user } = useSession();
   const {
     tickets,
     totalItems,
@@ -65,49 +77,65 @@ export function TicketList({ filter }: TicketListProps) {
     updateFilters,
     nextPage,
     prevPage,
-  } = useTickets()
+  } = useTickets();
 
   // Input text search state
-  const [searchTerm, setSearchTerm] = useState(filters.search || "")
-  const debouncedSearchTerm = useDebounce(searchTerm, 500)
-  
+  const [searchTerm, setSearchTerm] = useState(filters.search || "");
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+
   // Memoize the filter function to prevent recreation on every render
-  const applyFilterByType = useCallback((filterType: string | undefined) => {
-    if (!filterType) return;
-    
-    // Implementasikan logika filter sesuai dengan tipe yang didukung oleh updateFilters
-    if (filterType === "assigned") {
-      // Karena tidak ada assignedTo, gunakan status sebagai filter alternatif
-      // dan tambahkan logika khusus di hook useTickets atau komponen lain
-      updateFilters({ 
-        status: "all",  // Gunakan filter yang didukung
-        search: user?.name || "" // Gunakan search untuk filter tambahan jika perlu
-      });
-      console.log("Filter assigned applied - using status and search filters");
-    } else if (filterType === "created") {
-      // Gunakan filter yang tersedia
-      updateFilters({ status: "all" });
-      console.log("Filter created applied - using status filter");
-    } else if (["pending", "completed", "in-progress", "disposisi", "cancelled"].includes(filterType)) {
-      // Filter berdasarkan status yang valid
-      updateFilters({ status: filterType });
-      console.log(`Filter by status: ${filterType}`);
-    } else {
-      // Filter lainnya, gunakan sebagai category jika cocok
-      updateFilters({ category: filterType });
-      console.log(`Applied filter as category: ${filterType}`);
-    }
-  }, [updateFilters, user?.name]);
+  const applyFilterByType = useCallback(
+    (filterType: string | undefined) => {
+      if (!filterType) return;
+
+      // Implementasikan logika filter sesuai dengan tipe yang didukung oleh updateFilters
+      if (filterType === "assigned") {
+        // Karena tidak ada assignedTo, gunakan status sebagai filter alternatif
+        // dan tambahkan logika khusus di hook useTickets atau komponen lain
+        updateFilters({
+          status: "all", // Gunakan filter yang didukung
+          search: user?.name || "", // Gunakan search untuk filter tambahan jika perlu
+        });
+        console.log(
+          "Filter assigned applied - using status and search filters"
+        );
+      } else if (filterType === "created") {
+        // Gunakan filter yang tersedia
+        updateFilters({ status: "all" });
+        console.log("Filter created applied - using status filter");
+      } else if (
+        [
+          "pending",
+          "completed",
+          "in-progress",
+          "disposisi",
+          "cancelled",
+        ].includes(filterType)
+      ) {
+        // Filter berdasarkan status yang valid
+        updateFilters({ status: filterType });
+        console.log(`Filter by status: ${filterType}`);
+      } else {
+        // Filter lainnya, gunakan sebagai category jika cocok
+        updateFilters({ category: filterType });
+        console.log(`Applied filter as category: ${filterType}`);
+      }
+    },
+    [updateFilters, user?.name]
+  );
 
   // Handler for search input change
-  const handleSearchChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value);
-  }, []);
+  const handleSearchChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      setSearchTerm(e.target.value);
+    },
+    []
+  );
 
   // Handle filter changes - only run once on mount or when filter/user changes
   // Using a ref to prevent repeated executions
-  const filterApplied = useMemo(() => ({}), []);
-  
+  const filterApplied: any = useMemo(() => ({}), []);
+
   useEffect(() => {
     // Only apply filter if it hasn't been applied yet or if it changed
     if (filter && !filterApplied[filter]) {
@@ -124,20 +152,29 @@ export function TicketList({ filter }: TicketListProps) {
   }, [debouncedSearchTerm, updateFilters, filters.search]);
 
   // Handlers for filter changes
-  const handleStatusChange = useCallback((value: string) => {
-    updateFilters({ status: value });
-  }, [updateFilters]);
+  const handleStatusChange = useCallback(
+    (value: string) => {
+      updateFilters({ status: value });
+    },
+    [updateFilters]
+  );
 
-  const handlePriorityChange = useCallback((value: string) => {
-    updateFilters({ priority: value });
-  }, [updateFilters]);
+  const handlePriorityChange = useCallback(
+    (value: string) => {
+      updateFilters({ priority: value });
+    },
+    [updateFilters]
+  );
 
-  const handleCategoryChange = useCallback((value: string) => {
-    updateFilters({ category: value });
-  }, [updateFilters]);
+  const handleCategoryChange = useCallback(
+    (value: string) => {
+      updateFilters({ category: value });
+    },
+    [updateFilters]
+  );
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return <LoadingSpinner />;
   }
 
   if (isError) {
@@ -146,10 +183,12 @@ export function TicketList({ filter }: TicketListProps) {
         <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
         <h3 className="mt-2 text-lg font-medium">Gagal memuat data</h3>
         <p className="text-sm text-muted-foreground">
-          {error instanceof Error ? error.message : "Terjadi kesalahan saat memuat tiket."}
+          {error instanceof Error
+            ? error.message
+            : "Terjadi kesalahan saat memuat tiket."}
         </p>
       </div>
-    )
+    );
   }
 
   return (
@@ -173,10 +212,7 @@ export function TicketList({ filter }: TicketListProps) {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Select
-            value={filters.status}
-            onValueChange={handleStatusChange}
-          >
+          <Select value={filters.status} onValueChange={handleStatusChange}>
             <SelectTrigger className="h-9 w-[130px]">
               <SelectValue placeholder="Status" />
             </SelectTrigger>
@@ -190,10 +226,7 @@ export function TicketList({ filter }: TicketListProps) {
             </SelectContent>
           </Select>
 
-          <Select
-            value={filters.priority}
-            onValueChange={handlePriorityChange}
-          >
+          <Select value={filters.priority} onValueChange={handlePriorityChange}>
             <SelectTrigger className="h-9 w-[130px]">
               <SelectValue placeholder="Prioritas" />
             </SelectTrigger>
@@ -206,10 +239,7 @@ export function TicketList({ filter }: TicketListProps) {
             </SelectContent>
           </Select>
 
-          <Select
-            value={filters.category}
-            onValueChange={handleCategoryChange}
-          >
+          <Select value={filters.category} onValueChange={handleCategoryChange}>
             <SelectTrigger className="h-9 w-[150px]">
               <SelectValue placeholder="Kategori" />
             </SelectTrigger>
@@ -262,14 +292,27 @@ export function TicketList({ filter }: TicketListProps) {
               <Card>
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
-                    <Link href={`/tickets/${ticket.id}`} className="hover:underline">
-                      <CardTitle className="text-base">{ticket.subject}</CardTitle>
+                    <Link
+                      href={`/tickets/${ticket.id}`}
+                      className="hover:underline"
+                    >
+                      <CardTitle className="text-base">
+                        {ticket.subject}
+                      </CardTitle>
                     </Link>
                     <div className="flex gap-2">
-                      <Badge className={getTicketStatusColor(ticket.status)}>{ticket.status}</Badge>
-                      <Badge className={getTicketPriorityColor(ticket.priority)}>{ticket.priority}</Badge>
+                      <Badge className={getTicketStatusColor(ticket.status)}>
+                        {ticket.status}
+                      </Badge>
+                      <Badge
+                        className={getTicketPriorityColor(ticket.priority)}
+                      >
+                        {ticket.priority}
+                      </Badge>
                       {ticket.slaStatus && (
-                        <Badge className={getSLAStatusColor(ticket.slaStatus)}>{ticket.slaStatus}</Badge>
+                        <Badge className={getSLAStatusColor(ticket.slaStatus)}>
+                          {ticket.slaStatus}
+                        </Badge>
                       )}
                     </div>
                   </div>
@@ -279,7 +322,9 @@ export function TicketList({ filter }: TicketListProps) {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pb-2">
-                  <p className="line-clamp-2 text-sm text-muted-foreground">{ticket.description}</p>
+                  <p className="line-clamp-2 text-sm text-muted-foreground">
+                    {ticket.description}
+                  </p>
                   {ticket.progress > 0 && (
                     <div className="mt-2">
                       <div className="flex items-center justify-between text-xs">
@@ -293,10 +338,16 @@ export function TicketList({ filter }: TicketListProps) {
                 <CardFooter className="flex items-center justify-between pt-0">
                   <div className="flex flex-col text-xs text-muted-foreground">
                     <span>
-                      {ticket.creator?.name ? `Dari: ${ticket.creator.name}` : ""}
-                      {ticket.handler?.name ? ` • Handler: ${ticket.handler.name}` : ""}
+                      {ticket.creator?.name
+                        ? `Dari: ${ticket.creator.name}`
+                        : ""}
+                      {ticket.handler?.name
+                        ? ` • Handler: ${ticket.handler.name}`
+                        : ""}
                     </span>
-                    <span>Dibuat pada {formatDate(ticket.createdAt, "dd MMM yyyy")}</span>
+                    <span>
+                      Dibuat pada {formatDate(ticket.createdAt, "dd MMM yyyy")}
+                    </span>
                   </div>
                   <Button variant="ghost" size="sm" asChild>
                     <Link href={`/tickets/${ticket.id}`}>Lihat Detail</Link>
@@ -337,5 +388,5 @@ export function TicketList({ filter }: TicketListProps) {
         </div>
       )}
     </div>
-  )
+  );
 }

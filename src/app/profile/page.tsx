@@ -1,34 +1,52 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect } from "react"
-import { useSession } from "next-auth/react"
-import { useRouter } from "next/navigation"
-import { motion } from "framer-motion"
-import { Camera, CheckCircle, Edit, Mail, UserIcon, Building, BookOpen, Calendar, Award, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Separator } from "@/components/ui/separator"
-import { toast } from "@/components/ui/use-toast"
-import { ApiService } from "@/lib/api"
-import { User } from "@/types"
+import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import {
+  Camera,
+  CheckCircle,
+  Edit,
+  Mail,
+  UserIcon,
+  Building,
+  BookOpen,
+  Calendar,
+  Award,
+  Loader2,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Separator } from "@/components/ui/separator";
+import { toast } from "@/components/ui/use-toast";
+import { ApiService } from "@/lib/api";
+import { User } from "@/types";
 
 export default function ProfilePage() {
-  const { data: session, update } = useSession()
-  const router = useRouter()
-  const [isEditing, setIsEditing] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
+  const { data: session, update } = useSession();
+  const router = useRouter();
+  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
     department: "",
-  })
+  });
 
   useEffect(() => {
     if (session?.user) {
@@ -37,33 +55,34 @@ export default function ProfilePage() {
         email: session.user.email || "",
         phone: session.user.phone || "",
         department: session.user.department || "",
-      })
+      });
     }
-  }, [session])
+  }, [session]);
 
   if (!session?.user) {
     return (
       <div className="flex h-[80vh] w-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
-    )
+    );
   }
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
       // Use the PUT endpoint to update user
-      const userId = typeof session.user.id === "string"
-      ? Number.parseInt(session.user.id)
-      : session.user.id ?? 0
-          await ApiService.updateUser(userId, formData)
+      const userId =
+        typeof session.user.id === "string"
+          ? Number.parseInt(session.user.id)
+          : session.user.id ?? 0;
+      await ApiService.updateUser(userId, formData);
 
       // Update the session with new user data
       await update({
@@ -72,40 +91,48 @@ export default function ProfilePage() {
           ...session.user,
           ...formData,
         },
-      })
+      });
 
       toast({
         title: "Profil berhasil diperbarui",
         description: "Informasi profil Anda telah diperbarui dengan sukses.",
-      })
+      });
 
-      setIsEditing(false)
+      setIsEditing(false);
     } catch (error) {
-      console.error("Error updating profile:", error)
+      console.error("Error updating profile:", error);
       toast({
         title: "Gagal memperbarui profil",
-        description: ApiService.handleError(error) || "Terjadi kesalahan saat memperbarui profil. Silakan coba lagi.",
+        description:
+          ApiService.handleError(error) ||
+          "Terjadi kesalahan saat memperbarui profil. Silakan coba lagi.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handlePasswordChange = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const form = e.target as HTMLFormElement
-    const currentPassword = (form.elements.namedItem("current-password") as HTMLInputElement).value
-    const newPassword = (form.elements.namedItem("new-password") as HTMLInputElement).value
-    const confirmPassword = (form.elements.namedItem("confirm-password") as HTMLInputElement).value
+    e.preventDefault();
+    const form = e.target as HTMLFormElement;
+    const currentPassword = (
+      form.elements.namedItem("current-password") as HTMLInputElement
+    ).value;
+    const newPassword = (
+      form.elements.namedItem("new-password") as HTMLInputElement
+    ).value;
+    const confirmPassword = (
+      form.elements.namedItem("confirm-password") as HTMLInputElement
+    ).value;
 
     if (!currentPassword || !newPassword || !confirmPassword) {
       toast({
         title: "Validasi gagal",
         description: "Semua field harus diisi",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
     if (newPassword !== confirmPassword) {
@@ -113,11 +140,11 @@ export default function ProfilePage() {
         title: "Validasi gagal",
         description: "Password baru dan konfirmasi password tidak cocok",
         variant: "destructive",
-      })
-      return
+      });
+      return;
     }
 
-    setIsLoading(true)
+    setIsLoading(true);
 
     try {
       // This endpoint doesn't exist in the API service you shared
@@ -127,33 +154,37 @@ export default function ProfilePage() {
       toast({
         title: "Fitur dalam pengembangan",
         description: "Fitur ubah password akan segera tersedia",
-      })
+      });
     } catch (error) {
       toast({
         title: "Gagal mengubah password",
-        description: ApiService.handleError(error) || "Terjadi kesalahan saat mengubah password. Silakan coba lagi.",
+        description:
+          ApiService.handleError(error) ||
+          "Terjadi kesalahan saat mengubah password. Silakan coba lagi.",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
-      form.reset()
+      setIsLoading(false);
+      form.reset();
     }
-  }
+  };
 
   const roleLabels: Record<string, string> = {
     mahasiswa: "Mahasiswa",
     dosen: "Dosen",
     admin: "Administrator",
     executive: "Executive",
-  }
+  };
 
-  const user = session.user
+  const user = session.user;
 
   return (
     <div className="container mx-auto py-6 space-y-6">
       <div className="flex flex-col space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">Profil Pengguna</h1>
-        <p className="text-muted-foreground">Lihat dan kelola informasi profil Anda</p>
+        <p className="text-muted-foreground">
+          Lihat dan kelola informasi profil Anda
+        </p>
       </div>
 
       <Tabs defaultValue="profile" className="w-full">
@@ -192,7 +223,9 @@ export default function ProfilePage() {
                 </div>
                 <div className="text-center">
                   <h3 className="font-medium text-lg">{user.name}</h3>
-                  <p className="text-sm text-muted-foreground">{roleLabels[user.role] || user.role}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {roleLabels[user.role] || user.role}
+                  </p>
                 </div>
               </CardContent>
               <CardFooter className="flex justify-center border-t border-primary-100 bg-primary-50/50 p-3">
@@ -230,7 +263,9 @@ export default function ProfilePage() {
                   </Button>
                 </div>
                 <CardDescription>
-                  {isEditing ? "Edit informasi profil Anda" : "Detail informasi profil Anda"}
+                  {isEditing
+                    ? "Edit informasi profil Anda"
+                    : "Detail informasi profil Anda"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="pt-6">
@@ -257,7 +292,9 @@ export default function ProfilePage() {
                         placeholder="Masukkan email"
                         disabled
                       />
-                      <p className="text-xs text-muted-foreground">Email tidak dapat diubah</p>
+                      <p className="text-xs text-muted-foreground">
+                        Email tidak dapat diubah
+                      </p>
                     </div>
                     <div className="grid gap-4 md:grid-cols-2">
                       <div className="space-y-2">
@@ -280,12 +317,20 @@ export default function ProfilePage() {
                           placeholder="Masukkan departemen"
                           disabled
                         />
-                        <p className="text-xs text-muted-foreground">Departemen tidak dapat diubah</p>
+                        <p className="text-xs text-muted-foreground">
+                          Departemen tidak dapat diubah
+                        </p>
                       </div>
                     </div>
                     <div className="pt-2">
-                      <Button type="submit" className="bg-primary hover:bg-primary-600" disabled={isLoading}>
-                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      <Button
+                        type="submit"
+                        className="bg-primary hover:bg-primary-600"
+                        disabled={isLoading}
+                      >
+                        {isLoading && (
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        )}
                         Simpan Perubahan
                       </Button>
                     </div>
@@ -294,14 +339,18 @@ export default function ProfilePage() {
                   <div className="space-y-6">
                     <div className="grid gap-4 md:grid-cols-2">
                       <div>
-                        <p className="text-sm font-medium text-muted-foreground">Nama Lengkap</p>
+                        <p className="text-sm font-medium text-muted-foreground">
+                          Nama Lengkap
+                        </p>
                         <p className="flex items-center gap-2 mt-1">
                           <UserIcon className="h-4 w-4 text-primary" />
                           <span>{user.name}</span>
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-muted-foreground">Email</p>
+                        <p className="text-sm font-medium text-muted-foreground">
+                          Email
+                        </p>
                         <p className="flex items-center gap-2 mt-1">
                           <Mail className="h-4 w-4 text-primary" />
                           <span>{user.email}</span>
@@ -311,33 +360,41 @@ export default function ProfilePage() {
                     <Separator className="my-4" />
                     <div className="grid gap-4 md:grid-cols-2">
                       <div>
-                        <p className="text-sm font-medium text-muted-foreground">Departemen</p>
+                        <p className="text-sm font-medium text-muted-foreground">
+                          Departemen
+                        </p>
                         <p className="flex items-center gap-2 mt-1">
                           <Building className="h-4 w-4 text-primary" />
                           <span>{user.department || "-"}</span>
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm font-medium text-muted-foreground">Peran</p>
+                        <p className="text-sm font-medium text-muted-foreground">
+                          Peran
+                        </p>
                         <p className="flex items-center gap-2 mt-1">
                           <Award className="h-4 w-4 text-primary" />
                           <span>{roleLabels[user.role] || user.role}</span>
                         </p>
                       </div>
                     </div>
-                    {user.role === "mahasiswa" && (
+                    {user.role === "user" && (
                       <>
                         <Separator className="my-4" />
                         <div className="grid gap-4 md:grid-cols-2">
                           <div>
-                            <p className="text-sm font-medium text-muted-foreground">NIM</p>
+                            <p className="text-sm font-medium text-muted-foreground">
+                              NIM
+                            </p>
                             <p className="flex items-center gap-2 mt-1">
                               <BookOpen className="h-4 w-4 text-primary" />
                               <span>{user.nim || "-"}</span>
                             </p>
                           </div>
                           <div>
-                            <p className="text-sm font-medium text-muted-foreground">Angkatan</p>
+                            <p className="text-sm font-medium text-muted-foreground">
+                              Angkatan
+                            </p>
                             <p className="flex items-center gap-2 mt-1">
                               <Calendar className="h-4 w-4 text-primary" />
                               <span>{user.angkatan || "-"}</span>
@@ -346,17 +403,11 @@ export default function ProfilePage() {
                         </div>
                       </>
                     )}
-                    {user.role === "dosen" && (
+                    {/* {user.role === "dosen" && (
                       <>
                         <Separator className="my-4" />
                         <div className="grid gap-4 md:grid-cols-2">
-                          <div>
-                            <p className="text-sm font-medium text-muted-foreground">NIP</p>
-                            <p className="flex items-center gap-2 mt-1">
-                              <BookOpen className="h-4 w-4 text-primary" />
-                              <span>{user.nip || "-"}</span>
-                            </p>
-                          </div>
+                          
                           <div>
                             <p className="text-sm font-medium text-muted-foreground">Jabatan</p>
                             <p className="flex items-center gap-2 mt-1">
@@ -366,7 +417,7 @@ export default function ProfilePage() {
                           </div>
                         </div>
                       </>
-                    )}
+                    )} */}
                   </div>
                 )}
               </CardContent>
@@ -376,7 +427,9 @@ export default function ProfilePage() {
           <Card>
             <CardHeader className="bg-primary-50 border-b border-primary-100">
               <CardTitle className="text-lg">Aktivitas Terbaru</CardTitle>
-              <CardDescription>Riwayat aktivitas terbaru Anda di sistem</CardDescription>
+              <CardDescription>
+                Riwayat aktivitas terbaru Anda di sistem
+              </CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="space-y-4">
@@ -400,7 +453,9 @@ export default function ProfilePage() {
               </div>
             </CardContent>
             <CardFooter className="border-t border-primary-100 bg-primary-50/50 p-3 flex justify-center">
-              <p className="text-sm text-muted-foreground">Fitur aktivitas terbaru akan segera tersedia</p>
+              <p className="text-sm text-muted-foreground">
+                Fitur aktivitas terbaru akan segera tersedia
+              </p>
             </CardFooter>
           </Card>
         </TabsContent>
@@ -424,7 +479,12 @@ export default function ProfilePage() {
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="new-password">Password Baru</Label>
-                  <Input id="new-password" name="new-password" type="password" placeholder="Masukkan password baru" />
+                  <Input
+                    id="new-password"
+                    name="new-password"
+                    type="password"
+                    placeholder="Masukkan password baru"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="confirm-password">Konfirmasi Password</Label>
@@ -436,8 +496,14 @@ export default function ProfilePage() {
                   />
                 </div>
                 <div className="pt-2">
-                  <Button type="submit" className="bg-primary hover:bg-primary-600" disabled={isLoading}>
-                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                  <Button
+                    type="submit"
+                    className="bg-primary hover:bg-primary-600"
+                    disabled={isLoading}
+                  >
+                    {isLoading && (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    )}
                     Ubah Password
                   </Button>
                 </div>
@@ -448,7 +514,9 @@ export default function ProfilePage() {
           <Card>
             <CardHeader className="bg-primary-50 border-b border-primary-100">
               <CardTitle className="text-lg">Pengaturan Keamanan</CardTitle>
-              <CardDescription>Kelola pengaturan keamanan akun Anda</CardDescription>
+              <CardDescription>
+                Kelola pengaturan keamanan akun Anda
+              </CardDescription>
             </CardHeader>
             <CardContent className="pt-6">
               <div className="space-y-4">
@@ -459,36 +527,54 @@ export default function ProfilePage() {
                       Tingkatkan keamanan akun dengan autentikasi dua faktor
                     </p>
                   </div>
-                  <Button variant="outline" className="border-primary-200 text-primary hover:bg-primary-50" disabled>
+                  <Button
+                    variant="outline"
+                    className="border-primary-200 text-primary hover:bg-primary-50"
+                    disabled
+                  >
                     Aktifkan
                   </Button>
                 </div>
                 <div className="flex items-center justify-between border-b border-muted pb-4">
                   <div>
                     <h4 className="font-medium">Sesi Aktif</h4>
-                    <p className="text-sm text-muted-foreground">Kelola perangkat yang saat ini login ke akun Anda</p>
+                    <p className="text-sm text-muted-foreground">
+                      Kelola perangkat yang saat ini login ke akun Anda
+                    </p>
                   </div>
-                  <Button variant="outline" className="border-primary-200 text-primary hover:bg-primary-50" disabled>
+                  <Button
+                    variant="outline"
+                    className="border-primary-200 text-primary hover:bg-primary-50"
+                    disabled
+                  >
                     Kelola
                   </Button>
                 </div>
                 <div className="flex items-center justify-between">
                   <div>
                     <h4 className="font-medium">Riwayat Login</h4>
-                    <p className="text-sm text-muted-foreground">Lihat riwayat login ke akun Anda</p>
+                    <p className="text-sm text-muted-foreground">
+                      Lihat riwayat login ke akun Anda
+                    </p>
                   </div>
-                  <Button variant="outline" className="border-primary-200 text-primary hover:bg-primary-50" disabled>
+                  <Button
+                    variant="outline"
+                    className="border-primary-200 text-primary hover:bg-primary-50"
+                    disabled
+                  >
                     Lihat
                   </Button>
                 </div>
               </div>
             </CardContent>
             <CardFooter className="border-t border-primary-100 bg-primary-50/50 p-3 flex justify-center">
-              <p className="text-sm text-muted-foreground">Fitur keamanan lanjutan akan segera tersedia</p>
+              <p className="text-sm text-muted-foreground">
+                Fitur keamanan lanjutan akan segera tersedia
+              </p>
             </CardFooter>
           </Card>
         </TabsContent>
       </Tabs>
     </div>
-  )
+  );
 }

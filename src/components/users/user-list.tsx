@@ -1,17 +1,39 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { useUsers } from "@/hooks/use-users"
-import { useDebounce } from "@/hooks/use-debounce"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Badge } from "@/components/ui/badge"
-import { LoadingSpinner } from "@/components/ui/loading-spinner"
-import { PlusCircle, Search, Filter, AlertCircle, User, Mail, Building, Briefcase } from 'lucide-react'
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import { motion, Variants } from "framer-motion";
+import { useUsers } from "@/hooks/use-users";
+import { useDebounce } from "@/hooks/use-debounce";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Badge } from "@/components/ui/badge";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import {
+  PlusCircle,
+  Search,
+  Filter,
+  AlertCircle,
+  User,
+  Mail,
+  Building,
+  Briefcase,
+} from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -19,8 +41,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { UserForm } from "./user-form"
+} from "@/components/ui/dialog";
+import { UserForm } from "./user-form";
 
 // Animation variants
 const containerVariants = {
@@ -32,9 +54,9 @@ const containerVariants = {
       staggerChildren: 0.05,
     },
   },
-}
+};
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { y: 20, opacity: 0 },
   visible: {
     y: 0,
@@ -45,18 +67,19 @@ const itemVariants = {
       damping: 24,
     },
   },
-}
+};
 
 export function UserList() {
-  const { users, isLoading, isError, error, filters, updateFilters } = useUsers()
-  const [searchTerm, setSearchTerm] = useState(filters.search)
-  const debouncedSearchTerm = useDebounce(searchTerm, 500)
-  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false)
+  const { users, isLoading, isError, error, filters, updateFilters } =
+    useUsers();
+  const [searchTerm, setSearchTerm] = useState(filters.search);
+  const debouncedSearchTerm = useDebounce(searchTerm, 500);
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
   // Update search filter when debounced search term changes
-  useState(() => {
-    updateFilters({ search: debouncedSearchTerm })
-  }, [debouncedSearchTerm, updateFilters])
+  useEffect(() => {
+    updateFilters({ search: debouncedSearchTerm });
+  }, [debouncedSearchTerm, updateFilters]);
 
   // Get role badge color
   const getRoleBadgeColor = (role: string) => {
@@ -65,12 +88,12 @@ export function UserList() {
       dosen: "bg-green-100 text-green-800",
       admin: "bg-purple-100 text-purple-800",
       executive: "bg-amber-100 text-amber-800",
-    }
-    return roleColors[role] || "bg-gray-100 text-gray-800"
-  }
+    };
+    return roleColors[role] || "bg-gray-100 text-gray-800";
+  };
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return <LoadingSpinner />;
   }
 
   if (isError) {
@@ -79,10 +102,12 @@ export function UserList() {
         <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
         <h3 className="mt-2 text-lg font-medium">Gagal memuat data</h3>
         <p className="text-sm text-muted-foreground">
-          {error instanceof Error ? error.message : "Terjadi kesalahan saat memuat data pengguna."}
+          {error instanceof Error
+            ? error.message
+            : "Terjadi kesalahan saat memuat data pengguna."}
         </p>
       </div>
-    )
+    );
   }
 
   return (
@@ -106,7 +131,10 @@ export function UserList() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <Select value={filters.role} onValueChange={(value) => updateFilters({ role: value })}>
+          <Select
+            value={filters.role}
+            onValueChange={(value) => updateFilters({ role: value })}
+          >
             <SelectTrigger className="h-9 w-[130px]">
               <SelectValue placeholder="Role" />
             </SelectTrigger>
@@ -119,7 +147,10 @@ export function UserList() {
             </SelectContent>
           </Select>
 
-          <Select value={filters.department} onValueChange={(value) => updateFilters({ department: value })}>
+          <Select
+            value={filters.department}
+            onValueChange={(value) => updateFilters({ department: value })}
+          >
             <SelectTrigger className="h-9 w-[150px]">
               <SelectValue placeholder="Departemen" />
             </SelectTrigger>
@@ -133,7 +164,10 @@ export function UserList() {
             </SelectContent>
           </Select>
 
-          <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+          <Dialog
+            open={isCreateDialogOpen}
+            onOpenChange={setIsCreateDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button>
                 <PlusCircle className="mr-2 h-4 w-4" />
@@ -143,7 +177,9 @@ export function UserList() {
             <DialogContent className="sm:max-w-[600px]">
               <DialogHeader>
                 <DialogTitle>Tambah Pengguna Baru</DialogTitle>
-                <DialogDescription>Isi formulir berikut untuk menambahkan pengguna baru.</DialogDescription>
+                <DialogDescription>
+                  Isi formulir berikut untuk menambahkan pengguna baru.
+                </DialogDescription>
               </DialogHeader>
               <UserForm onSuccess={() => setIsCreateDialogOpen(false)} />
             </DialogContent>
@@ -164,8 +200,8 @@ export function UserList() {
             <Button
               className="mt-4"
               onClick={() => {
-                updateFilters({ role: "all", department: "all", search: "" })
-                setSearchTerm("")
+                updateFilters({ role: "all", department: "all", search: "" });
+                setSearchTerm("");
               }}
             >
               Reset Filter
@@ -173,19 +209,33 @@ export function UserList() {
           </CardContent>
         </Card>
       ) : (
-        <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-4">
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="space-y-4"
+        >
           {users.map((user) => (
             <motion.div key={user.id} variants={itemVariants}>
               <Card>
                 <CardHeader className="pb-2">
                   <div className="flex items-center justify-between">
-                    <Link href={`/users/${user.id}`} className="hover:underline">
+                    <Link
+                      href={`/users/${user.id}`}
+                      className="hover:underline"
+                    >
                       <CardTitle className="text-base">{user.name}</CardTitle>
                     </Link>
-                    <Badge className={getRoleBadgeColor(user.role)}>{user.role}</Badge>
+                    <Badge className={getRoleBadgeColor(user.role)}>
+                      {user.role}
+                    </Badge>
                   </div>
                   <CardDescription>
-                    {user.nim ? `NIM: ${user.nim}` : user.nip ? `NIP: ${user.nip}` : ""}
+                    {user.nim
+                      ? `NIM: ${user.nim}`
+                      : user.nip
+                      ? `NIP: ${user.nip}`
+                      : ""}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="pb-2">
@@ -206,7 +256,9 @@ export function UserList() {
                     )}
                     {user.programStudi && (
                       <div className="flex items-center">
-                        <span className="text-muted-foreground">Program Studi:</span>
+                        <span className="text-muted-foreground">
+                          Program Studi:
+                        </span>
                         <span className="ml-2">{user.programStudi}</span>
                       </div>
                     )}
@@ -223,5 +275,5 @@ export function UserList() {
         </motion.div>
       )}
     </div>
-  )
+  );
 }

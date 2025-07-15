@@ -1,21 +1,41 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import Link from "next/link"
-import { motion } from "framer-motion"
-import { useQuery } from "@tanstack/react-query"
-import { ApiService } from "@/lib/api"
-import { useAuth } from "@/hooks/use-auth"
-import { PageTitle } from "@/components/ui/page-title"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { LoadingSpinner } from "@/components/ui/loading-spinner"
-import { Progress } from "@/components/ui/progress"
-import { formatDate, getTicketStatusColor, getTicketPriorityColor, getSLAStatusColor } from "@/lib/utils"
-import { Badge } from "@/components/ui/badge"
-import { PlusCircle, Clock, CheckCircle, AlertCircle, BarChart3, FileText, AlertTriangle } from 'lucide-react'
-import type { Ticket } from "@/types"
+import { useState } from "react";
+import Link from "next/link";
+import { motion, Variants } from "framer-motion";
+import { useQuery } from "@tanstack/react-query";
+import { ApiService } from "@/lib/api";
+import { PageTitle } from "@/components/ui/page-title";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { Progress } from "@/components/ui/progress";
+import {
+  formatDate,
+  getTicketStatusColor,
+  getTicketPriorityColor,
+  getSLAStatusColor,
+} from "@/lib/utils";
+import { Badge } from "@/components/ui/badge";
+import {
+  PlusCircle,
+  Clock,
+  CheckCircle,
+  AlertCircle,
+  BarChart3,
+  FileText,
+  AlertTriangle,
+} from "lucide-react";
+import type { Ticket } from "@/types";
+import { useSession } from "@/context/SessionContext";
 
 // Animation variants
 const containerVariants = {
@@ -27,9 +47,9 @@ const containerVariants = {
       staggerChildren: 0.1,
     },
   },
-}
+};
 
-const itemVariants = {
+const itemVariants: Variants = {
   hidden: { y: 20, opacity: 0 },
   visible: {
     y: 0,
@@ -40,11 +60,11 @@ const itemVariants = {
       damping: 24,
     },
   },
-}
+};
 
 export function DosenDashboard() {
-  const { user } = useAuth()
-  const [activeTab, setActiveTab] = useState("assigned")
+  const { user } = useSession();
+  const [activeTab, setActiveTab] = useState("assigned");
 
   const {
     data: assignedTickets = [],
@@ -53,8 +73,8 @@ export function DosenDashboard() {
   } = useQuery<Ticket[]>({
     queryKey: ["tickets", "assigned"],
     queryFn: () => ApiService.getAssignedTickets(),
-  })
-  
+  });
+
   const {
     data: myTickets = [],
     isLoading: isLoadingMy,
@@ -62,26 +82,41 @@ export function DosenDashboard() {
   } = useQuery<Ticket[]>({
     queryKey: ["tickets", "my"],
     queryFn: () => ApiService.getMyTickets(),
-  })
+  });
   // Filter tickets based on active tab
-  const displayedTickets = activeTab === "assigned" ? assignedTickets : myTickets
+  const displayedTickets =
+    activeTab === "assigned" ? assignedTickets : myTickets;
 
   // Count tickets by status for assigned tickets
-  const pendingCount = assignedTickets.filter((ticket) => ticket.status === "pending").length
-  const inProgressCount = assignedTickets.filter((ticket) => ticket.status === "in-progress").length
-  const completedCount = assignedTickets.filter((ticket) => ticket.status === "completed").length
-  const atRiskCount = assignedTickets.filter((ticket) => ticket.slaStatus === "at-risk").length
+  const pendingCount = assignedTickets.filter(
+    (ticket) => ticket.status === "pending"
+  ).length;
+  const inProgressCount = assignedTickets.filter(
+    (ticket) => ticket.status === "in-progress"
+  ).length;
+  const completedCount = assignedTickets.filter(
+    (ticket) => ticket.status === "completed"
+  ).length;
+  const atRiskCount = assignedTickets.filter(
+    (ticket) => ticket.slaStatus === "at-risk"
+  ).length;
 
   // Count tickets by SLA status
-  const onTimeCount = assignedTickets.filter((ticket) => ticket.slaStatus === "on-time").length
-  const atRiskSLACount = assignedTickets.filter((ticket) => ticket.slaStatus === "at-risk").length
-  const breachedCount = assignedTickets.filter((ticket) => ticket.slaStatus === "breached").length
+  const onTimeCount = assignedTickets.filter(
+    (ticket) => ticket.slaStatus === "on-time"
+  ).length;
+  const atRiskSLACount = assignedTickets.filter(
+    (ticket) => ticket.slaStatus === "at-risk"
+  ).length;
+  const breachedCount = assignedTickets.filter(
+    (ticket) => ticket.slaStatus === "breached"
+  ).length;
 
-  const isLoading = isLoadingAssigned || isLoadingMy
-  const isError = isErrorAssigned || isErrorMy
+  const isLoading = isLoadingAssigned || isLoadingMy;
+  const isError = isErrorAssigned || isErrorMy;
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return <LoadingSpinner />;
   }
 
   if (isError) {
@@ -89,13 +124,20 @@ export function DosenDashboard() {
       <div className="text-center">
         <AlertCircle className="mx-auto h-12 w-12 text-red-500" />
         <h3 className="mt-2 text-lg font-medium">Gagal memuat data</h3>
-        <p className="text-sm text-muted-foreground">Terjadi kesalahan saat memuat tiket.</p>
+        <p className="text-sm text-muted-foreground">
+          Terjadi kesalahan saat memuat tiket.
+        </p>
       </div>
-    )
+    );
   }
 
   return (
-    <motion.div variants={containerVariants} initial="hidden" animate="visible" className="space-y-6">
+    <motion.div
+      variants={containerVariants}
+      initial="hidden"
+      animate="visible"
+      className="space-y-6"
+    >
       <PageTitle
         title={`Selamat datang, ${user?.name}!`}
         description="Pantau dan kelola tiket yang ditugaskan kepada Anda."
@@ -109,7 +151,9 @@ export function DosenDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{pendingCount}</div>
-            <p className="text-xs text-muted-foreground">Tiket yang menunggu tindakan</p>
+            <p className="text-xs text-muted-foreground">
+              Tiket yang menunggu tindakan
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -119,7 +163,9 @@ export function DosenDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{inProgressCount}</div>
-            <p className="text-xs text-muted-foreground">Tiket yang sedang diproses</p>
+            <p className="text-xs text-muted-foreground">
+              Tiket yang sedang diproses
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -129,7 +175,9 @@ export function DosenDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{completedCount}</div>
-            <p className="text-xs text-muted-foreground">Tiket yang telah diselesaikan</p>
+            <p className="text-xs text-muted-foreground">
+              Tiket yang telah diselesaikan
+            </p>
           </CardContent>
         </Card>
         <Card>
@@ -139,7 +187,9 @@ export function DosenDashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{atRiskCount}</div>
-            <p className="text-xs text-muted-foreground">Tiket yang berisiko melewati SLA</p>
+            <p className="text-xs text-muted-foreground">
+              Tiket yang berisiko melewati SLA
+            </p>
           </CardContent>
         </Card>
       </motion.div>
@@ -155,17 +205,26 @@ export function DosenDashboard() {
                 <span className="text-xs">Tepat Waktu</span>
                 <span className="text-xs font-medium">{onTimeCount}</span>
               </div>
-              <Progress value={(onTimeCount / assignedTickets.length) * 100 || 0} className="h-2 bg-green-100" />
+              <Progress
+                value={(onTimeCount / assignedTickets.length) * 100 || 0}
+                className="h-2 bg-green-100"
+              />
               <div className="flex items-center justify-between">
                 <span className="text-xs">Berisiko</span>
                 <span className="text-xs font-medium">{atRiskSLACount}</span>
               </div>
-              <Progress value={(atRiskSLACount / assignedTickets.length) * 100 || 0} className="h-2 bg-yellow-100" />
+              <Progress
+                value={(atRiskSLACount / assignedTickets.length) * 100 || 0}
+                className="h-2 bg-yellow-100"
+              />
               <div className="flex items-center justify-between">
                 <span className="text-xs">Terlambat</span>
                 <span className="text-xs font-medium">{breachedCount}</span>
               </div>
-              <Progress value={(breachedCount / assignedTickets.length) * 100 || 0} className="h-2 bg-red-100" />
+              <Progress
+                value={(breachedCount / assignedTickets.length) * 100 || 0}
+                className="h-2 bg-red-100"
+              />
             </div>
           </CardContent>
         </Card>
@@ -178,14 +237,22 @@ export function DosenDashboard() {
             {assignedTickets.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-6">
                 <FileText className="h-8 w-8 text-muted-foreground" />
-                <p className="mt-2 text-sm text-muted-foreground">Tidak ada tiket yang ditugaskan</p>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  Tidak ada tiket yang ditugaskan
+                </p>
               </div>
             ) : (
               <div className="space-y-4">
                 {assignedTickets.slice(0, 3).map((ticket) => (
-                  <div key={ticket.id} className="flex items-center justify-between">
+                  <div
+                    key={ticket.id}
+                    className="flex items-center justify-between"
+                  >
                     <div className="space-y-1">
-                      <Link href={`/tickets/${ticket.id}`} className="font-medium hover:underline">
+                      <Link
+                        href={`/tickets/${ticket.id}`}
+                        className="font-medium hover:underline"
+                      >
                         {ticket.subject}
                       </Link>
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
@@ -195,8 +262,14 @@ export function DosenDashboard() {
                       </div>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Badge className={getTicketStatusColor(ticket.status)}>{ticket.status}</Badge>
-                      {ticket.slaStatus && <Badge className={getSLAStatusColor(ticket.slaStatus)}>{ticket.slaStatus}</Badge>}
+                      <Badge className={getTicketStatusColor(ticket.status)}>
+                        {ticket.status}
+                      </Badge>
+                      {ticket.slaStatus && (
+                        <Badge className={getSLAStatusColor(ticket.slaStatus)}>
+                          {ticket.slaStatus}
+                        </Badge>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -262,14 +335,33 @@ export function DosenDashboard() {
                     <Card>
                       <CardHeader className="pb-2">
                         <div className="flex items-center justify-between">
-                          <Link href={`/tickets/${ticket.id}`} className="hover:underline">
-                            <CardTitle className="text-base">{ticket.subject}</CardTitle>
+                          <Link
+                            href={`/tickets/${ticket.id}`}
+                            className="hover:underline"
+                          >
+                            <CardTitle className="text-base">
+                              {ticket.subject}
+                            </CardTitle>
                           </Link>
                           <div className="flex gap-2">
-                            <Badge className={getTicketStatusColor(ticket.status)}>{ticket.status}</Badge>
-                            <Badge className={getTicketPriorityColor(ticket.priority)}>{ticket.priority}</Badge>
+                            <Badge
+                              className={getTicketStatusColor(ticket.status)}
+                            >
+                              {ticket.status}
+                            </Badge>
+                            <Badge
+                              className={getTicketPriorityColor(
+                                ticket.priority
+                              )}
+                            >
+                              {ticket.priority}
+                            </Badge>
                             {ticket.slaStatus && (
-                              <Badge className={getSLAStatusColor(ticket.slaStatus)}>{ticket.slaStatus}</Badge>
+                              <Badge
+                                className={getSLAStatusColor(ticket.slaStatus)}
+                              >
+                                {ticket.slaStatus}
+                              </Badge>
                             )}
                           </div>
                         </div>
@@ -279,24 +371,33 @@ export function DosenDashboard() {
                         </CardDescription>
                       </CardHeader>
                       <CardContent className="pb-2">
-                        <p className="line-clamp-2 text-sm text-muted-foreground">{ticket.description}</p>
+                        <p className="line-clamp-2 text-sm text-muted-foreground">
+                          {ticket.description}
+                        </p>
                         {ticket.progress > 0 && (
                           <div className="mt-2">
                             <div className="flex items-center justify-between text-xs">
                               <span>Progress</span>
                               <span>{ticket.progress}%</span>
                             </div>
-                            <Progress value={ticket.progress} className="h-2 mt-1" />
+                            <Progress
+                              value={ticket.progress}
+                              className="h-2 mt-1"
+                            />
                           </div>
                         )}
                       </CardContent>
                       <CardFooter className="flex items-center justify-between pt-0">
                         <p className="text-xs text-muted-foreground">
-                          {ticket.creator?.name ? `Dari: ${ticket.creator.name} • ` : ""}
+                          {ticket.creator?.name
+                            ? `Dari: ${ticket.creator.name} • `
+                            : ""}
                           {formatDate(ticket.createdAt, "dd MMM yyyy")}
                         </p>
                         <Button variant="ghost" size="sm" asChild>
-                          <Link href={`/tickets/${ticket.id}`}>Lihat Detail</Link>
+                          <Link href={`/tickets/${ticket.id}`}>
+                            Lihat Detail
+                          </Link>
                         </Button>
                       </CardFooter>
                     </Card>
@@ -308,5 +409,5 @@ export function DosenDashboard() {
         </Tabs>
       </motion.div>
     </motion.div>
-  )
+  );
 }

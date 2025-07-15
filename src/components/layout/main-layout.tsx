@@ -2,7 +2,6 @@
 
 import { ReactNode, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { useAuth } from "@/hooks/use-auth";
 import { Sidebar } from "./app-sidebar";
 import { Navbar } from "./navbar";
 import { MobileNav } from "./mobile-nav";
@@ -10,6 +9,8 @@ import { useMobile } from "@/hooks/use-mobile";
 import { ToastProvider } from "@/providers/toast-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { motion, AnimatePresence } from "framer-motion";
+import { useSession } from "@/context/SessionContext";
+import { LoadingSpinner } from "../ui/loading-spinner";
 
 type MainLayoutProps = {
   children: ReactNode;
@@ -18,32 +19,18 @@ type MainLayoutProps = {
 export function MainLayout({ children }: MainLayoutProps) {
   const { isMobile } = useMobile();
   const pathname = usePathname();
-  const { userRole } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
+  const { user, isLoading } = useSession();
 
   // Load sidebar preference on mount and check for mobile
   useEffect(() => {
-    const checkSidebarState = () => {
-      const savedState = localStorage.getItem("sidebar-state");
-
-      // Default to closed on mobile, use saved state or default to open on desktop
-      if (window.innerWidth < 768) {
-        setSidebarOpen(false);
-        setMobileSidebarOpen(false);
-      } else {
-        setSidebarOpen(savedState ? savedState === "open" : true);
-      }
-    };
-
-    // Check on mount
-    checkSidebarState();
-
-    // Listen for window resize events
-    window.addEventListener("resize", checkSidebarState);
-
-    // Clean up
-    return () => window.removeEventListener("resize", checkSidebarState);
+    const savedState = localStorage.getItem("sidebar-state");
+    if (window.innerWidth >= 768) {
+      setSidebarOpen(savedState ? savedState === "open" : true);
+    } else {
+      setSidebarOpen(false);
+    }
   }, []);
 
   // Function to toggle sidebar on desktop
@@ -72,6 +59,12 @@ export function MainLayout({ children }: MainLayoutProps) {
     animate: { opacity: 1, y: 0 },
     exit: { opacity: 0, y: -8 },
   };
+
+  const userRole = user?.role;
+
+  if (isLoading) {
+    return <LoadingSpinner />;
+  }
 
   return (
     <TooltipProvider>

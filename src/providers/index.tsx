@@ -1,20 +1,12 @@
-"use client"
+"use client";
 
-import type { ReactNode } from "react"
-import { AuthProvider } from "./auth-provider"
-import { QueryProvider } from "./query-provider"
-
+import type { ReactNode } from "react";
+import { QueryProvider } from "./query-provider";
 
 interface ProvidersProps {
-  children: ReactNode
+  children: ReactNode;
 }
 
 export function Providers({ children }: ProvidersProps) {
-  return (
-    <AuthProvider>
-      <QueryProvider>
-          {children}
-      </QueryProvider>
-    </AuthProvider>
-  )
+  return <QueryProvider>{children}</QueryProvider>;
 }

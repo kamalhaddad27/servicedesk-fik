@@ -1,17 +1,34 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { motion } from "framer-motion"
-import { useUsers } from "@/hooks/use-users"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { LoadingSpinner } from "@/components/ui/loading-spinner"
-import { UserForm } from "./user-form"
-import { AlertCircle, ArrowLeft, Mail, Building, Briefcase, User, Calendar, School, GraduationCap } from 'lucide-react'
-import { Alert, AlertDescription } from "@/components/ui/alert"
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { motion } from "framer-motion";
+import { useUsers } from "@/hooks/use-users";
+import { Button } from "@/components/ui/button";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
+import { UserForm } from "./user-form";
+import {
+  AlertCircle,
+  ArrowLeft,
+  Mail,
+  Building,
+  Briefcase,
+  User,
+  Calendar,
+  School,
+  GraduationCap,
+} from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import {
   Dialog,
   DialogContent,
@@ -20,21 +37,21 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
+} from "@/components/ui/dialog";
 
 interface UserDetailProps {
-  userId: number
+  userId: number;
 }
 
 export function UserDetail({ userId }: UserDetailProps) {
-  const router = useRouter()
-  const { useUserDetail, deleteUser } = useUsers()
-  const [activeTab, setActiveTab] = useState("profile")
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
-  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false)
+  const router = useRouter();
+  const { useUserDetail, deleteUser } = useUsers();
+  const [activeTab, setActiveTab] = useState("profile");
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   // Fetch user details
-  const { data: user, isLoading, isError, error } = useUserDetail(userId)
+  const { data: user, isLoading, isError, error } = useUserDetail(userId);
 
   // Get role badge color
   const getRoleBadgeColor = (role: string) => {
@@ -43,23 +60,23 @@ export function UserDetail({ userId }: UserDetailProps) {
       dosen: "bg-green-100 text-green-800",
       admin: "bg-purple-100 text-purple-800",
       executive: "bg-amber-100 text-amber-800",
-    }
-    return roleColors[role] || "bg-gray-100 text-gray-800"
-  }
+    };
+    return roleColors[role] || "bg-gray-100 text-gray-800";
+  };
 
   // Handle delete user
   const handleDeleteUser = async () => {
     try {
-      await deleteUser.mutateAsync(userId)
-      setIsDeleteDialogOpen(false)
-      router.push("/users")
+      await deleteUser.mutateAsync(userId);
+      setIsDeleteDialogOpen(false);
+      router.push("/users");
     } catch (error) {
-      console.error("Error deleting user:", error)
+      console.error("Error deleting user:", error);
     }
-  }
+  };
 
   if (isLoading) {
-    return <LoadingSpinner />
+    return <LoadingSpinner />;
   }
 
   if (isError || !user) {
@@ -67,14 +84,21 @@ export function UserDetail({ userId }: UserDetailProps) {
       <Alert variant="destructive">
         <AlertCircle className="h-4 w-4" />
         <AlertDescription>
-          {error instanceof Error ? error.message : "Gagal memuat detail pengguna. Silakan coba lagi nanti."}
+          {error instanceof Error
+            ? error.message
+            : "Gagal memuat detail pengguna. Silakan coba lagi nanti."}
         </AlertDescription>
       </Alert>
-    )
+    );
   }
 
   return (
-    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.3 }} className="space-y-6">
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="space-y-6"
+    >
       <div className="flex items-center justify-between">
         <Button variant="ghost" size="sm" onClick={() => router.back()}>
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -89,13 +113,21 @@ export function UserDetail({ userId }: UserDetailProps) {
             <DialogContent className="sm:max-w-[600px]">
               <DialogHeader>
                 <DialogTitle>Edit Pengguna</DialogTitle>
-                <DialogDescription>Perbarui informasi pengguna.</DialogDescription>
+                <DialogDescription>
+                  Perbarui informasi pengguna.
+                </DialogDescription>
               </DialogHeader>
-              <UserForm user={user} onSuccess={() => setIsEditDialogOpen(false)} />
+              <UserForm
+                user={user}
+                onSuccess={() => setIsEditDialogOpen(false)}
+              />
             </DialogContent>
           </Dialog>
 
-          <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <Dialog
+            open={isDeleteDialogOpen}
+            onOpenChange={setIsDeleteDialogOpen}
+          >
             <DialogTrigger asChild>
               <Button variant="destructive">Hapus</Button>
             </DialogTrigger>
@@ -103,14 +135,22 @@ export function UserDetail({ userId }: UserDetailProps) {
               <DialogHeader>
                 <DialogTitle>Hapus Pengguna</DialogTitle>
                 <DialogDescription>
-                  Apakah Anda yakin ingin menghapus pengguna ini? Tindakan ini tidak dapat dibatalkan.
+                  Apakah Anda yakin ingin menghapus pengguna ini? Tindakan ini
+                  tidak dapat dibatalkan.
                 </DialogDescription>
               </DialogHeader>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+                <Button
+                  variant="outline"
+                  onClick={() => setIsDeleteDialogOpen(false)}
+                >
                   Batal
                 </Button>
-                <Button variant="destructive" onClick={handleDeleteUser} disabled={deleteUser.isPending}>
+                <Button
+                  variant="destructive"
+                  onClick={handleDeleteUser}
+                  disabled={deleteUser.isPending}
+                >
                   {deleteUser.isPending ? "Menghapus..." : "Hapus Pengguna"}
                 </Button>
               </DialogFooter>
@@ -127,10 +167,16 @@ export function UserDetail({ userId }: UserDetailProps) {
                 <div>
                   <CardTitle className="text-xl">{user.name}</CardTitle>
                   <CardDescription>
-                    {user.nim ? `NIM: ${user.nim}` : user.nip ? `NIP: ${user.nip}` : ""}
+                    {user.nim
+                      ? `NIM: ${user.nim}`
+                      : user.nip
+                      ? `NIP: ${user.nip}`
+                      : ""}
                   </CardDescription>
                 </div>
-                <Badge className={getRoleBadgeColor(user.role)}>{user.role}</Badge>
+                <Badge className={getRoleBadgeColor(user.role)}>
+                  {user.role}
+                </Badge>
               </div>
             </CardHeader>
             <CardContent>
@@ -153,7 +199,9 @@ export function UserDetail({ userId }: UserDetailProps) {
                     </div>
 
                     <div>
-                      <h3 className="text-sm font-medium">Departemen & Jabatan</h3>
+                      <h3 className="text-sm font-medium">
+                        Departemen & Jabatan
+                      </h3>
                       <div className="mt-2 space-y-2">
                         <div className="flex items-center">
                           <Building className="mr-2 h-4 w-4 text-muted-foreground" />
@@ -168,22 +216,30 @@ export function UserDetail({ userId }: UserDetailProps) {
                       </div>
                     </div>
 
-                    {user.role === "mahasiswa" && (
+                    {user.role === "user" && (
                       <>
                         <div>
-                          <h3 className="text-sm font-medium">Informasi Akademik</h3>
+                          <h3 className="text-sm font-medium">
+                            Informasi Akademik
+                          </h3>
                           <div className="mt-2 space-y-2">
                             <div className="flex items-center">
                               <School className="mr-2 h-4 w-4 text-muted-foreground" />
-                              <span className="text-sm">{user.programStudi || "-"}</span>
+                              <span className="text-sm">
+                                {user.programStudi || "-"}
+                              </span>
                             </div>
                             <div className="flex items-center">
                               <GraduationCap className="mr-2 h-4 w-4 text-muted-foreground" />
-                              <span className="text-sm">{user.fakultas || "-"}</span>
+                              <span className="text-sm">
+                                {user.fakultas || "-"}
+                              </span>
                             </div>
                             <div className="flex items-center">
                               <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-                              <span className="text-sm">Angkatan {user.angkatan || "-"}</span>
+                              <span className="text-sm">
+                                Angkatan {user.angkatan || "-"}
+                              </span>
                             </div>
                           </div>
                         </div>
@@ -195,7 +251,8 @@ export function UserDetail({ userId }: UserDetailProps) {
                   <div className="mt-4">
                     <h3 className="text-sm font-medium">Tiket Terkait</h3>
                     <p className="mt-2 text-sm text-muted-foreground">
-                      Daftar tiket yang dibuat atau ditangani oleh pengguna ini akan ditampilkan di sini.
+                      Daftar tiket yang dibuat atau ditangani oleh pengguna ini
+                      akan ditampilkan di sini.
                     </p>
                   </div>
                 </TabsContent>
@@ -215,7 +272,9 @@ export function UserDetail({ userId }: UserDetailProps) {
         <div>
           <Card>
             <CardHeader>
-              <CardTitle className="text-sm font-medium">Informasi Pengguna</CardTitle>
+              <CardTitle className="text-sm font-medium">
+                Informasi Pengguna
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex flex-col items-center">
@@ -223,21 +282,29 @@ export function UserDetail({ userId }: UserDetailProps) {
                   <User className="h-10 w-10 text-muted-foreground" />
                 </div>
                 <h3 className="mt-2 text-lg font-medium">{user.name}</h3>
-                <Badge className={`mt-1 ${getRoleBadgeColor(user.role)}`}>{user.role}</Badge>
+                <Badge className={`mt-1 ${getRoleBadgeColor(user.role)}`}>
+                  {user.role}
+                </Badge>
               </div>
 
               <div>
-                <h3 className="text-xs font-medium text-muted-foreground">ID Pengguna</h3>
+                <h3 className="text-xs font-medium text-muted-foreground">
+                  ID Pengguna
+                </h3>
                 <p className="mt-1 text-sm">{user.id}</p>
               </div>
 
               <div>
-                <h3 className="text-xs font-medium text-muted-foreground">Status</h3>
+                <h3 className="text-xs font-medium text-muted-foreground">
+                  Status
+                </h3>
                 <p className="mt-1 text-sm">{user.status || "Aktif"}</p>
               </div>
 
               <div>
-                <h3 className="text-xs font-medium text-muted-foreground">Aktivitas</h3>
+                <h3 className="text-xs font-medium text-muted-foreground">
+                  Aktivitas
+                </h3>
                 <div className="mt-1 space-y-2 text-sm">
                   <div className="flex items-center justify-between">
                     <span>Tiket Dibuat</span>
@@ -263,5 +330,5 @@ export function UserDetail({ userId }: UserDetailProps) {
         </div>
       </div>
     </motion.div>
-  )
+  );
 }
