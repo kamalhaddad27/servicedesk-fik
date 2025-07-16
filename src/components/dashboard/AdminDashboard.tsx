@@ -228,7 +228,7 @@ export function AdminDashboard({ stats }: { stats: IAdminDashboard }) {
                 Belum ada tiket
               </div>
             ) : (
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {stats.recentTickets.map((ticket) => (
                   <div
                     key={ticket.id}
@@ -254,6 +254,11 @@ export function AdminDashboard({ stats }: { stats: IAdminDashboard }) {
                     <div className="flex items-center gap-2">
                       <Badge className={getTicketStatusColor(ticket.status)}>
                         {ticket.status}
+                      </Badge>
+                      <Badge
+                        className={getTicketPriorityColor(ticket.priority)}
+                      >
+                        {ticket.priority}
                       </Badge>
                     </div>
                   </div>

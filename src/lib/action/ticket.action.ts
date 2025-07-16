@@ -1,93 +1,90 @@
-// lib/actions/ticket.actions.ts
 "use server";
 
 import prisma from "@/lib/prisma";
-import { Prisma, StatusTicket, PriorityTicket } from "@prisma/client";
+import { PriorityTicket, Prisma, StatusTicket } from "@prisma/client";
 import { getProfile } from "./user.action";
 
-// ACTION UNTUK MENGAMBIL DAFTAR TIKET (DENGAN FILTER & PAGINASI)
+// Definisikan interface untuk parameter yang diterima
 interface GetTicketsParams {
+  page?: number;
+  limit?: number;
   query?: string;
   status?: StatusTicket;
   priority?: PriorityTicket;
-  page?: number;
-  limit?: number;
 }
 
 export async function getTickets({
+  page = 1,
+  limit = 10, // Default 10 item per halaman
   query,
   status,
   priority,
-  page = 1,
-  limit = 10,
 }: GetTicketsParams) {
   try {
     const user = await getProfile();
-
     if (!user) {
       throw new Error("Anda harus login untuk melihat tiket.");
     }
 
     const skip = (page - 1) * limit;
 
-    // Objek 'where' dinamis berdasarkan filter dan peran pengguna
+    const filterConditions: Prisma.TicketWhereInput = {};
+    if (query) {
+      filterConditions.subject = { contains: query };
+    }
+    if (status) {
+      filterConditions.status = status;
+    }
+    if (priority) {
+      filterConditions.priority = priority;
+    }
+
     const where: Prisma.TicketWhereInput = {};
 
-    // 1. Terapkan filter berdasarkan pencarian (query)
-    if (query) {
-      where.OR = [
-        { subject: { contains: query } },
-        { description: { contains: query } },
-      ];
-    }
-
-    // 2. Terapkan filter status dan prioritas
-    if (status) where.status = status;
-    if (priority) where.priority = priority;
-
-    // 3. Terapkan filter berdasarkan peran (Role-Based Access Control)
     if (user.role === "user") {
-      // User hanya bisa melihat tiket yang mereka buat
-      where.userId = user.id;
+      where.AND = [filterConditions, { userId: user.id }];
     } else if (user.role === "staff") {
-      // Staf bisa melihat tiket yang ditugaskan kepada mereka ATAU yang belum ditugaskan
-      where.OR = [
-        ...(where.OR || []),
-        { assignedToId: user.id },
-        { assignedToId: null },
+      where.AND = [
+        filterConditions,
+        { OR: [{ assignedToId: user.id }, { assignedToId: null }] },
       ];
+    } else {
+      // Admin
+      Object.assign(where, filterConditions);
     }
-    // Admin tidak perlu filter tambahan, bisa melihat semua tiket
 
-    // Ambil data tiket dengan paginasi dan relasi
-    const tickets = await prisma.ticket.findMany({
-      where,
-      skip,
-      take: limit,
-      orderBy: {
-        createdAt: "desc",
-      },
-      include: {
-        user: { select: { name: true } }, // Pembuat tiket
-        assignedTo: { select: { name: true } }, // Yang ditugaskan
-      },
-    });
+    // 4. Gunakan $transaction untuk mengambil data dan total hitungan secara efisien
+    const [tickets, totalItems] = await prisma.$transaction([
+      prisma.ticket.findMany({
+        where,
+        skip,
+        take: limit,
+        orderBy: {
+          updatedAt: "desc",
+        },
+        include: {
+          user: { select: { name: true } },
+          assignedTo: { select: { name: true } },
+        },
+      }),
+      prisma.ticket.count({ where }),
+    ]);
 
-    // Hitung total tiket untuk paginasi
-    const totalTickets = await prisma.ticket.count({ where });
-    const totalPages = Math.ceil(totalTickets / limit);
+    // 5. Hitung total halaman
+    const totalPages = Math.ceil(totalItems / limit);
 
+    // 6. Kembalikan data beserta informasi paginasi
     return {
       data: tickets,
       totalPages,
+      totalItems,
     };
   } catch (error) {
     console.error("GET_TICKETS_ERROR:", error);
-    return { data: [], totalPages: 0 };
+    return { data: [], totalPages: 0, totalItems: 0 };
   }
 }
 
-// ACTION UNTUK MENGAMBIL DETAIL SATU TIKET
 export async function getTicketById(id: string) {
   try {
     const user = await getProfile();
@@ -103,15 +100,17 @@ export async function getTicketById(id: string) {
         message: {
           orderBy: { createdAt: "asc" },
           include: {
-            user: { select: { name: true, role: true } }, // Sertakan detail pengirim pesan
+            user: { select: { name: true, role: true } },
           },
         },
       },
     });
 
-    if (!ticket) return null;
+    if (!ticket) {
+      return null;
+    }
 
-    // Cek hak akses
+    // Cek hak akses untuk melihat tiket
     const isAdmin = user.role === "admin";
     const isCreator = ticket.userId === user.id;
     const isAssignedTo = ticket.assignedToId === user.id;
@@ -120,7 +119,7 @@ export async function getTicketById(id: string) {
       return ticket;
     }
 
-    // Jika tidak punya hak akses
+    // Jika tidak punya hak akses, kembalikan null
     return null;
   } catch (error) {
     console.error("GET_TICKET_BY_ID_ERROR:", error);

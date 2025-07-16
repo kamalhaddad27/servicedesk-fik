@@ -192,14 +192,14 @@ export default function SearchPage() {
                         </CardTitle>
                       </Link>
                       <div className="flex gap-2">
-                        <Badge className={getTicketStatusColor(ticket.status)}>
+                        {/* <Badge className={getTicketStatusColor(ticket.status)}>
                           {ticket.status}
                         </Badge>
                         <Badge
                           className={getTicketPriorityColor(ticket.priority)}
                         >
                           {ticket.priority}
-                        </Badge>
+                        </Badge> */}
                       </div>
                     </div>
                     <CardDescription>

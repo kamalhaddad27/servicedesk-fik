@@ -256,12 +256,12 @@ export function TicketDetail({ ticketId }: TicketDetailProps) {
                   </CardDescription>
                 </div>
                 <div className="flex gap-2">
-                  <Badge className={getTicketStatusColor(ticket.status)}>
+                  {/* <Badge className={getTicketStatusColor(ticket.status)}>
                     {ticket.status}
                   </Badge>
                   <Badge className={getTicketPriorityColor(ticket.priority)}>
                     {ticket.priority}
-                  </Badge>
+                  </Badge> */}
                   {ticket.slaStatus && (
                     <Badge className={getSLAStatusColor(ticket.slaStatus)}>
                       {ticket.slaStatus}

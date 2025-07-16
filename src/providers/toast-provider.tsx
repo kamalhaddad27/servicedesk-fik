@@ -1,19 +1,12 @@
-"use client"
+"use client";
 
-import { Toaster } from "sonner"
+import { Toaster } from "sonner";
 
 export function ToastProvider() {
   return (
-    <Toaster 
-      position="top-right" 
-      toastOptions={{
-        style: {
-          background: "hsl(var(--background))",
-          color: "hsl(var(--foreground))",
-          border: "1px solid hsl(var(--border))",
-        },
-        className: "text-sm",
-      }}
+    <Toaster
+      className="bg-white border shadow rounded-xl"
+      position="top-right"
     />
-  )
+  );
 }

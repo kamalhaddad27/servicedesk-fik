@@ -1,5 +1,4 @@
 import { PageTitle } from "@/components/ui/page-title";
-import { TicketList } from "@/components/tickets/ticket-list";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -14,7 +13,6 @@ export default function AssignedTicketsPage() {
         title="Tiket Ditugaskan"
         description="Lihat dan kelola tiket yang ditugaskan kepada Anda."
       />
-      <TicketList filter="assigned" />
     </div>
   );
 }
