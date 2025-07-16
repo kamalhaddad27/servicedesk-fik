@@ -166,7 +166,6 @@ export function AdminDashboard({ stats }: { stats: IAdminDashboard }) {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {/* Ganti ticketStats menjadi stats */}
               {stats?.ticketsByPriority.map((priorityItem) => (
                 <div key={priorityItem.priority} className="space-y-2">
                   <div className="flex items-center justify-between">

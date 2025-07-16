@@ -10,7 +10,6 @@ import { useForm } from "react-hook-form";
 import { loginSchema, TLoginSchema } from "@/lib/validator/auth";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { login } from "@/lib/action/auth.action";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 export function LoginForm() {
@@ -19,8 +18,6 @@ export function LoginForm() {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
-
-  const router = useRouter();
 
   const {
     register,
@@ -34,7 +31,7 @@ export function LoginForm() {
     const result = await login(data);
     if (result.success.status) {
       toast.success(result.success.message);
-      router.push("/dashboard");
+      window.location.href = "/dashboard";
     } else {
       toast.error(result.error.message);
     }

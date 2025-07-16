@@ -3,27 +3,35 @@ import { StaffDashboard } from "@/components/dashboard/StaffDashboard";
 import { AdminDashboard } from "@/components/dashboard/AdminDashboard";
 import { getProfile } from "@/lib/action/user.action";
 import { redirect } from "next/navigation";
-import { getDashboardAdminStats } from "@/lib/action/dashboardAdmin.action";
+import {
+  getAdminDashboardStats,
+  getStaffDashboardStats,
+  getUserDashboardStats,
+} from "@/lib/action/dashboard.action";
 
 export default async function DashboardPage() {
   const user = await getProfile();
+  if (!user) redirect("/login");
 
-  if (!user) {
-    redirect("/login");
-  }
-
-  const userRole = user?.role;
-  let stats;
-  if (userRole === "admin") {
-    stats = await getDashboardAdminStats();
+  let adminStats, staffStats, userStats;
+  if (user.role === "admin") {
+    adminStats = await getAdminDashboardStats();
+  } else if (user.role === "staff") {
+    staffStats = await getStaffDashboardStats();
+  } else if (user.role === "user") {
+    userStats = await getUserDashboardStats();
   }
 
   // Render dashboard based on user role
   return (
     <div className="space-y-6">
-      {userRole === "user" && <UserDashboard />}
-      {userRole === "staff" && <StaffDashboard />}
-      {userRole === "admin" && stats && <AdminDashboard stats={stats} />}
+      {user.role === "user" && userStats && <UserDashboard stats={userStats} />}
+      {user.role === "staff" && staffStats && (
+        <StaffDashboard stats={staffStats} />
+      )}
+      {user.role === "admin" && adminStats && (
+        <AdminDashboard stats={adminStats} />
+      )}
     </div>
   );
 }
