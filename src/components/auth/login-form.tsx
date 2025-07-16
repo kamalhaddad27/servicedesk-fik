@@ -4,78 +4,44 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
-import { AtSign, Lock, Loader2, Eye, EyeOff, AlertCircle } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { useAuth } from "@/hooks/use-auth";
+import { AtSign, Lock, Loader2, Eye, EyeOff } from "lucide-react";
 import React from "react";
+import { useForm } from "react-hook-form";
+import { loginSchema, TLoginSchema } from "@/lib/validator/auth";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { login } from "@/lib/action/auth.action";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export function LoginForm() {
-  const { login, isLoading, error } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-    rememberMe: false,
-  });
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    try {
-      // Use the actual login function from the useAuth hook
-      const success = await login({
-        email: formData.email,
-        password: formData.password,
-      });
-
-      // If remember me is checked, store in localStorage
-      if (success && formData.rememberMe) {
-        localStorage.setItem("rememberedEmail", formData.email);
-      } else if (!formData.rememberMe) {
-        localStorage.removeItem("rememberedEmail");
-      }
-
-      // No need to manually redirect - the login function handles this
-    } catch (error) {
-      console.error("Login failed", error);
-    }
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleCheckboxChange = (checked: boolean) => {
-    setFormData((prev) => ({ ...prev, rememberMe: checked }));
-  };
-
-  // Load remembered email on component mount
-  React.useEffect(() => {
-    const rememberedEmail = localStorage.getItem("rememberedEmail");
-    if (rememberedEmail) {
-      setFormData((prev) => ({
-        ...prev,
-        email: rememberedEmail,
-        rememberMe: true,
-      }));
-    }
-  }, []);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
+  const router = useRouter();
 
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<TLoginSchema>({
+    resolver: zodResolver(loginSchema),
+  });
+
+  const onSubmit = async (data: TLoginSchema) => {
+    const result = await login(data);
+    if (result.success.status) {
+      toast.success(result.success.message);
+      router.push("/dashboard");
+    } else {
+      toast.error(result.error.message);
+    }
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <div className="relative">
@@ -83,48 +49,33 @@ export function LoginForm() {
             <AtSign className="h-4 w-4" />
           </div>
           <Input
-            id="email"
-            name="email"
             type="email"
             placeholder="nama@upnvj.ac.id"
-            value={formData.email}
-            onChange={handleChange}
             className="pl-10"
             required
             autoComplete="email"
-            disabled={isLoading}
+            {...register("email")}
           />
+          {errors.email && <p>{errors.email.message}</p>}
         </div>
       </div>
 
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <Label htmlFor="password">Password</Label>
-          <Button
-            variant="link"
-            size="sm"
-            className="h-auto p-0 text-xs"
-            asChild
-          >
-            <a href="/forgot-password">Lupa password?</a>
-          </Button>
         </div>
         <div className="relative">
           <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">
             <Lock className="h-4 w-4" />
           </div>
           <Input
-            id="password"
-            name="password"
             type={showPassword ? "text" : "password"}
             placeholder="••••••••"
-            value={formData.password}
-            onChange={handleChange}
             className="pl-10 pr-10"
             required
-            autoComplete="current-password"
-            disabled={isLoading}
+            {...register("password")}
           />
+          {errors.password && <p>{errors.password.message}</p>}
           <Button
             type="button"
             variant="ghost"
@@ -132,7 +83,7 @@ export function LoginForm() {
             className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
             onClick={togglePasswordVisibility}
             aria-label={showPassword ? "Hide password" : "Show password"}
-            disabled={isLoading}
+            disabled={isSubmitting}
           >
             {showPassword ? (
               <EyeOff className="h-4 w-4 text-muted-foreground" />
@@ -143,23 +94,8 @@ export function LoginForm() {
         </div>
       </div>
 
-      <div className="flex items-center space-x-2">
-        <Checkbox
-          id="remember"
-          checked={formData.rememberMe}
-          onCheckedChange={handleCheckboxChange}
-          disabled={isLoading}
-        />
-        <Label
-          htmlFor="remember"
-          className="text-sm font-normal cursor-pointer"
-        >
-          Ingat saya
-        </Label>
-      </div>
-
-      <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? (
+      <Button type="submit" className="w-full" disabled={isSubmitting}>
+        {isSubmitting ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             Memproses...

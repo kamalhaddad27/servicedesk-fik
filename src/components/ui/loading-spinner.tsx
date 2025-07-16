@@ -9,7 +9,7 @@ interface LoadingSpinnerProps {
 }
 
 export function LoadingSpinner({
-  size = "md",
+  size = "lg",
   className,
 }: LoadingSpinnerProps) {
   const sizeClasses = {
@@ -19,7 +19,12 @@ export function LoadingSpinner({
   };
 
   return (
-    <div className={cn("flex items-center justify-center", className)}>
+    <div
+      className={cn(
+        "flex items-center justify-center absolute h-screen top-0 left-0 w-full",
+        className
+      )}
+    >
       <motion.div
         className={cn(
           "rounded-full border-t-transparent border-primary animate-spin",

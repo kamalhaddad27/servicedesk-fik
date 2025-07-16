@@ -59,7 +59,7 @@ const itemVariants: Variants = {
   },
 };
 
-export function MahasiswaDashboard() {
+export function UserDashboard() {
   const { user } = useSession();
   const [activeTab, setActiveTab] = useState("all");
 

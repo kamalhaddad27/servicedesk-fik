@@ -1,4 +1,10 @@
-import { PrismaClient, RoleUser, StaffDepartment } from "@prisma/client";
+import {
+  PriorityTicket,
+  PrismaClient,
+  RoleUser,
+  StaffDepartment,
+  StatusTicket,
+} from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
@@ -85,6 +91,91 @@ async function main() {
       },
     });
     console.log(`User dibuat/diperbarui: ${user.name} (${user.email})`);
+  }
+
+  // SEED TICKER
+  const adminUser = await prisma.user.findUnique({
+    where: { email: "admin@university.ac.id" },
+  });
+  const staffLabUser = await prisma.user.findUnique({
+    where: { email: "budi.staff@university.ac.id" },
+  });
+  const staffTuUser = await prisma.user.findUnique({
+    where: { email: "citra.tu@university.ac.id" },
+  });
+  const mahasiswaUser = await prisma.user.findUnique({
+    where: { email: "dian.mahasiswa@student.university.ac.id" },
+  });
+
+  // Pastikan semua user ditemukan sebelum melanjutkan
+  if (!adminUser || !staffLabUser || !staffTuUser || !mahasiswaUser) {
+    throw new Error(
+      "Satu atau lebih pengguna tidak ditemukan. Jalankan seed user terlebih dahulu."
+    );
+  }
+
+  // Data tiket yang akan di-seed
+  const ticketsToSeed = [
+    {
+      subject: "Tidak bisa akses Wi-Fi di Perpustakaan",
+      description:
+        "Koneksi Wi-Fi 'Uni-Hotspot' terus menerus terputus saat saya coba hubungkan dari area perpustakaan lantai 2.",
+      status: StatusTicket.pending,
+      priority: PriorityTicket.medium,
+      department: "IT Support",
+      category: "Jaringan",
+      subcategory: "Wi-Fi",
+      type: "Permintaan Layanan",
+      userId: mahasiswaUser.id, // Tiket dibuat oleh mahasiswa
+      assignedToId: staffLabUser.id, // Ditugaskan ke staf lab
+    },
+    {
+      subject: "Permintaan Instalasi Software SPSS",
+      description:
+        "Saya memerlukan software SPSS versi terbaru untuk mata kuliah statistik. Mohon bantuannya untuk diinstal di komputer lab 3.",
+      status: StatusTicket.progress,
+      priority: PriorityTicket.low,
+      department: "Laboratorium Komputer",
+      category: "Software",
+      subcategory: "Instalasi",
+      type: "Permintaan Layanan",
+      userId: mahasiswaUser.id,
+      assignedToId: staffLabUser.id,
+    },
+    {
+      subject: "LCD Proyektor di Ruang Kelas 101 Mati",
+      description:
+        "Proyektor di ruang 101 tidak mau menyala sama sekali. Sudah coba ganti kabel power tapi tetap tidak berhasil.",
+      status: StatusTicket.done,
+      priority: PriorityTicket.hight,
+      department: "Sarana & Prasarana",
+      category: "Hardware",
+      subcategory: "Proyektor",
+      type: "Laporan Insiden",
+      userId: staffTuUser.id, // Tiket dibuat oleh staf TU
+      assignedToId: adminUser.id, // Ditugaskan ke admin
+    },
+    {
+      subject: "Error saat membuka Sistem Informasi Akademik",
+      description:
+        "Saat saya mencoba login ke SIA, muncul pesan error '503 Service Unavailable'.",
+      status: StatusTicket.pending,
+      priority: PriorityTicket.urgent,
+      department: "IT Support",
+      category: "Aplikasi",
+      subcategory: "Sistem Informasi",
+      type: "Laporan Insiden",
+      userId: mahasiswaUser.id,
+      // Tiket ini belum di-assign, jadi assignedToId null
+    },
+  ];
+
+  // Looping dan buat tiket menggunakan create
+  for (const ticketData of ticketsToSeed) {
+    const ticket = await prisma.ticket.create({
+      data: ticketData,
+    });
+    console.log(`✅ Tiket dibuat: "${ticket.subject}"`);
   }
 
   console.log("Seeding selesai. ");
