@@ -16,11 +16,8 @@ type TicketData = Ticket & {
   assignedTo: { name: string | null } | null;
 };
 
-// Wrapper Suspense untuk memastikan useSearchParams bekerja dengan benar
 function TicketsPageClient() {
   const searchParams = useSearchParams();
-
-  // State untuk menyimpan data, paginasi, dan status loading
   const [tickets, setTickets] = useState<TicketData[]>([]);
   const [pagination, setPagination] = useState({
     totalPages: 0,
@@ -34,7 +31,6 @@ function TicketsPageClient() {
   const priority =
     (searchParams.get("priority") as PriorityTicket) || undefined;
 
-  // useEffect akan berjalan setiap kali searchParams berubah
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -47,14 +43,13 @@ function TicketsPageClient() {
         });
       } catch (error) {
         console.error("Failed to fetch tickets:", error);
-        // Handle error jika perlu, misalnya dengan toast
       } finally {
         setIsLoading(false);
       }
     };
 
     fetchData();
-  }, [page, priority, query, searchParams, status]); // <-- Kunci: effect ini bergantung pada searchParams
+  }, [page, priority, query, searchParams, status]);
 
   return (
     <div className="space-y-6">

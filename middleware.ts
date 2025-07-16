@@ -1,47 +1,22 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getToken } from "next-auth/jwt";
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-// Define protected routes by role
-const protectedRoutes = {
-  all: ["/dashboard"],
-  admin: ["/dashboard/users", "/dashboard/settings"],
-  executive: ["/dashboard/executive"],
-};
-
-export async function middleware(req: NextRequest) {
-  // const path = req.nextUrl.pathname;
-  // // Authentication check
-  // if (path.startsWith('/dashboard')) {
-  //   const session = await getToken({
-  //     req,
-  //     secret: process.env.NEXTAUTH_SECRET,
-  //   });
-  //   // No session means not logged in, redirect to login
-  //   if (!session) {
-  //     const url = new URL('/login', req.url);
-  //     url.searchParams.set('callbackUrl', encodeURI(path));
-  //     return NextResponse.redirect(url);
-  //   }
-  //   // Role-based access control
-  //   const userRole = session.role as string;
-  //   // Check admin routes
-  //   if (
-  //     protectedRoutes.admin.some(route => path.startsWith(route)) &&
-  //     !['admin', 'executive'].includes(userRole)
-  //   ) {
-  //     return NextResponse.redirect(new URL('/dashboard', req.url));
-  //   }
-  //   // Check executive routes
-  //   if (
-  //     protectedRoutes.executive.some(route => path.startsWith(route)) &&
-  //     userRole !== 'executive'
-  //   ) {
-  //     return NextResponse.redirect(new URL('/dashboard', req.url));
-  //   }
-  // }
-  // return NextResponse.next();
+export function middleware(request: NextRequest) {
+  // Logika middleware Anda
+  return NextResponse.next();
 }
 
+// Gunakan matcher untuk menerapkan middleware HANYA pada rute yang dibutuhkan
+// dan mengecualikan rute API, aset statis, dan gambar.
 export const config = {
-  matcher: ["/dashboard/:path*", "/login"],
+  matcher: [
+    /*
+     * Match all request paths except for the ones starting with:
+     * - api (API routes)
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     */
+    "/((?!api|_next/static|_next/image|favicon.ico).*)",
+  ],
 };

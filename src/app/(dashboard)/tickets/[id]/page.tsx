@@ -1,11 +1,16 @@
-"use client"
+"use client";
 
-import { useParams } from "next/navigation"
-import { TicketDetail } from "@/components/tickets/ticket-detail"
+import { useParams } from "next/navigation";
+import { TicketDetail } from "@/components/tickets/detail/ticket-detail";
+import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function TicketDetailPage() {
-  const params = useParams()
-  const ticketId = Number(params.id)
+  const params = useParams();
+  const ticketId = Array.isArray(params.id) ? params.id[0] : params.id;
 
-  return <TicketDetail ticketId={ticketId} />
+  if (!ticketId) {
+    return <LoadingSpinner />;
+  }
+
+  return <TicketDetail ticketId={ticketId} />;
 }

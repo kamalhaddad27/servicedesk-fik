@@ -3,8 +3,8 @@
 import prisma from "@/lib/prisma";
 import { PriorityTicket, Prisma, StatusTicket } from "@prisma/client";
 import { getProfile } from "./user.action";
+import { revalidatePath } from "next/cache";
 
-// Definisikan interface untuk parameter yang diterima
 interface GetTicketsParams {
   page?: number;
   limit?: number;

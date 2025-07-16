@@ -1,10 +1,10 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import { z } from "zod"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -13,110 +13,88 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"
-import { useSettings } from "@/hooks/use-settings"
-import { useTickets } from "@/hooks/use-ticket"
-import { Alert, AlertDescription } from "@/components/ui/alert"
-import { AlertCircle, Loader2, Upload } from "lucide-react"
-import { Card, CardContent } from "@/components/ui/card"
-
-const ticketFormSchema = z.object({
-  subject: z.string().min(5, {
-    message: "Judul tiket harus minimal 5 karakter",
-  }),
-  description: z.string().min(10, {
-    message: "Deskripsi tiket harus minimal 10 karakter",
-  }),
-  category: z.string().min(1, {
-    message: "Kategori harus dipilih",
-  }),
-  subcategory: z.string().optional(),
-  type: z.string({
-    required_error: "Tipe tiket harus dipilih",
-  }),
-  department: z.string().min(1, {
-    message: "Departemen harus dipilih",
-  }),
-  priority: z.string().min(1, {
-    message: "Prioritas harus dipilih",
-  }),
-})
+} from "@/components/ui/select";
+import { useSettings } from "@/hooks/use-settings";
+import { useTickets } from "@/hooks/use-ticket";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, Loader2, Upload } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import { ticketSchema } from "@/lib/validator/ticket";
 
 export function TicketForm() {
-  const { categories } = useSettings()
-  const { createTicket } = useTickets()
-  const [attachments, setAttachments] = useState<File[]>([])
-  const [subcategoryList, setSubcategoryList] = useState<string[]>([])
+  const { categories } = useSettings();
+  const { createTicket } = useTickets();
+  const [attachments, setAttachments] = useState<File[]>([]);
+  const [subcategoryList, setSubcategoryList] = useState<string[]>([]);
 
-  const form = useForm<z.infer<typeof ticketFormSchema>>({
-    resolver: zodResolver(ticketFormSchema),
+  const form = useForm<z.infer<typeof ticketSchema>>({
+    resolver: zodResolver(ticketSchema),
     defaultValues: {
       subject: "",
       description: "",
       category: "",
       subcategory: "",
-      type: "permintaan", // Set a default value for type
+      type: "permintaan",
       department: "",
       priority: "medium",
     },
-  })
+  });
 
-  // Watch for category changes to update subcategories
-  const selectedCategory = form.watch("category")
+  const selectedCategory = form.watch("category");
   useState(() => {
     if (selectedCategory && categories?.[selectedCategory]?.subcategories) {
-      setSubcategoryList(categories[selectedCategory].subcategories)
+      setSubcategoryList(categories[selectedCategory].subcategories);
     } else {
-      setSubcategoryList([])
+      setSubcategoryList([]);
     }
-  })
+  });
 
-  const onSubmit = async (values: z.infer<typeof ticketFormSchema>) => {
+  const onSubmit = async (values: z.infer<typeof ticketSchema>) => {
     try {
-      const formData = new FormData()
+      const formData = new FormData();
 
       // Add form fields to FormData
       Object.entries(values).forEach(([key, value]) => {
         if (value) {
-          formData.append(key, value)
+          formData.append(key, value);
         }
-      })
+      });
 
       // Add attachments to FormData
       attachments.forEach((file) => {
-        formData.append("attachments", file)
-      })
+        formData.append("attachments", file);
+      });
 
       // Submit the form
-      await createTicket.mutateAsync(formData)
+      await createTicket.mutateAsync(formData);
 
       // Reset form
-      form.reset()
-      setAttachments([])
+      form.reset();
+      setAttachments([]);
     } catch (error) {
-      console.error("Error creating ticket:", error)
+      console.error("Error creating ticket:", error);
     }
-  }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
-      const newFiles = Array.from(e.target.files)
-      setAttachments((prev) => [...prev, ...newFiles])
+      const newFiles = Array.from(e.target.files);
+      setAttachments((prev) => [...prev, ...newFiles]);
     }
-  }
+  };
 
   const removeAttachment = (index: number) => {
-    setAttachments((prev) => prev.filter((_, i) => i !== index))
-  }
+    setAttachments((prev) => prev.filter((_, i) => i !== index));
+  };
 
   return (
     <div className="mx-auto w-full max-w-3xl">
@@ -126,7 +104,8 @@ export function TicketForm() {
             <Alert variant="destructive">
               <AlertCircle className="h-4 w-4" />
               <AlertDescription>
-                {createTicket.error?.message || "Terjadi kesalahan saat membuat tiket"}
+                {createTicket.error?.message ||
+                  "Terjadi kesalahan saat membuat tiket"}
               </AlertDescription>
             </Alert>
           )}
@@ -157,13 +136,12 @@ export function TicketForm() {
                   <FormLabel>Kategori</FormLabel>
                   <Select
                     onValueChange={(value) => {
-                      field.onChange(value)
-                      // Update subcategories when category changes
+                      field.onChange(value);
                       if (categories?.[value]?.subcategories) {
-                        setSubcategoryList(categories[value].subcategories)
-                        form.setValue("subcategory", "") // Reset subcategory
+                        setSubcategoryList(categories[value].subcategories);
+                        form.setValue("subcategory", "");
                       } else {
-                        setSubcategoryList([])
+                        setSubcategoryList([]);
                       }
                     }}
                     defaultValue={field.value}
@@ -200,11 +178,13 @@ export function TicketForm() {
                   >
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder={
-                          subcategoryList.length === 0
-                            ? "Pilih kategori terlebih dahulu"
-                            : "Pilih subkategori"
-                        } />
+                        <SelectValue
+                          placeholder={
+                            subcategoryList.length === 0
+                              ? "Pilih kategori terlebih dahulu"
+                              : "Pilih subkategori"
+                          }
+                        />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="bg-white">
@@ -268,7 +248,9 @@ export function TicketForm() {
                       <SelectItem value="Akademik">Akademik</SelectItem>
                       <SelectItem value="Fasilitas">Fasilitas</SelectItem>
                       <SelectItem value="Keuangan">Keuangan</SelectItem>
-                      <SelectItem value="Kemahasiswaan">Kemahasiswaan</SelectItem>
+                      <SelectItem value="Kemahasiswaan">
+                        Kemahasiswaan
+                      </SelectItem>
                       <SelectItem value="IT">IT</SelectItem>
                       <SelectItem value="Umum">Umum</SelectItem>
                     </SelectContent>
@@ -373,7 +355,11 @@ export function TicketForm() {
             )}
           </div>
 
-          <Button type="submit" disabled={createTicket.isPending} className="w-full">
+          <Button
+            type="submit"
+            disabled={createTicket.isPending}
+            className="w-full"
+          >
             {createTicket.isPending ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -386,5 +372,5 @@ export function TicketForm() {
         </form>
       </Form>
     </div>
-  )
+  );
 }

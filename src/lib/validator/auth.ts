@@ -1,8 +1,6 @@
-// lib/validator/auth.ts
 import { z } from "zod";
 
 export const loginSchema = z.object({
-  // Menggunakan validasi email standar yang lebih tepat
   email: z.string().email({
     message: "Format email tidak valid",
   }),

@@ -3,7 +3,7 @@
 import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 import prisma from "@/lib/prisma";
-import { User } from "@prisma/client";
+import { RoleUser, User } from "@prisma/client";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
@@ -36,5 +36,27 @@ export async function getProfile(): Promise<User | null> {
     // Token tidak valid atau error lain
     console.error("GET_PROFILE_ERROR:", error);
     return null;
+  }
+}
+
+// GET USER STAFF
+export async function getAvailableStaff() {
+  try {
+    const staffUsers = await prisma.user.findMany({
+      where: {
+        role: RoleUser.staff,
+      },
+      select: {
+        id: true,
+        name: true,
+      },
+      orderBy: {
+        name: "asc",
+      },
+    });
+    return staffUsers;
+  } catch (error) {
+    console.error("GET_STAFF_LIST_ERROR:", error);
+    return [];
   }
 }
