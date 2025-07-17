@@ -101,9 +101,7 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
 
   // Define navigation items based on role with different visual hierarchies
   const getNav = () => {
-    // Common items for all roles
     const common = {
-      // Dashboard varies by role for different views
       dashboard: {
         name: "Dashboard",
         href: "/dashboard",
@@ -371,9 +369,7 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
             {isOpen && openGroupsRef.current[group.name] && (
               <div className="ml-1 mt-1 space-y-1 border-l-2 border-muted pl-2">
                 {group.subItems.map((item: any) => {
-                  const isActive =
-                    pathname === item.href ||
-                    pathname.startsWith(`${item.href}/`);
+                  const isActive = pathname === item.href;
                   return (
                     <SidebarLink
                       key={item.href}
@@ -411,16 +407,7 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
                 )}
               >
                 <Avatar
-                  className={cn(
-                    "h-8 w-8 border",
-                    userRole === "user"
-                      ? "border-blue-200 bg-blue-50"
-                      : userRole === "staff"
-                      ? "border-indigo-200 bg-indigo-50"
-                      : userRole === "admin"
-                      ? "border-violet-200 bg-violet-50"
-                      : "border-amber-200 bg-amber-50"
-                  )}
+                  className={cn("h-8 w-8 border border-blue-200 bg-blue-50")}
                 >
                   <AvatarFallback
                     className={cn(

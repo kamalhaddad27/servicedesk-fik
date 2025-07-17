@@ -11,3 +11,18 @@ export async function getAllCategories() {
     return [];
   }
 }
+
+export async function getCategoriesWithSubcategories() {
+  try {
+    return await prisma.category.findMany({
+      include: {
+        subcategories: {
+          orderBy: { name: "asc" },
+        },
+      },
+      orderBy: { name: "asc" },
+    });
+  } catch (error) {
+    return [];
+  }
+}

@@ -1,9 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -23,93 +22,69 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { useSettings } from "@/hooks/use-settings";
-import { useTickets } from "@/hooks/use-ticket";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Loader2, Upload } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
-import { ticketSchema } from "@/lib/validator/ticket";
+import { Loader2 } from "lucide-react";
+import {
+  createTicketSchema,
+  TCreateTicketSchema,
+} from "@/lib/validator/ticket";
+import { Category, PriorityTicket, Subcategory } from "@prisma/client";
+import { getCategoriesWithSubcategories } from "@/lib/action/category.action";
+import { createTicket } from "@/lib/action/ticket.action";
+import { toast } from "sonner";
+
+type CategoryWithSubcategories = Category & {
+  subcategories: Subcategory[];
+};
 
 export function TicketForm() {
-  const { categories } = useSettings();
-  const { createTicket } = useTickets();
-  const [attachments, setAttachments] = useState<File[]>([]);
-  const [subcategoryList, setSubcategoryList] = useState<string[]>([]);
+  const [categories, setCategories] = useState<CategoryWithSubcategories[]>([]);
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
 
-  const form = useForm<z.infer<typeof ticketSchema>>({
-    resolver: zodResolver(ticketSchema),
+  const form = useForm<TCreateTicketSchema>({
+    resolver: zodResolver(createTicketSchema),
     defaultValues: {
       subject: "",
       description: "",
-      category: "",
-      subcategory: "",
-      type: "permintaan",
-      department: "",
-      priority: "medium",
+      priority: PriorityTicket.medium,
     },
   });
 
-  const selectedCategory = form.watch("category");
-  useState(() => {
-    if (selectedCategory && categories?.[selectedCategory]?.subcategories) {
-      setSubcategoryList(categories[selectedCategory].subcategories);
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const data = await getCategoriesWithSubcategories();
+      setCategories(data);
+    };
+    fetchCategories();
+  }, []);
+
+  const selectedCategoryId = form.watch("categoryId");
+
+  useEffect(() => {
+    if (selectedCategoryId) {
+      const selectedCategory = categories.find(
+        (c) => c.id === selectedCategoryId
+      );
+      setSubcategories(selectedCategory?.subcategories || []);
+      form.setValue("subcategoryId", "");
     } else {
-      setSubcategoryList([]);
+      setSubcategories([]);
     }
-  });
+  }, [selectedCategoryId, categories, form]);
 
-  const onSubmit = async (values: z.infer<typeof ticketSchema>) => {
-    try {
-      const formData = new FormData();
-
-      // Add form fields to FormData
-      Object.entries(values).forEach(([key, value]) => {
-        if (value) {
-          formData.append(key, value);
-        }
-      });
-
-      // Add attachments to FormData
-      attachments.forEach((file) => {
-        formData.append("attachments", file);
-      });
-
-      // Submit the form
-      await createTicket.mutateAsync(formData);
-
-      // Reset form
+  const onSubmit = async (values: TCreateTicketSchema) => {
+    const result = await createTicket(values);
+    if (result?.error) {
+      toast.error(result.error);
       form.reset();
-      setAttachments([]);
-    } catch (error) {
-      console.error("Error creating ticket:", error);
+    } else {
+      toast.success("Tiket berhasil dibuat!");
     }
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      setAttachments((prev) => [...prev, ...newFiles]);
-    }
-  };
-
-  const removeAttachment = (index: number) => {
-    setAttachments((prev) => prev.filter((_, i) => i !== index));
   };
 
   return (
     <div className="mx-auto w-full max-w-3xl">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-          {createTicket.isError && (
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertDescription>
-                {createTicket.error?.message ||
-                  "Terjadi kesalahan saat membuat tiket"}
-              </AlertDescription>
-            </Alert>
-          )}
-
           <FormField
             control={form.control}
             name="subject"
@@ -130,20 +105,12 @@ export function TicketForm() {
           <div className="grid gap-4 md:grid-cols-2">
             <FormField
               control={form.control}
-              name="category"
+              name="categoryId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Kategori</FormLabel>
                   <Select
-                    onValueChange={(value) => {
-                      field.onChange(value);
-                      if (categories?.[value]?.subcategories) {
-                        setSubcategoryList(categories[value].subcategories);
-                        form.setValue("subcategory", "");
-                      } else {
-                        setSubcategoryList([]);
-                      }
-                    }}
+                    onValueChange={field.onChange}
                     defaultValue={field.value}
                   >
                     <FormControl>
@@ -151,13 +118,12 @@ export function TicketForm() {
                         <SelectValue placeholder="Pilih kategori" />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent className="bg-white">
-                      {categories &&
-                        Object.entries(categories).map(([key, category]) => (
-                          <SelectItem key={key} value={key}>
-                            {category.name}
-                          </SelectItem>
-                        ))}
+                    <SelectContent>
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -167,30 +133,30 @@ export function TicketForm() {
 
             <FormField
               control={form.control}
-              name="subcategory"
+              name="subcategoryId"
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Subkategori</FormLabel>
                   <Select
                     onValueChange={field.onChange}
-                    defaultValue={field.value}
-                    disabled={subcategoryList.length === 0}
+                    value={field.value}
+                    disabled={subcategories.length === 0}
                   >
                     <FormControl>
                       <SelectTrigger>
                         <SelectValue
                           placeholder={
-                            subcategoryList.length === 0
-                              ? "Pilih kategori terlebih dahulu"
+                            !selectedCategoryId
+                              ? "Pilih kategori dulu"
                               : "Pilih subkategori"
                           }
                         />
                       </SelectTrigger>
                     </FormControl>
-                    <SelectContent className="bg-white">
-                      {subcategoryList.map((subcat) => (
-                        <SelectItem key={subcat} value={subcat}>
-                          {subcat}
+                    <SelectContent>
+                      {subcategories.map((sub) => (
+                        <SelectItem key={sub.id} value={sub.id}>
+                          {sub.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -276,10 +242,16 @@ export function TicketForm() {
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent className="bg-white">
-                      <SelectItem value="low">Rendah</SelectItem>
-                      <SelectItem value="medium">Sedang</SelectItem>
-                      <SelectItem value="high">Tinggi</SelectItem>
-                      <SelectItem value="urgent">Urgent</SelectItem>
+                      <SelectItem value={PriorityTicket.low}>Rendah</SelectItem>
+                      <SelectItem value={PriorityTicket.medium}>
+                        Sedang
+                      </SelectItem>
+                      <SelectItem value={PriorityTicket.high}>
+                        Tinggi
+                      </SelectItem>
+                      <SelectItem value={PriorityTicket.urgent}>
+                        Urgent
+                      </SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
@@ -309,61 +281,15 @@ export function TicketForm() {
             )}
           />
 
-          <div>
-            <FormLabel>Lampiran</FormLabel>
-            <div className="mt-2">
-              <label
-                htmlFor="file-upload"
-                className="flex cursor-pointer items-center gap-2 rounded-md border border-input bg-background px-3 py-2 text-sm text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-              >
-                <Upload className="h-4 w-4" />
-                <span>Pilih File</span>
-                <input
-                  id="file-upload"
-                  type="file"
-                  multiple
-                  className="sr-only"
-                  onChange={handleFileChange}
-                />
-              </label>
-            </div>
-
-            {attachments.length > 0 && (
-              <Card className="mt-4">
-                <CardContent className="p-4">
-                  <div className="text-sm font-medium">Lampiran</div>
-                  <ul className="mt-2 space-y-2">
-                    {attachments.map((file, index) => (
-                      <li
-                        key={index}
-                        className="flex items-center justify-between rounded-md border p-2 text-sm"
-                      >
-                        <span className="truncate">{file.name}</span>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => removeAttachment(index)}
-                        >
-                          Hapus
-                        </Button>
-                      </li>
-                    ))}
-                  </ul>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
           <Button
             type="submit"
-            disabled={createTicket.isPending}
+            disabled={form.formState.isSubmitting}
             className="w-full"
           >
-            {createTicket.isPending ? (
+            {form.formState.isSubmitting ? (
               <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Membuat Tiket...
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Membuat
+                Tiket...
               </>
             ) : (
               "Buat Tiket"
