@@ -129,8 +129,8 @@ export function TicketInfoCard({
             Kategori
           </h3>
           <p className="mt-1 text-sm">
-            {ticket.category.name}
-            {ticket.subcategory.name && ` > ${ticket.subcategory}`}
+            {ticket.category?.name}
+            {ticket.subcategory?.name && ` > ${ticket.subcategory?.name}`}
           </p>
         </div>
         {ticket.department && (

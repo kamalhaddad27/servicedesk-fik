@@ -209,7 +209,7 @@ async function main() {
       department: "Sarana & Prasarana",
       type: "Laporan Insiden",
       userId: staffTuUser.id,
-      assignedToId: adminUser.id,
+      assignedToId: staffTuUser.id,
       categoryId: hardwareCategory.id,
       subcategoryId: proyektorSubcategory.id,
     },

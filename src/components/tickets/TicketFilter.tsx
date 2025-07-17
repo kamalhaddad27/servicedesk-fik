@@ -13,12 +13,23 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Search, PlusCircle } from "lucide-react";
-import { PriorityTicket, StatusTicket } from "@prisma/client";
+import { Category, PriorityTicket, StatusTicket } from "@prisma/client";
+import { useEffect, useState } from "react";
+import { getAllCategories } from "@/lib/action/category.action";
 
 export function TicketFilters() {
+  const [categories, setCategories] = useState<Category[]>([]);
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const { replace } = useRouter();
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      const allCategories = await getAllCategories();
+      setCategories(allCategories);
+    };
+    fetchCategories();
+  }, []);
 
   const createQueryString = (name: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
@@ -36,7 +47,14 @@ export function TicketFilters() {
   }, 300);
 
   const handleFilterChange = (name: string, value: string) => {
-    replace(`${pathname}?${createQueryString(name, value)}`);
+    const params = new URLSearchParams(searchParams.toString());
+    params.set("page", "1");
+    if (value && value !== "all") {
+      params.set(name, value);
+    } else {
+      params.delete(name);
+    }
+    replace(`${pathname}?${params.toString()}`);
   };
 
   return (
@@ -84,6 +102,23 @@ export function TicketFilters() {
             <SelectItem value={PriorityTicket.medium}>Medium</SelectItem>
             <SelectItem value={PriorityTicket.high}>High</SelectItem>
             <SelectItem value={PriorityTicket.urgent}>Urgent</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Select
+          value={searchParams.get("categoryId") || "all"}
+          onValueChange={(value) => handleFilterChange("categoryId", value)}
+        >
+          <SelectTrigger className="w-full sm:w-[180px]">
+            <SelectValue placeholder="Filter berdasarkan kategori" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Semua Kategori</SelectItem>
+            {categories.map((category) => (
+              <SelectItem key={category.id} value={category.id}>
+                {category.name}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
 

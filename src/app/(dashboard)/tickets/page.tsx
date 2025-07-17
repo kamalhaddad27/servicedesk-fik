@@ -31,12 +31,19 @@ function TicketsPageClient() {
   const status = (searchParams.get("status") as StatusTicket) || undefined;
   const priority =
     (searchParams.get("priority") as PriorityTicket) || undefined;
+  const categoryId = searchParams.get("categoryId") || undefined;
 
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        const result = await getTickets({ page, query, status, priority });
+        const result = await getTickets({
+          page,
+          query,
+          status,
+          priority,
+          categoryId,
+        });
         setTickets(result.data);
         setPagination({
           totalPages: result.totalPages,
@@ -50,7 +57,7 @@ function TicketsPageClient() {
     };
 
     fetchData();
-  }, [page, priority, query, searchParams, status]);
+  }, [categoryId, page, priority, query, searchParams, status]);
 
   return (
     <div className="space-y-6">

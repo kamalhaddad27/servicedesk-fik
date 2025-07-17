@@ -3,7 +3,6 @@
 import prisma from "@/lib/prisma";
 import { PriorityTicket, Prisma, StatusTicket } from "@prisma/client";
 import { getProfile } from "./user.action";
-import { revalidatePath } from "next/cache";
 
 interface GetTicketsParams {
   page?: number;
@@ -11,6 +10,7 @@ interface GetTicketsParams {
   query?: string;
   status?: StatusTicket;
   priority?: PriorityTicket;
+  categoryId?: string;
 }
 
 export async function getTickets({
@@ -19,6 +19,7 @@ export async function getTickets({
   query,
   status,
   priority,
+  categoryId,
 }: GetTicketsParams) {
   try {
     const user = await getProfile();
@@ -37,6 +38,9 @@ export async function getTickets({
     }
     if (priority) {
       filterConditions.priority = priority;
+    }
+    if (categoryId) {
+      filterConditions.categoryId = categoryId;
     }
 
     const where: Prisma.TicketWhereInput = {};
@@ -96,6 +100,8 @@ export async function getTicketById(id: string) {
       include: {
         user: { select: { name: true, email: true } },
         assignedTo: { select: { name: true, email: true } },
+        category: { select: { name: true } },
+        subcategory: { select: { name: true } },
         message: {
           orderBy: { createdAt: "asc" },
           include: {

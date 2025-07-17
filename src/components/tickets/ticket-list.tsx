@@ -80,7 +80,8 @@ export function TicketList({ tickets }: TicketListProps) {
                 </div>
               </div>
               <CardDescription>
-                Tiket #{ticket.id.slice(-6).toUpperCase()} • {ticket.categoryId}
+                Tiket #{ticket.id.slice(-6).toUpperCase()} •{" "}
+                {ticket.category.name}
               </CardDescription>
             </CardHeader>
             <CardContent className="pb-2">
