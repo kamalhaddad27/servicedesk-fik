@@ -13,6 +13,7 @@ interface GetTicketsParams {
   status?: StatusTicket;
   priority?: PriorityTicket;
   categoryId?: string;
+  assignment?: "me" | "unassigned";
 }
 
 export async function getTickets({
@@ -22,6 +23,7 @@ export async function getTickets({
   status,
   priority,
   categoryId,
+  assignment,
 }: GetTicketsParams) {
   try {
     const user = await getProfile();
@@ -44,18 +46,21 @@ export async function getTickets({
     if (categoryId) {
       filterConditions.categoryId = categoryId;
     }
+    if (user.role === "staff" && assignment === "me") {
+      filterConditions.assignedToId = user.id;
+    } else if (assignment === "unassigned") {
+      filterConditions.assignedToId = null;
+    }
 
     const where: Prisma.TicketWhereInput = {};
-
     if (user.role === "user") {
       where.AND = [filterConditions, { userId: user.id }];
-    } else if (user.role === "staff") {
+    } else if (user.role === "staff" && assignment !== "me") {
       where.AND = [
         filterConditions,
         { OR: [{ assignedToId: user.id }, { assignedToId: null }] },
       ];
     } else {
-      // Admin
       Object.assign(where, filterConditions);
     }
 

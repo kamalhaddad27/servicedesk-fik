@@ -2,7 +2,7 @@ import { type ClassValue, clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { format, formatDistanceToNow } from "date-fns";
 import { id } from "date-fns/locale";
-import { PriorityTicket, StatusTicket } from "@prisma/client";
+import { PriorityTicket, RoleUser, StatusTicket } from "@prisma/client";
 
 // Combine class names with tailwind-merge
 export function cn(...inputs: ClassValue[]) {
@@ -66,15 +66,16 @@ export function getTicketPriorityColor(priority: PriorityTicket) {
 }
 
 // Generate SLA status color
-export function getSLAStatusColor(status: string): string {
-  const slaMap: Record<string, string> = {
-    "on-time": "bg-green-100 text-green-800",
-    "at-risk": "bg-yellow-100 text-yellow-800",
-    breached: "bg-red-100 text-red-800",
-  };
-
-  return slaMap[status] || "bg-gray-100 text-gray-800";
-}
+export const getRoleBadgeColor = (role: RoleUser) => {
+  switch (role) {
+    case "admin":
+      return "bg-purple-100 text-purple-800";
+    case "staff":
+      return "bg-amber-100 text-amber-800";
+    case "user":
+      return "bg-green-100 text-green-800";
+  }
+};
 
 // Truncate text with ellipsis
 export function truncateText(text: string, maxLength: number): string {

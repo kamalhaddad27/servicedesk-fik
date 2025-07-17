@@ -182,7 +182,7 @@ export function Navbar({
       {/* Right side actions */}
       <div className="ml-auto flex items-center gap-2">
         {/* Search */}
-        <div className="relative" ref={searchRef}>
+        {/* <div className="relative" ref={searchRef}>
           <Button
             variant="ghost"
             size="icon"
@@ -224,33 +224,7 @@ export function Navbar({
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
-
-        {/* Quick Actions */}
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="relative text-muted-foreground hover:text-foreground"
-              aria-label="Quick Actions"
-            >
-              <PlusCircle className="h-5 w-5" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-56 bg-background">
-            <DropdownMenuLabel>Aksi Cepat</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {filteredQuickActions.map((action) => (
-              <DropdownMenuItem key={action.href} asChild>
-                <Link href={action.href} className="flex items-center">
-                  <span className="text-primary-500 mr-2">{action.icon}</span>
-                  <span>{action.name}</span>
-                </Link>
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        </div> */}
 
         {/* Notifications */}
         <div className="relative" ref={notificationRef}>

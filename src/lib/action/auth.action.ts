@@ -6,49 +6,43 @@ import { cookies } from "next/headers";
 import prisma from "@/lib/prisma";
 import { responAction } from "./responseAction";
 import { TLoginSchema, TRegisterSchema } from "@/lib/validator/auth";
+import { RoleUser } from "@prisma/client";
+import { getProfile } from "./user.action";
+import { revalidatePath } from "next/cache";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 
 // REGISTER ACTION
 export async function register(values: TRegisterSchema) {
   try {
-    // Cek apakah email atau nomor telepon sudah ada
+    const admin = await getProfile();
+    if (!admin || admin.role !== "admin")
+      throw new Error("Hanya admin yang bisa membuat pengguna.");
+
+    if (!values.password)
+      throw new Error("Password wajib diisi untuk pengguna baru.");
+
     const existingUser = await prisma.user.findFirst({
-      where: { OR: [{ email: values.email }, { phone: values.phone }] },
+      where: { OR: [{ email: values.email }] },
     });
+    if (existingUser)
+      throw new Error("Email atau nomor telepon sudah terdaftar.");
 
-    if (existingUser) {
-      return responAction({
-        statusError: true,
-        messageError: "Email atau nomor telepon sudah terdaftar.",
-      });
-    }
-
-    // Hash password
     const hashedPassword = await bcrypt.hash(values.password, 10);
 
-    // Buat user baru (tambahkan field lain sesuai skema prisma Anda)
     await prisma.user.create({
       data: {
         name: values.name,
         email: values.email,
-        phone: values.phone,
+        role: values.role || RoleUser.user,
         password: hashedPassword,
-        // Default role, nim, nip, dll bisa ditambahkan di sini
-        role: "user",
       },
     });
 
-    return responAction({
-      statusSuccess: true,
-      messageSuccess: "Registrasi berhasil! Silakan login.",
-    });
-  } catch (error) {
-    console.error("REGISTER_ERROR:", error);
-    return responAction({
-      statusError: true,
-      messageError: "Terjadi kesalahan internal.",
-    });
+    revalidatePath("/users");
+    return { success: true, message: "Pengguna baru berhasil dibuat." };
+  } catch (error: any) {
+    return { success: false, message: error.message };
   }
 }
 

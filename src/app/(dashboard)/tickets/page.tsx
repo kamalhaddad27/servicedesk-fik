@@ -8,7 +8,9 @@ import { TicketList } from "@/components/tickets/ticket-list";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { PriorityTicket, StatusTicket, Ticket } from "@prisma/client";
 import { PaginationControls } from "@/components/ui/pagination";
-import { TicketFilters } from "@/components/tickets/TicketFilter";
+import { TicketFilters } from "@/components/tickets/ticket-filter";
+import { TicketQuickFilters } from "@/components/tickets/ticket-quick-filters";
+import { useSession } from "@/context/SessionContext";
 
 // Tipe untuk data tiket yang akan disimpan di state
 type TicketData = Ticket & {
@@ -18,6 +20,7 @@ type TicketData = Ticket & {
 };
 
 function TicketsPageClient() {
+  const { user: currentUser } = useSession();
   const searchParams = useSearchParams();
   const [tickets, setTickets] = useState<TicketData[]>([]);
   const [pagination, setPagination] = useState({
@@ -32,6 +35,10 @@ function TicketsPageClient() {
   const priority =
     (searchParams.get("priority") as PriorityTicket) || undefined;
   const categoryId = searchParams.get("categoryId") || undefined;
+  const assignment = searchParams.get("assignment") as
+    | "me"
+    | "unassigned"
+    | undefined;
 
   useEffect(() => {
     const fetchData = async () => {
@@ -43,6 +50,7 @@ function TicketsPageClient() {
           status,
           priority,
           categoryId,
+          assignment,
         });
         setTickets(result.data);
         setPagination({
@@ -57,14 +65,20 @@ function TicketsPageClient() {
     };
 
     fetchData();
-  }, [categoryId, page, priority, query, searchParams, status]);
+  }, [assignment, categoryId, page, priority, query, searchParams, status]);
+
+  const pageTitle =
+    currentUser?.role === "user" ? "Tiket Saya" : "Daftar Tiket";
+  const pageDescription =
+    currentUser?.role === "user"
+      ? "Lihat semua riwayat tiket yang pernah Anda buat."
+      : "Kelola dan pantau semua tiket dalam sistem.";
 
   return (
     <div className="space-y-6">
-      <PageTitle
-        title="Daftar Tiket"
-        description="Kelola dan pantau semua tiket dalam sistem."
-      />
+      <PageTitle title={pageTitle} description={pageDescription} />
+
+      {currentUser?.role !== "user" && <TicketQuickFilters />}
 
       <TicketFilters />
 
@@ -85,7 +99,6 @@ function TicketsPageClient() {
   );
 }
 
-// Komponen ekspor utama sekarang hanya membungkus dengan Suspense
 export default function TicketsPage() {
   return (
     <Suspense fallback={<LoadingSpinner />}>

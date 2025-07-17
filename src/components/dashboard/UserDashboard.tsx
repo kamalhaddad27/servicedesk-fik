@@ -1,39 +1,13 @@
 "use client";
 
-import { useState } from "react";
 import Link from "next/link";
 import { motion, Variants } from "framer-motion";
-import { useQuery } from "@tanstack/react-query";
-import { ApiService } from "@/lib/api";
 import { PageTitle } from "../ui/page-title";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import {
-  formatDate,
-  getTicketStatusColor,
-  getTicketPriorityColor,
-} from "@/lib/utils";
+import { getTicketStatusColor } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
-import {
-  PlusCircle,
-  Clock,
-  CheckCircle,
-  AlertCircle,
-  BarChart3,
-  FileText,
-  List,
-  Check,
-} from "lucide-react";
-import TicketIconProps from "@/components/ui/ticket-icon";
+import { PlusCircle, FileText, List, Check } from "lucide-react";
 import { useSession } from "@/context/SessionContext";
 import { Ticket } from "@prisma/client";
 

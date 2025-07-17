@@ -16,12 +16,11 @@ import { Search, PlusCircle } from "lucide-react";
 import { Category, PriorityTicket, StatusTicket } from "@prisma/client";
 import { useEffect, useState } from "react";
 import { getAllCategories } from "@/lib/action/category.action";
+import { useFilter } from "@/hooks/use-filter";
 
 export function TicketFilters() {
   const [categories, setCategories] = useState<Category[]>([]);
-  const searchParams = useSearchParams();
-  const pathname = usePathname();
-  const { replace } = useRouter();
+  const { handleFilterChange, handleSearchChange, searchParams } = useFilter();
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -30,32 +29,6 @@ export function TicketFilters() {
     };
     fetchCategories();
   }, []);
-
-  const createQueryString = (name: string, value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", "1"); // Selalu reset ke halaman 1 saat filter berubah
-    if (value && value !== "all") {
-      params.set(name, value);
-    } else {
-      params.delete(name);
-    }
-    return params.toString();
-  };
-
-  const handleSearchChange = useDebouncedCallback((term: string) => {
-    replace(`${pathname}?${createQueryString("query", term)}`);
-  }, 300);
-
-  const handleFilterChange = (name: string, value: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("page", "1");
-    if (value && value !== "all") {
-      params.set(name, value);
-    } else {
-      params.delete(name);
-    }
-    replace(`${pathname}?${params.toString()}`);
-  };
 
   return (
     <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
@@ -109,7 +82,7 @@ export function TicketFilters() {
           value={searchParams.get("categoryId") || "all"}
           onValueChange={(value) => handleFilterChange("categoryId", value)}
         >
-          <SelectTrigger className="w-full sm:w-[180px]">
+          <SelectTrigger className="h-9 w-auto">
             <SelectValue placeholder="Filter berdasarkan kategori" />
           </SelectTrigger>
           <SelectContent>

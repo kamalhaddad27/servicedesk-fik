@@ -1,3 +1,4 @@
+import { RoleUser } from "@prisma/client";
 import { z } from "zod";
 
 export const loginSchema = z.object({
@@ -13,7 +14,7 @@ export const loginSchema = z.object({
 export const registerSchema = z.object({
   name: z.string().min(3, { message: "Nama minimal 3 karakter" }),
   email: z.string().email({ message: "Format email tidak valid" }),
-  phone: z.string().min(10, { message: "Nomor telepon tidak valid" }),
+  role: z.nativeEnum(RoleUser).optional(),
   password: z.string().min(6, { message: "Password minimal 6 karakter" }),
 });
 

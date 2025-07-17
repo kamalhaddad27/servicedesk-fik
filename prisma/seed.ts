@@ -59,7 +59,7 @@ async function main() {
   ];
 
   // Data User Biasa (Mahasiswa dan dosen)
-  const regularUsersToSeed = [
+  const usersToSeed = [
     {
       name: "Dian Mahasiswa",
       email: "dian.mahasiswa@student.university.ac.id",
@@ -78,7 +78,7 @@ async function main() {
   ];
 
   // Gabungkan semua data menjadi satu array
-  const allUsers = [...adminsToSeed, ...staffToSeed, ...regularUsersToSeed];
+  const allUsers = [...adminsToSeed, ...staffToSeed, ...usersToSeed];
 
   // Looping dan buat user menggunakan upsert
   for (const userData of allUsers) {

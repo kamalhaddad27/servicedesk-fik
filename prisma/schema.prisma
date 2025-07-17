@@ -39,7 +39,7 @@ model User {
   nip           String? @unique
   name          String  
   email         String  @unique
-  phone         String  @unique
+  phone         String?  @unique
   password      String
   department    StaffDepartment?
   major         String?

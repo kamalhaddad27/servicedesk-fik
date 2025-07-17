@@ -115,42 +115,18 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
         icon: <Ticket className="h-4 w-4" />,
         color: "text-primary-500",
         subItems: [
-          ...(userRole === "user" || userRole === "admin"
-            ? [
-                {
-                  name: "Buat Tiket",
-                  href: "/tickets/create",
-                  icon: <PlusCircle className="h-4 w-4" />,
-                  color: "text-primary-400",
-                },
-              ]
-            : []),
           {
-            name: "Semua Tiket",
+            name: "Buat Tiket",
+            href: "/tickets/create",
+            icon: <PlusCircle className="h-4 w-4" />,
+            color: "text-primary-400",
+          },
+          {
+            name: userRole === "user" ? "Tiket Saya" : "Semua Tiket",
             href: "/tickets",
             icon: <FileText className="h-4 w-4" />,
             color: "text-primary-600",
           },
-          ...(userRole === "staff"
-            ? [
-                {
-                  name: "Tiket Ditugaskan",
-                  href: "/tickets/assigned",
-                  icon: <ClipboardList className="h-4 w-4" />,
-                  color: "text-primary-500",
-                },
-              ]
-            : []),
-          ...(userRole === "user"
-            ? [
-                {
-                  name: "Tiket Saya",
-                  href: "/tickets/my-tickets",
-                  icon: <ClipboardList className="h-4 w-4" />,
-                  color: "text-primary-500",
-                },
-              ]
-            : []),
         ],
       },
 
@@ -221,12 +197,6 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
                   href: "/users",
                   icon: <Users className="h-4 w-4" />,
                   color: "text-violet-400",
-                },
-                {
-                  name: "Pengaturan",
-                  href: "/settings",
-                  icon: <Settings className="h-4 w-4" />,
-                  color: "text-violet-600",
                 },
               ],
             },
@@ -409,17 +379,7 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
                 <Avatar
                   className={cn("h-8 w-8 border border-blue-200 bg-blue-50")}
                 >
-                  <AvatarFallback
-                    className={cn(
-                      userRole === "user"
-                        ? "text-blue-700"
-                        : userRole === "staff"
-                        ? "text-indigo-700"
-                        : userRole === "admin"
-                        ? "text-violet-700"
-                        : "text-amber-700"
-                    )}
-                  >
+                  <AvatarFallback className="text-blue-700">
                     {user?.name?.charAt(0) || "U"}
                   </AvatarFallback>
                 </Avatar>
@@ -428,16 +388,7 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
                     {user?.name}
                   </span>
                   <span
-                    className={cn(
-                      "text-xs capitalize truncate",
-                      userRole === "user"
-                        ? "text-blue-600"
-                        : userRole === "staff"
-                        ? "text-indigo-600"
-                        : userRole === "admin"
-                        ? "text-violet-600"
-                        : "text-amber-600"
-                    )}
+                    className={cn("text-xs capitalize truncate text-blue-600")}
                   >
                     {user?.role}
                   </span>
@@ -445,8 +396,8 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="ml-auto h-7 w-7 rounded-full text-muted-foreground hover:bg-primary-100 hover:text-primary-700"
-                  onClick={() => logout()}
+                  className="ml-auto h-7 w-7 rounded-full text-muted-foreground hover:bg-primary-100 hover:text-primary-700 cursor-pointer"
+                  onClick={handleLogout}
                 >
                   <LogOut className="h-4 w-4" />
                   <span className="sr-only">Logout</span>
@@ -464,28 +415,11 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
             >
               <Avatar
                 className={cn(
-                  "h-8 w-8 border cursor-pointer",
-                  userRole === "user"
-                    ? "border-blue-200 bg-blue-50"
-                    : userRole === "staff"
-                    ? "border-indigo-200 bg-indigo-50"
-                    : userRole === "admin"
-                    ? "border-violet-200 bg-violet-50"
-                    : "border-amber-200 bg-amber-50"
+                  "h-8 w-8 border cursor-pointer border-blue-200 bg-blue-50"
                 )}
-                onClick={() => logout()}
+                onClick={handleLogout}
               >
-                <AvatarFallback
-                  className={cn(
-                    userRole === "user"
-                      ? "text-blue-700"
-                      : userRole === "staff"
-                      ? "text-indigo-700"
-                      : userRole === "admin"
-                      ? "text-violet-700"
-                      : "text-amber-700"
-                  )}
-                >
+                <AvatarFallback className="text-blue-700">
                   {user?.name?.charAt(0) || "U"}
                 </AvatarFallback>
               </Avatar>
