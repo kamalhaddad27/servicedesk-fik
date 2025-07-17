@@ -14,9 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { User } from "lucide-react";
+import { User2 } from "lucide-react";
 import { FullTicket } from "./ticket-detail";
-import { StatusTicket, PriorityTicket } from "@prisma/client";
+import { StatusTicket, PriorityTicket, User } from "@prisma/client";
 import { formatDate } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 
@@ -25,6 +25,7 @@ interface TicketInfoCardProps {
   canEdit: boolean;
   isUpdating: boolean;
   isDirty: boolean;
+  currentUser: User | null;
   staffList: { id: string; name: string | null }[];
   draftStatus?: StatusTicket;
   draftPriority?: PriorityTicket;
@@ -39,6 +40,7 @@ export function TicketInfoCard({
   ticket,
   canEdit,
   isUpdating,
+  currentUser,
   isDirty,
   staffList,
   draftStatus,
@@ -92,40 +94,43 @@ export function TicketInfoCard({
               <SelectItem value="all">Semua Prioritas</SelectItem>
               <SelectItem value={PriorityTicket.low}>Low</SelectItem>
               <SelectItem value={PriorityTicket.medium}>Medium</SelectItem>
-              <SelectItem value={PriorityTicket.hight}>High</SelectItem>
+              <SelectItem value={PriorityTicket.high}>High</SelectItem>
               <SelectItem value={PriorityTicket.urgent}>Urgent</SelectItem>
             </SelectContent>
           </Select>
         </div>
-        <div>
-          <h3 className="text-xs font-medium text-muted-foreground mb-1">
-            Ditangani oleh
-          </h3>
-          <Select
-            value={draftAssigneeId || ""}
-            onValueChange={(v) => setDraftAssigneeId(v)}
-            disabled={!canEdit || isUpdating}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Tugaskan ke staf..." />
-            </SelectTrigger>
-            <SelectContent>
-              {staffList.map((staff) => (
-                <SelectItem key={staff.id} value={staff.id}>
-                  {staff.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
+
+        {currentUser?.role === "admin" && (
+          <div>
+            <h3 className="text-xs font-medium text-muted-foreground mb-1">
+              Ditangani oleh
+            </h3>
+            <Select
+              value={draftAssigneeId || ""}
+              onValueChange={(v) => setDraftAssigneeId(v)}
+              disabled={!canEdit || isUpdating}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Tugaskan ke staf..." />
+              </SelectTrigger>
+              <SelectContent>
+                {staffList.map((staff) => (
+                  <SelectItem key={staff.id} value={staff.id}>
+                    {staff.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         <div>
           <h3 className="text-xs font-medium text-muted-foreground">
             Kategori
           </h3>
           <p className="mt-1 text-sm">
-            {ticket.category}
-            {ticket.subcategory && ` > ${ticket.subcategory}`}
+            {ticket.category.name}
+            {ticket.subcategory.name && ` > ${ticket.subcategory}`}
           </p>
         </div>
         {ticket.department && (
@@ -142,7 +147,7 @@ export function TicketInfoCard({
               Dibuat oleh
             </h3>
             <div className="mt-1 flex items-center">
-              <User className="h-4 w-4 mr-2 text-muted-foreground" />
+              <User2 className="h-4 w-4 mr-2 text-muted-foreground" />
               <p className="text-sm">{ticket.user?.name}</p>
             </div>
           </div>
@@ -152,7 +157,7 @@ export function TicketInfoCard({
                 Ditangani oleh
               </h3>
               <div className="mt-1 flex items-center">
-                <User className="h-4 w-4 mr-2 text-muted-foreground" />
+                <User2 className="h-4 w-4 mr-2 text-muted-foreground" />
                 <p className="text-sm">{ticket.assignedTo?.name}</p>
               </div>
             </div>

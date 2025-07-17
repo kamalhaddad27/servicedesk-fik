@@ -32,7 +32,7 @@ const messageFormSchema = z.object({
 });
 
 interface TicketMessagesProps {
-  ticketId: string;
+  ticketId: number;
 }
 
 export function TicketMessages({ ticketId }: TicketMessagesProps) {

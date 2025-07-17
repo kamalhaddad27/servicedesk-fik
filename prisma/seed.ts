@@ -93,6 +93,69 @@ async function main() {
     console.log(`User dibuat/diperbarui: ${user.name} (${user.email})`);
   }
 
+  // SEEDING CATEGORY DAN SUBCATEGORY
+  const categoriesData = [
+    {
+      name: "Hardware",
+      subcategories: [
+        "Komputer/Laptop",
+        "Printer",
+        "Proyektor",
+        "Perangkat Jaringan",
+      ],
+    },
+    {
+      name: "Software",
+      subcategories: [
+        "Aplikasi Error",
+        "Instalasi Software",
+        "Update Sistem Operasi",
+      ],
+    },
+    {
+      name: "Akun & Akses",
+      subcategories: ["Reset Password", "Aktivasi Akun", "Hak Akses Folder"],
+    },
+  ];
+
+  for (const catData of categoriesData) {
+    const category = await prisma.category.upsert({
+      where: { name: catData.name },
+      update: {},
+      create: { name: catData.name },
+    });
+    console.log(`✅ Kategori di-upsert: ${category.name}`);
+
+    if (catData.subcategories && catData.subcategories.length > 0) {
+      for (const subName of catData.subcategories) {
+        await prisma.subcategory.upsert({
+          where: {
+            name_categoryId: { name: subName, categoryId: category.id },
+          },
+          update: {},
+          create: {
+            name: subName,
+            categoryId: category.id,
+          },
+        });
+      }
+    }
+  }
+
+  // --- Ambil data master yang baru dibuat untuk seeding tiket ---
+  const softwareCategory = await prisma.category.findUnique({
+    where: { name: "Software" },
+  });
+  const hardwareCategory = await prisma.category.findUnique({
+    where: { name: "Hardware" },
+  });
+  const instalasiSubcategory = await prisma.subcategory.findFirst({
+    where: { name: "Instalasi Software" },
+  });
+  const proyektorSubcategory = await prisma.subcategory.findFirst({
+    where: { name: "Proyektor" },
+  });
+
   // SEED TICKER
   const adminUser = await prisma.user.findUnique({
     where: { email: "admin@university.ac.id" },
@@ -107,70 +170,51 @@ async function main() {
     where: { email: "dian.mahasiswa@student.university.ac.id" },
   });
 
-  // Pastikan semua user ditemukan sebelum melanjutkan
-  if (!adminUser || !staffLabUser || !staffTuUser || !mahasiswaUser) {
+  // Pastikan semua user, kategori, dan subkategori dibuat sebelum melanjutkan
+  if (
+    !mahasiswaUser ||
+    !staffTuUser ||
+    !staffLabUser ||
+    !adminUser ||
+    !softwareCategory ||
+    !hardwareCategory ||
+    !instalasiSubcategory ||
+    !proyektorSubcategory
+  ) {
     throw new Error(
-      "Satu atau lebih pengguna tidak ditemukan. Jalankan seed user terlebih dahulu."
+      "Satu atau lebih data master untuk seed tiket tidak ditemukan."
     );
   }
 
   // Data tiket yang akan di-seed
   const ticketsToSeed = [
     {
-      subject: "Tidak bisa akses Wi-Fi di Perpustakaan",
-      description:
-        "Koneksi Wi-Fi 'Uni-Hotspot' terus menerus terputus saat saya coba hubungkan dari area perpustakaan lantai 2.",
-      status: StatusTicket.pending,
-      priority: PriorityTicket.medium,
-      department: "IT Support",
-      category: "Jaringan",
-      subcategory: "Wi-Fi",
-      type: "Permintaan Layanan",
-      userId: mahasiswaUser.id, // Tiket dibuat oleh mahasiswa
-      assignedToId: staffLabUser.id, // Ditugaskan ke staf lab
-    },
-    {
       subject: "Permintaan Instalasi Software SPSS",
       description:
-        "Saya memerlukan software SPSS versi terbaru untuk mata kuliah statistik. Mohon bantuannya untuk diinstal di komputer lab 3.",
+        "Saya memerlukan software SPSS versi terbaru untuk mata kuliah statistik.",
       status: StatusTicket.progress,
       priority: PriorityTicket.low,
       department: "Laboratorium Komputer",
-      category: "Software",
-      subcategory: "Instalasi",
       type: "Permintaan Layanan",
       userId: mahasiswaUser.id,
       assignedToId: staffLabUser.id,
+      categoryId: softwareCategory.id,
+      subcategoryId: instalasiSubcategory.id,
     },
     {
       subject: "LCD Proyektor di Ruang Kelas 101 Mati",
-      description:
-        "Proyektor di ruang 101 tidak mau menyala sama sekali. Sudah coba ganti kabel power tapi tetap tidak berhasil.",
+      description: "Proyektor di ruang 101 tidak mau menyala sama sekali.",
       status: StatusTicket.done,
-      priority: PriorityTicket.hight,
+      priority: PriorityTicket.high,
       department: "Sarana & Prasarana",
-      category: "Hardware",
-      subcategory: "Proyektor",
       type: "Laporan Insiden",
-      userId: staffTuUser.id, // Tiket dibuat oleh staf TU
-      assignedToId: adminUser.id, // Ditugaskan ke admin
-    },
-    {
-      subject: "Error saat membuka Sistem Informasi Akademik",
-      description:
-        "Saat saya mencoba login ke SIA, muncul pesan error '503 Service Unavailable'.",
-      status: StatusTicket.pending,
-      priority: PriorityTicket.urgent,
-      department: "IT Support",
-      category: "Aplikasi",
-      subcategory: "Sistem Informasi",
-      type: "Laporan Insiden",
-      userId: mahasiswaUser.id,
-      // Tiket ini belum di-assign, jadi assignedToId null
+      userId: staffTuUser.id,
+      assignedToId: adminUser.id,
+      categoryId: hardwareCategory.id,
+      subcategoryId: proyektorSubcategory.id,
     },
   ];
 
-  // Looping dan buat tiket menggunakan create
   for (const ticketData of ticketsToSeed) {
     const ticket = await prisma.ticket.create({
       data: ticketData,

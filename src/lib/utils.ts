@@ -56,7 +56,7 @@ export function getTicketPriorityColor(priority: PriorityTicket) {
       return "bg-sky-200";
     case "medium":
       return "bg-amber-200";
-    case "hight":
+    case "high":
       return "bg-orange-200";
     case "urgent":
       return "bg-red-200";

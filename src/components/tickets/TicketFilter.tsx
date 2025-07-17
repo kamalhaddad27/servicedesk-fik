@@ -82,7 +82,7 @@ export function TicketFilters() {
             <SelectItem value="all">Semua Prioritas</SelectItem>
             <SelectItem value={PriorityTicket.low}>Low</SelectItem>
             <SelectItem value={PriorityTicket.medium}>Medium</SelectItem>
-            <SelectItem value={PriorityTicket.hight}>High</SelectItem>
+            <SelectItem value={PriorityTicket.high}>High</SelectItem>
             <SelectItem value={PriorityTicket.urgent}>Urgent</SelectItem>
           </SelectContent>
         </Select>

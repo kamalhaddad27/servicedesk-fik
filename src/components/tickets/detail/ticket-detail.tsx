@@ -3,16 +3,12 @@
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { motion } from "framer-motion";
-
-// Tipe Data
 import {
   Ticket,
   TicketMessage,
   StatusTicket,
   PriorityTicket,
 } from "@prisma/client";
-
-// Komponen Anak
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { TicketHeader } from "./ticket-header";
 import { TicketMainCard } from "./ticket-main-card";
@@ -25,11 +21,12 @@ import {
   UpdateTicketPayload,
 } from "@/lib/action/ticket-update.action";
 
-// Definisikan tipe lengkap untuk tiket agar bisa di-impor oleh komponen anak
 export type FullTicket = Ticket & {
   user: { name: string | null; email: string | null };
   assignedTo: { name: string | null; email: string | null } | null;
   message: (TicketMessage & { user: { name: string | null; role: string } })[];
+  category: { name: string };
+  subcategory: { name: string };
 };
 
 export function TicketDetail({ ticketId }: { ticketId: string }) {
@@ -40,8 +37,6 @@ export function TicketDetail({ ticketId }: { ticketId: string }) {
   >([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isUpdating, setIsUpdating] = useState(false);
-
-  // State untuk menampung perubahan (draft)
   const [draftStatus, setDraftStatus] = useState<StatusTicket | undefined>();
   const [draftPriority, setDraftPriority] = useState<
     PriorityTicket | undefined
@@ -50,7 +45,6 @@ export function TicketDetail({ ticketId }: { ticketId: string }) {
     string | null | undefined
   >();
 
-  // Ambil data tiket dan daftar staf saat komponen dimuat
   useEffect(() => {
     const fetchInitialData = async () => {
       setIsLoading(true);
@@ -65,7 +59,6 @@ export function TicketDetail({ ticketId }: { ticketId: string }) {
     fetchInitialData();
   }, [ticketId]);
 
-  // Sinkronkan state draft dengan data tiket asli saat data berubah
   useEffect(() => {
     if (ticket) {
       setDraftStatus(ticket.status);
@@ -129,6 +122,7 @@ export function TicketDetail({ ticketId }: { ticketId: string }) {
         <TicketInfoCard
           ticket={ticket}
           canEdit={canEdit}
+          currentUser={currentUser}
           isUpdating={isUpdating}
           isDirty={isDirty}
           staffList={staffList}

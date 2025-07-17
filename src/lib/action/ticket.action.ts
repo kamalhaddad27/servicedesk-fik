@@ -15,7 +15,7 @@ interface GetTicketsParams {
 
 export async function getTickets({
   page = 1,
-  limit = 10, // Default 10 item per halaman
+  limit = 10,
   query,
   status,
   priority,
@@ -53,7 +53,6 @@ export async function getTickets({
       Object.assign(where, filterConditions);
     }
 
-    // 4. Gunakan $transaction untuk mengambil data dan total hitungan secara efisien
     const [tickets, totalItems] = await prisma.$transaction([
       prisma.ticket.findMany({
         where,
@@ -65,15 +64,15 @@ export async function getTickets({
         include: {
           user: { select: { name: true } },
           assignedTo: { select: { name: true } },
+          category: { select: { name: true } },
+          subcategory: { select: { name: true } },
         },
       }),
       prisma.ticket.count({ where }),
     ]);
 
-    // 5. Hitung total halaman
     const totalPages = Math.ceil(totalItems / limit);
 
-    // 6. Kembalikan data beserta informasi paginasi
     return {
       data: tickets,
       totalPages,

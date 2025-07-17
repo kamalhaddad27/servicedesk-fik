@@ -14,6 +14,7 @@ import { TicketFilters } from "@/components/tickets/TicketFilter";
 type TicketData = Ticket & {
   user: { name: string | null };
   assignedTo: { name: string | null } | null;
+  category: { name: string };
 };
 
 function TicketsPageClient() {

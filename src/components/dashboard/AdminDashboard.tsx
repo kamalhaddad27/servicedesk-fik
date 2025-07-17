@@ -57,7 +57,10 @@ interface IAdminDashboard {
   totalUsers: number;
   ticketsByStatus: { status: StatusTicket; count: number }[];
   ticketsByPriority: { priority: PriorityTicket; count: number }[];
-  recentTickets: (Ticket & { user: { name: string | null } })[];
+  recentTickets: (Ticket & {
+    user: { name: string | null };
+    category: { name: string };
+  })[];
 }
 
 export function AdminDashboard({ stats }: { stats: IAdminDashboard }) {
@@ -244,7 +247,7 @@ export function AdminDashboard({ stats }: { stats: IAdminDashboard }) {
                       <div className="flex items-center gap-2 text-xs text-muted-foreground">
                         <span>#{ticket.id.slice(-6).toUpperCase()}</span>
                         <span>•</span>
-                        <span>{ticket.category}</span>
+                        <span>{ticket.category.name}</span>
                         <span>•</span>
                         <span>
                           {ticket.user?.name ? `Dari: ${ticket.user.name}` : ""}

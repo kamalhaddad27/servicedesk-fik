@@ -20,6 +20,7 @@ interface TicketListProps {
   tickets: (Ticket & {
     user: { name: string | null };
     assignedTo: { name: string | null } | null;
+    category: { name: string };
   })[];
 }
 
@@ -79,7 +80,7 @@ export function TicketList({ tickets }: TicketListProps) {
                 </div>
               </div>
               <CardDescription>
-                Tiket #{ticket.id.slice(-6).toUpperCase()} • {ticket.category}
+                Tiket #{ticket.id.slice(-6).toUpperCase()} • {ticket.categoryId}
               </CardDescription>
             </CardHeader>
             <CardContent className="pb-2">

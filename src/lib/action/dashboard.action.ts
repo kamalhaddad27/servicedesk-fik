@@ -63,6 +63,7 @@ export async function getAdminDashboardStats() {
       },
       include: {
         user: { select: { name: true } },
+        category: { select: { name: true } },
       },
     });
 
@@ -110,7 +111,7 @@ export async function getStaffDashboardStats() {
       where: {
         assignedToId: user.id,
         status: { not: StatusTicket.done },
-        priority: { in: [PriorityTicket.urgent, PriorityTicket.hight] },
+        priority: { in: [PriorityTicket.urgent, PriorityTicket.high] },
       },
     });
 

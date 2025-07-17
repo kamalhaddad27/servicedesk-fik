@@ -23,7 +23,7 @@ enum StatusTicket {
 enum PriorityTicket {
   low
   medium
-  hight
+  high
   urgent
 }
 
@@ -64,8 +64,8 @@ model Ticket {
   subject       String
   description   String    @db.Text
   department    String
-  category      String
-  subcategory   String
+  categoryId    String
+  subcategoryId String? 
   type          String
   userId        String
   assignedToId  String? 
@@ -74,6 +74,8 @@ model Ticket {
 
   assignedTo    User?     @relation("AssignedTickets", fields: [assignedToId], references: [id])
   user          User      @relation("CreatedTickets", fields: [userId], references: [id])
+  category      Category       @relation(fields: [categoryId], references: [id])
+  subcategory   Subcategory?   @relation(fields: [subcategoryId], references: [id])
 
   message       TicketMessage[]
 }
@@ -89,6 +91,26 @@ model TicketMessage {
 
   ticket        Ticket    @relation(fields: [ticketId], references: [id])
   user          User      @relation(fields: [userId], references: [id])
+}
+
+model Category {
+  id            String        @id @default(cuid())
+  name          String        @unique
+  
+  subcategories Subcategory[]
+  tickets       Ticket[]
+}
+
+model Subcategory {
+  id   String @id @default(cuid())
+  name String
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  tickets    Ticket[]
+
+   @@unique([name, categoryId])
 }
 
 model Setting {
