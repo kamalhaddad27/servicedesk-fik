@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -20,174 +20,123 @@ import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox"; // Import the proper Checkbox component
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 import { formatDate, formatRelativeTime } from "@/lib/utils";
-import { AlertCircle, Paperclip, Send, Upload, X } from "lucide-react";
+import { AlertCircle, EyeOff, Paperclip, Send, Upload, X } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import type { MessageFormValues } from "@/types";
 import { useSession } from "@/context/SessionContext";
+import { RoleUser, TicketMessage } from "@prisma/client";
+import {
+  addTicketMessage,
+  getTicketMessages,
+} from "@/lib/action/message.action";
+import { toast } from "sonner";
+import { messageSchema, TMassageSchema } from "@/lib/validator/message";
 
 // Form schema
-const messageFormSchema = z.object({
-  message: z.string().min(1, { message: "Pesan tidak boleh kosong" }),
-  isInternal: z.boolean().default(false),
-});
+// Tipe untuk pesan yang sudah digabung dengan info pengirim
+type MessageWithSender = TicketMessage & {
+  user: { name: string | null; role: RoleUser };
+};
 
 interface TicketMessagesProps {
-  ticketId: number;
+  ticketId: string;
 }
 
 export function TicketMessages({ ticketId }: TicketMessagesProps) {
-  const { user } = useSession();
-  const userRole = user?.role;
-  const { useTicketMessages, addMessage } = useTickets();
-  const [files, setFiles] = useState<File[]>([]);
+  const { user: currentUser } = useSession();
+  const [messages, setMessages] = useState<MessageWithSender[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Fetch ticket messages
-  const {
-    data: messages = [],
-    isLoading,
-    isError,
-    error,
-  } = useTicketMessages(ticketId);
-
-  // Form definition
-  const form = useForm<MessageFormValues>({
-    resolver: zodResolver(messageFormSchema),
-    defaultValues: {
-      message: "",
-      isInternal: false,
-    },
+  const form = useForm({
+    resolver: zodResolver(messageSchema),
+    defaultValues: { message: "", isInternal: false },
   });
 
-  // Handle file selection
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      setFiles((prev) => [...prev, ...newFiles]);
-    }
-  };
+  // Ambil data pesan saat komponen dimuat
+  useEffect(() => {
+    const fetchMessages = async () => {
+      const result = await getTicketMessages(ticketId);
+      if (result.success) {
+        setMessages(result.data as MessageWithSender[]);
+      }
+      setIsLoading(false);
+    };
+    fetchMessages();
+  }, [ticketId]);
 
-  // Remove file
-  const removeFile = (index: number) => {
-    setFiles((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  // Form submission
-  const onSubmit = async (values: MessageFormValues) => {
-    const formData = new FormData();
-
-    // Add form values to FormData
-    formData.append("message", values.message);
-    formData.append("isInternal", String(values.isInternal));
-
-    // Add files to FormData
-    files.forEach((file) => {
-      formData.append("attachments", file);
+  // Handler untuk submit form
+  const onSubmit = async (values: TMassageSchema) => {
+    const result = await addTicketMessage({
+      ticketId,
+      message: values.message,
+      isInternal: values.isInternal,
     });
 
-    try {
-      await addMessage.mutateAsync({
-        ticketId,
-        formData,
-      });
+    if (result.success && result.data) {
+      toast.success(result.message);
+      setMessages((prev) => [...prev, result.data as MessageWithSender]);
       form.reset();
-      setFiles([]);
-    } catch (error) {
-      console.error("Error adding message:", error);
+    } else {
+      toast.error(result.message);
     }
   };
 
-  if (isLoading) {
-    return <LoadingSpinner />;
-  }
+  const canSendInternal =
+    currentUser?.role === "admin" || currentUser?.role === "staff";
 
-  if (isError) {
+  if (isLoading)
     return (
-      <Alert variant="destructive">
-        <AlertCircle className="h-4 w-4" />
-        <AlertDescription>
-          {error instanceof Error
-            ? error.message
-            : "Gagal memuat pesan. Silakan coba lagi nanti."}
-        </AlertDescription>
-      </Alert>
+      <p className="text-sm text-muted-foreground mt-4">Memuat pesan...</p>
     );
-  }
 
   return (
     <div className="mt-4 space-y-6">
       <div className="space-y-4">
         {messages.length === 0 ? (
-          <div className="rounded-md bg-muted p-4 text-center">
-            <p className="text-sm text-muted-foreground">
-              Belum ada pesan untuk tiket ini.
-            </p>
+          <div className="text-center py-6 text-muted-foreground">
+            Belum ada pesan.
           </div>
         ) : (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ staggerChildren: 0.05 }}
-            className="space-y-4"
-          >
-            {messages.map((message) => (
-              <motion.div
-                key={message.id}
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className={`rounded-lg p-4 ${
+          messages.map((message) => (
+            <div
+              key={message.id}
+              className={`flex gap-3 ${
+                message.userId === currentUser?.id
+                  ? "justify-end"
+                  : "justify-start"
+              }`}
+            >
+              <div
+                className={`max-w-md rounded-lg p-3 ${
                   message.isInternal
-                    ? "bg-yellow-50 border border-yellow-200"
+                    ? "bg-amber-100 border border-amber-200"
+                    : message.userId === currentUser?.id
+                    ? "bg-amber-400 text-primary-foreground"
                     : "bg-muted"
                 }`}
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center">
-                    <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                      {message.sender?.name.charAt(0) || "U"}
-                    </div>
-                    <div className="ml-2">
-                      <p className="text-sm font-medium">
-                        {message.sender?.name || "Unknown"}
-                      </p>
-                      <p className="text-xs text-muted-foreground">
-                        {formatDate(message.createdAt, "dd MMM yyyy, HH:mm")} (
-                        {formatRelativeTime(message.createdAt)})
-                      </p>
-                    </div>
-                  </div>
+                <div className="flex items-center justify-between text-xs font-medium mb-1">
+                  <p>{message.user?.name}</p>
                   {message.isInternal && (
-                    <span className="rounded-full bg-yellow-100 px-2 py-1 text-xs text-yellow-800">
-                      Internal
-                    </span>
+                    <EyeOff className="h-4 w-4 text-amber-600 ml-2" />
                   )}
                 </div>
-                <div className="mt-2 whitespace-pre-wrap text-sm">
-                  {message.message}
-                </div>
-                {message.attachments && message.attachments.length > 0 && (
-                  <div className="mt-3 space-y-2">
-                    <p className="text-xs font-medium text-muted-foreground">
-                      Lampiran:
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {message.attachments.map((attachment) => (
-                        <a
-                          key={attachment.id}
-                          href={attachment.fileUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center rounded-md bg-background px-2 py-1 text-xs hover:bg-accent"
-                        >
-                          <Paperclip className="mr-1 h-3 w-3" />
-                          {attachment.fileName}
-                        </a>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </motion.div>
-            ))}
-          </motion.div>
+                <p className="whitespace-pre-wrap text-sm">{message.message}</p>
+                <p
+                  className={`text-xs mt-2 opacity-70 ${
+                    message.userId === currentUser?.id
+                      ? "text-right"
+                      : "text-left"
+                  }`}
+                >
+                  {new Date(message.createdAt).toLocaleTimeString("id-ID", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </div>
+            </div>
+          ))
         )}
       </div>
 
@@ -200,95 +149,35 @@ export function TicketMessages({ ticketId }: TicketMessagesProps) {
               render={({ field }) => (
                 <FormItem>
                   <FormControl>
-                    <Textarea
-                      placeholder="Tulis pesan Anda di sini..."
-                      className="min-h-24"
-                      {...field}
-                    />
+                    <Textarea placeholder="Tulis balasan Anda..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            {(userRole === "user" || userRole === "admin") && (
+            {canSendInternal && (
               <FormField
                 control={form.control}
                 name="isInternal"
                 render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-2 space-y-0">
+                  <FormItem className="flex items-center gap-2 space-y-0">
                     <FormControl>
                       <Checkbox
                         checked={field.value}
                         onCheckedChange={field.onChange}
-                        id="isInternal"
                       />
                     </FormControl>
-                    <label
-                      htmlFor="isInternal"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      Pesan internal (hanya dapat dilihat oleh staf)
+                    <label className="text-sm font-medium">
+                      Jadikan pesan internal
                     </label>
                   </FormItem>
                 )}
               />
             )}
-
-            <div>
-              <div className="flex items-center gap-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() =>
-                    document.getElementById("message-file-upload")?.click()
-                  }
-                >
-                  <Upload className="mr-2 h-4 w-4" />
-                  Lampirkan File
-                </Button>
-                <input
-                  id="message-file-upload"
-                  type="file"
-                  className="hidden"
-                  multiple
-                  onChange={handleFileChange}
-                />
-              </div>
-
-              {files.length > 0 && (
-                <div className="mt-2 space-y-2">
-                  <p className="text-xs font-medium">File yang dipilih:</p>
-                  <div className="space-y-2">
-                    {files.map((file, index) => (
-                      <div
-                        key={index}
-                        className="flex items-center justify-between rounded-md bg-muted p-2 text-xs"
-                      >
-                        <span className="truncate max-w-[250px]">
-                          {file.name}
-                        </span>
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => removeFile(index)}
-                        >
-                          <X className="h-3 w-3" />
-                          <span className="sr-only">Remove file</span>
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
             <div className="flex justify-end">
-              <Button type="submit" disabled={addMessage.isPending}>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
                 <Send className="mr-2 h-4 w-4" />
-                {addMessage.isPending ? "Mengirim..." : "Kirim Pesan"}
+                {form.formState.isSubmitting ? "Mengirim..." : "Kirim"}
               </Button>
             </div>
           </form>

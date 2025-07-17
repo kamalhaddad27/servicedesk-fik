@@ -57,48 +57,54 @@ export function TicketInfoCard({
         <CardTitle className="text-sm font-medium">Informasi Tiket</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        <div>
-          <h3 className="text-xs font-medium text-muted-foreground mb-1">
-            Status
-          </h3>
-          <Select
-            value={draftStatus}
-            onValueChange={(v) => setDraftStatus(v as StatusTicket)}
-            disabled={!canEdit || isUpdating}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Semua Status</SelectItem>
-              <SelectItem value={StatusTicket.pending}>Pending</SelectItem>
-              <SelectItem value={StatusTicket.progress}>In Progress</SelectItem>
-              <SelectItem value={StatusTicket.done}>Completed</SelectItem>
-              <SelectItem value={StatusTicket.cancel}>Cancelled</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-        <div>
-          <h3 className="text-xs font-medium text-muted-foreground mb-1">
-            Prioritas
-          </h3>
-          <Select
-            value={draftPriority}
-            onValueChange={(v) => setDraftPriority(v as PriorityTicket)}
-            disabled={!canEdit || isUpdating}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">Semua Prioritas</SelectItem>
-              <SelectItem value={PriorityTicket.low}>Low</SelectItem>
-              <SelectItem value={PriorityTicket.medium}>Medium</SelectItem>
-              <SelectItem value={PriorityTicket.high}>High</SelectItem>
-              <SelectItem value={PriorityTicket.urgent}>Urgent</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+        {currentUser?.role !== "user" && (
+          <>
+            <div>
+              <h3 className="text-xs font-medium text-muted-foreground mb-1">
+                Status
+              </h3>
+              <Select
+                value={draftStatus}
+                onValueChange={(v) => setDraftStatus(v as StatusTicket)}
+                disabled={!canEdit || isUpdating}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Status</SelectItem>
+                  <SelectItem value={StatusTicket.pending}>Pending</SelectItem>
+                  <SelectItem value={StatusTicket.progress}>
+                    In Progress
+                  </SelectItem>
+                  <SelectItem value={StatusTicket.done}>Completed</SelectItem>
+                  <SelectItem value={StatusTicket.cancel}>Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <h3 className="text-xs font-medium text-muted-foreground mb-1">
+                Prioritas
+              </h3>
+              <Select
+                value={draftPriority}
+                onValueChange={(v) => setDraftPriority(v as PriorityTicket)}
+                disabled={!canEdit || isUpdating}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Semua Prioritas</SelectItem>
+                  <SelectItem value={PriorityTicket.low}>Low</SelectItem>
+                  <SelectItem value={PriorityTicket.medium}>Medium</SelectItem>
+                  <SelectItem value={PriorityTicket.high}>High</SelectItem>
+                  <SelectItem value={PriorityTicket.urgent}>Urgent</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </>
+        )}
 
         {currentUser?.role === "admin" && (
           <div>

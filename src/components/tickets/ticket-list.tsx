@@ -12,7 +12,11 @@ import {
 } from "../ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { getTicketStatusColor, getTicketPriorityColor } from "@/lib/utils";
+import {
+  getTicketStatusColor,
+  getTicketPriorityColor,
+  formatDate,
+} from "@/lib/utils";
 import { PlusCircle, TicketIcon } from "lucide-react";
 import { Ticket } from "@prisma/client";
 
@@ -98,7 +102,7 @@ export function TicketList({ tickets }: TicketListProps) {
               </div>
               <p className="text-xs text-muted-foreground">
                 Dibuat pada:{" "}
-                {new Date(ticket.createdAt).toLocaleDateString("id-ID")}
+                {formatDate(ticket.createdAt, "dd MMMM yyyy, HH:mm")}
               </p>
             </CardFooter>
           </Card>

@@ -16,6 +16,7 @@ import {
   formatDate,
 } from "@/lib/utils";
 import { FullTicket } from "./ticket-detail"; // Impor tipe dari komponen utama
+import { TicketMessages } from "./ticket-messages";
 
 interface TicketMainCardProps {
   ticket: FullTicket;
@@ -59,10 +60,7 @@ export function TicketMainCard({ ticket }: TicketMainCardProps) {
             </p>
           </TabsContent>
           <TabsContent value="messages">
-            {/* <TicketMessages ticketId={ticket.id} /> */}
-            <p className="mt-4 text-sm text-muted-foreground">
-              Komponen pesan akan ditampilkan di sini.
-            </p>
+            <TicketMessages ticketId={ticket.id} />
           </TabsContent>
           <TabsContent value="history">
             <p className="mt-4 text-sm text-muted-foreground">

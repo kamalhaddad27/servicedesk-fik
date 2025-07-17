@@ -208,7 +208,7 @@ async function main() {
       priority: PriorityTicket.high,
       department: "Sarana & Prasarana",
       type: "Laporan Insiden",
-      userId: staffTuUser.id,
+      userId: mahasiswaUser.id,
       assignedToId: staffTuUser.id,
       categoryId: hardwareCategory.id,
       subcategoryId: proyektorSubcategory.id,

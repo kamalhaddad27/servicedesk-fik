@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { TicketDetail } from "@/components/tickets/detail/ticket-detail";
+import { TicketDetail } from "@/components/tickets/ticket-detail";
 import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 export default function TicketDetailPage() {

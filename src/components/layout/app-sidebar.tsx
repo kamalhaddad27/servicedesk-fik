@@ -170,7 +170,7 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
           },
           {
             name: "FAQ",
-            href: "/help/faq",
+            href: "/help/contact",
             icon: <HelpCircle className="h-4 w-4" />,
             color: "text-amber-500",
           },
@@ -282,25 +282,11 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
     </Link>
   );
 
-  // Get a theme color class based on role
-  const getRoleThemeClass = () => {
-    switch (userRole) {
-      case "user":
-        return "from-blue-500/5 to-green-500/5 border-blue-500/10";
-      case "admin":
-        return "from-violet-500/5 to-fuchsia-500/5 border-violet-500/10";
-      case "staff":
-        return "from-amber-500/5 to-red-500/5 border-amber-500/10";
-      default:
-        return "from-gray-500/5 to-gray-500/5 border-gray-500/10";
-    }
-  };
-
   return (
     <aside
       className={cn(
         "sidebar h-full flex flex-col border-r bg-gradient-to-b",
-        getRoleThemeClass(),
+        "from-violet-500/5 to-fuchsia-500/5 border-violet-500/10",
         isOpen
           ? "w-[var(--sidebar-width)]"
           : "w-[var(--sidebar-collapsed-width)]",
@@ -311,7 +297,7 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
       <div
         className={cn(
           "flex items-center h-14 px-3 border-b",
-          getRoleThemeClass()
+          "from-violet-500/5 to-fuchsia-500/5 border-violet-500/10"
         )}
       >
         <Link href="/dashboard" className="flex items-center gap-2">
@@ -403,7 +389,12 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
       </div>
 
       {/* Profile section with role-specific styling */}
-      <div className={cn("border-t p-2 mt-auto", getRoleThemeClass())}>
+      <div
+        className={cn(
+          "border-t p-2 mt-auto",
+          "from-violet-500/5 to-fuchsia-500/5 border-violet-500/10"
+        )}
+      >
         <AnimatePresence mode="wait">
           {isOpen ? (
             <motion.div
