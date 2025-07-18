@@ -225,3 +225,33 @@ export async function createTicket(values: TCreateTicketSchema) {
     return { error: error.message || "Gagal membuat tiket." };
   }
 }
+
+export async function getRelatedTickets(userId: string) {
+  try {
+    // Cek izin, hanya admin yang boleh melihat tiket orang lain
+    const currentUser = await getProfile();
+    if (
+      !currentUser ||
+      (currentUser.role !== "admin" && currentUser.id !== userId)
+    ) {
+      throw new Error("Akses ditolak.");
+    }
+
+    const tickets = await prisma.ticket.findMany({
+      where: {
+        OR: [{ userId: userId }, { assignedToId: userId }],
+      },
+      orderBy: {
+        updatedAt: "desc",
+      },
+      take: 10,
+      include: {
+        category: { select: { name: true } },
+      },
+    });
+
+    return { success: true, data: tickets };
+  } catch (error: any) {
+    return { success: false, message: error.message, data: [] };
+  }
+}

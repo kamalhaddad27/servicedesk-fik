@@ -20,6 +20,7 @@ import {
   GraduationCap,
   Calendar,
 } from "lucide-react";
+import { UserTicketsTab } from "./user-tickets-tab";
 
 interface UserProfileCardProps {
   user: UserWithCounts;
@@ -107,9 +108,7 @@ export function UserProfileCard({ user }: UserProfileCardProps) {
 
           {/* Placeholder untuk Tab lainnya */}
           <TabsContent value="tickets">
-            <div className="mt-4 text-center text-muted-foreground">
-              Daftar tiket terkait akan ditampilkan di sini.
-            </div>
+            <UserTicketsTab userId={user.id} />
           </TabsContent>
         </Tabs>
       </CardContent>
