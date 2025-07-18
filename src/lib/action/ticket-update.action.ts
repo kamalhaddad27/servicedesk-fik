@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { StatusTicket, PriorityTicket } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { getProfile } from "./user.action";
+import { createNotification } from "./notification.action";
 
 // Helper function untuk cek izin
 async function checkPermission(ticketId: string) {
@@ -39,6 +40,23 @@ export async function updateTicketDetails({
       where: { id: ticketId },
       data: payload,
     });
+
+    if (payload.assignedToId) {
+      const ticket = await prisma.ticket.findUnique({
+        where: { id: ticketId },
+        select: { subject: true },
+      });
+      await createNotification({
+        userId: payload.assignedToId,
+        title: "Anda Mendapat Tugas Baru",
+        message: `Anda telah ditugaskan untuk menangani tiket "${ticket?.subject.substring(
+          0,
+          30
+        )}...".`,
+        url: `/tickets/${ticketId}`,
+        type: "TICKET",
+      });
+    }
 
     revalidatePath(`/tickets/${ticketId}`);
     revalidatePath("/dashboard");

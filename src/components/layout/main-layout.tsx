@@ -17,55 +17,57 @@ type MainLayoutProps = {
 };
 
 export function MainLayout({ children }: MainLayoutProps) {
-  const { isMobile } = useMobile();
   const pathname = usePathname();
+  const [isMobile, setIsMobile] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const { user, isLoading } = useSession();
 
-  // Load sidebar preference on mount and check for mobile
   useEffect(() => {
-    const savedState = localStorage.getItem("sidebar-state");
-    if (window.innerWidth >= 768) {
-      setSidebarOpen(savedState ? savedState === "open" : true);
-    } else {
-      setSidebarOpen(false);
-    }
+    const checkScreenSize = () => {
+      const mobile = window.innerWidth < 768;
+      setIsMobile(mobile);
+      if (!mobile) {
+        setMobileSidebarOpen(false);
+      }
+    };
+
+    checkScreenSize();
+
+    window.addEventListener("resize", checkScreenSize);
+
+    return () => window.removeEventListener("resize", checkScreenSize);
   }, []);
 
-  // Function to toggle sidebar on desktop
+  useEffect(() => {
+    if (!isMobile) {
+      const savedState = localStorage.getItem("sidebar-state");
+      setSidebarOpen(savedState ? savedState === "open" : true);
+    }
+  }, [isMobile]);
+
   const toggleSidebar = () => {
     if (isMobile) {
-      // For mobile, toggle the mobile sidebar
-      setMobileSidebarOpen(!mobileSidebarOpen);
+      setMobileSidebarOpen((prev) => !prev);
     } else {
-      // For desktop, toggle the regular sidebar and save state
       const newState = !sidebarOpen;
       setSidebarOpen(newState);
       localStorage.setItem("sidebar-state", newState ? "open" : "closed");
     }
   };
 
-  // Close mobile sidebar when route changes
   useEffect(() => {
     if (mobileSidebarOpen) {
       setMobileSidebarOpen(false);
     }
-  }, [mobileSidebarOpen, pathname]);
-
-  // Page transition variants
-  const pageVariants = {
-    initial: { opacity: 0, y: 8 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -8 },
-  };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [pathname]);
 
   const userRole = user?.role;
 
   if (isLoading) {
     return <LoadingSpinner />;
   }
-
   return (
     <TooltipProvider>
       <div className="layout-container">
@@ -115,7 +117,6 @@ export function MainLayout({ children }: MainLayoutProps) {
               initial="initial"
               animate="animate"
               exit="exit"
-              variants={pageVariants}
               transition={{ duration: 0.25, ease: "easeInOut" }}
               className={`layout-main`}
               style={{

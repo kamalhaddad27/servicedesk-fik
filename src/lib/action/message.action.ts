@@ -4,6 +4,7 @@ import prisma from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { getProfile } from "./user.action";
 import { Prisma } from "@prisma/client";
+import { createNotification } from "./notification.action";
 
 export async function getTicketMessages(ticketId: string) {
   try {
@@ -75,6 +76,42 @@ export async function addTicketMessage({
         isInternal,
       },
     });
+
+    const ticket = await prisma.ticket.findUnique({
+      where: { id: ticketId },
+      select: { userId: true, assignedToId: true, subject: true },
+    });
+    if (!ticket) return;
+
+    const recipients = new Set<string>();
+    if (ticket.userId !== user.id) {
+      recipients.add(ticket.userId);
+    }
+    if (ticket.assignedToId && ticket.assignedToId !== user.id) {
+      recipients.add(ticket.assignedToId);
+    }
+
+    if (user.role !== "admin") {
+      const admins = await prisma.user.findMany({
+        where: { role: "admin" },
+        select: { id: true },
+      });
+      admins.forEach((admin) => recipients.add(admin.id));
+    }
+
+    for (const recipientId of recipients) {
+      if (recipientId === user.id) continue;
+
+      await createNotification({
+        userId: recipientId,
+        title: "Pesan Baru di Tiket",
+        message: `${
+          user.name
+        } mengirim pesan di tiket "${ticket.subject.substring(0, 20)}...".`,
+        url: `/tickets/${ticketId}`,
+        type: "MESSAGE",
+      });
+    }
 
     revalidatePath(`/tickets/${ticketId}`);
 

@@ -51,7 +51,6 @@ export function TicketMainCard({ ticket }: TicketMainCardProps) {
           <TabsList>
             <TabsTrigger value="details">Detail</TabsTrigger>
             <TabsTrigger value="messages">Pesan</TabsTrigger>
-            <TabsTrigger value="history">Riwayat</TabsTrigger>
           </TabsList>
           <TabsContent value="details" className="mt-4">
             <h3 className="text-sm font-medium">Deskripsi</h3>
@@ -61,11 +60,6 @@ export function TicketMainCard({ ticket }: TicketMainCardProps) {
           </TabsContent>
           <TabsContent value="messages">
             <TicketMessages ticketId={ticket.id} />
-          </TabsContent>
-          <TabsContent value="history">
-            <p className="mt-4 text-sm text-muted-foreground">
-              Riwayat tiket akan ditampilkan di sini.
-            </p>
           </TabsContent>
         </Tabs>
       </CardContent>

@@ -5,6 +5,8 @@ import { PriorityTicket, Prisma, RoleUser, StatusTicket } from "@prisma/client";
 import { getProfile } from "./user.action";
 import { revalidatePath } from "next/cache";
 import { TCreateTicketSchema } from "../validator/ticket";
+import { createNotification } from "./notification.action";
+import { responAction } from "./responseAction";
 
 interface GetTicketsParams {
   page?: number;
@@ -205,24 +207,50 @@ export async function createTicket(values: TCreateTicketSchema) {
     const user = await getProfile();
     if (!user) throw new Error("Anda harus login untuk membuat tiket.");
 
-    await prisma.ticket.create({
+    const dataTicket = await prisma.ticket.create({
       data: {
         subject: values.subject,
         description: values.description,
         type: values.type,
         department: values.department,
         priority: values.priority,
-        userId: user.id, // ID pengguna yang sedang login
+        userId: user.id,
         categoryId: values.categoryId,
         subcategoryId: values.subcategoryId,
-        status: "pending", // Status default saat dibuat
+        status: "pending",
       },
     });
 
+    const adminsAndStaff = await prisma.user.findMany({
+      where: { role: { in: ["admin", "staff"] } },
+      select: { id: true },
+    });
+
+    for (const recipient of adminsAndStaff) {
+      await createNotification({
+        userId: recipient.id,
+        title: "Tiket Baru Dibuat",
+        message: `Tiket "${dataTicket.subject.substring(
+          0,
+          30
+        )}..." telah dibuat oleh ${user.name}.`,
+        url: `/tickets/${dataTicket.id}`,
+        type: "TICKET",
+      });
+    }
+
     revalidatePath("/tickets");
     revalidatePath("/dashboard");
+
+    return responAction({
+      statusSuccess: true,
+      messageSuccess: "ticket berhasil dibuat",
+    });
   } catch (error: any) {
-    return { error: error.message || "Gagal membuat tiket." };
+    return responAction({
+      statusError: true,
+      messageError: "Gagal membuat tiket",
+    });
   }
 }
 

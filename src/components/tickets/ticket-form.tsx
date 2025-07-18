@@ -73,11 +73,11 @@ export function TicketForm() {
 
   const onSubmit = async (values: TCreateTicketSchema) => {
     const result = await createTicket(values);
-    if (result?.error) {
-      toast.error(result.error);
+    if (result.success.status) {
+      toast.error(result.success.message);
       form.reset();
     } else {
-      toast.success("Tiket berhasil dibuat!");
+      toast.success(result.error.message);
     }
   };
 

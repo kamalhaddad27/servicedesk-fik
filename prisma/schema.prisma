@@ -34,6 +34,11 @@ enum StaffDepartment {
   REKTORAT
 }
 
+enum NotificationType {
+  TICKET
+  MESSAGE
+}
+
 model User {
   id            String  @id @default(cuid())
   nim           String? @unique
@@ -54,6 +59,7 @@ model User {
 
   createdTickets  Ticket[]  @relation("CreatedTickets")
   message         TicketMessage[]
+  notifications   Notification[]
 
   assignedTickets Ticket[] @relation("AssignedTickets")
 }
@@ -114,13 +120,16 @@ model Subcategory {
    @@unique([name, categoryId])
 }
 
-model Setting {
-  id            String @id @default(cuid())
-  key           String
-  value         String
-  type          String
-  category      String
-  description   String    @db.Text
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
+model Notification {
+  id        String           @id @default(cuid())
+  userId    String
+  title     String           
+  message   String
+  url       String
+  isRead    Boolean          @default(false)
+  type      NotificationType 
+  createdAt DateTime         @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  @@index([userId])
 }

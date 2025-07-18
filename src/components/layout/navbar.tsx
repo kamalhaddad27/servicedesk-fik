@@ -36,98 +36,21 @@ import {
 } from "lucide-react";
 import { useSession } from "@/context/SessionContext";
 import { logout } from "@/lib/action/auth.action";
+import { NotificationBell } from "../notifications/notification-bell";
 
 interface NavbarProps {
   className?: string;
   toggleSidebar?: () => void;
-  userRole?: string;
-  isMobile?: boolean;
 }
 
-export function Navbar({
-  className,
-  toggleSidebar,
-  userRole,
-  isMobile,
-}: NavbarProps) {
+export function Navbar({ className, toggleSidebar }: NavbarProps) {
   const router = useRouter();
   const { user } = useSession();
-  // const { unreadCount } = useNotifications();
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const notificationRef = useRef<HTMLDivElement>(null);
-  const searchRef = useRef<HTMLDivElement>(null);
-  const [searchOpen, setSearchOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
     router.push("/login");
   };
-
-  // Close notifications and search when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (
-        notificationRef.current &&
-        !notificationRef.current.contains(event.target as Node)
-      ) {
-        setNotificationsOpen(false);
-      }
-      if (
-        searchRef.current &&
-        !searchRef.current.contains(event.target as Node) &&
-        searchOpen
-      ) {
-        setSearchOpen(false);
-      }
-    }
-
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [searchOpen]);
-
-  // Handle search submit
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      router.push(`/search?q=${encodeURIComponent(searchQuery.trim())}`);
-      setSearchOpen(false);
-    }
-  };
-
-  // Quick actions based on user role
-  const quickActions = [
-    {
-      name: "Buat Tiket Baru",
-      href: "/tickets/create",
-      icon: <PlusCircle className="h-4 w-4" />,
-      roles: ["mahasiswa", "staff", "admin"],
-    },
-    {
-      name: "Tiket Ditugaskan",
-      href: "/tickets/assigned",
-      icon: <FileText className="h-4 w-4" />,
-      roles: ["staff"],
-    },
-    {
-      name: "Kalender",
-      href: "/calendar",
-      icon: <Calendar className="h-4 w-4" />,
-      roles: ["staff", "admin", "executive"],
-    },
-    {
-      name: "Bantuan",
-      href: "/help",
-      icon: <HelpCircle className="h-4 w-4" />,
-      roles: ["mahasiswa", "staff", "admin"],
-    },
-  ];
-
-  const filteredQuickActions = quickActions
-    .filter((action) => userRole && action.roles.includes(userRole))
-    .slice(0, 5); // Only show top 5
 
   return (
     <header
@@ -182,48 +105,7 @@ export function Navbar({
       {/* Right side actions */}
       <div className="ml-auto flex items-center gap-2">
         {/* Notifications */}
-        {/* <div className="relative" ref={notificationRef}>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setNotificationsOpen(!notificationsOpen)}
-            className="relative text-muted-foreground hover:text-foreground"
-            aria-label="Notifications"
-          >
-            <Bell className="h-5 w-5" />
-            <AnimatePresence>
-              {unreadCount > 0 && (
-                <motion.span
-                  initial={{ scale: 0 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0 }}
-                  className="absolute right-1 top-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] font-medium text-white"
-                >
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </motion.span>
-              )}
-            </AnimatePresence>
-          </Button>
-
-          <AnimatePresence>
-            {notificationsOpen && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                transition={{ duration: 0.2 }}
-                className={cn(
-                  "fixed z-50 bg-background border border-border shadow-lg rounded-md overflow-hidden",
-                  isMobile
-                    ? "top-[var(--header-height)] left-0 right-0 mx-4 mt-2 max-h-[80vh]"
-                    : "top-[var(--header-height)] right-4 mt-1 w-80 max-h-[calc(100vh-var(--header-height)-2rem)]"
-                )}
-              >
-                <NotificationList onClose={() => setNotificationsOpen(false)} />
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div> */}
+        <NotificationBell />
 
         {/* User Menu */}
         <DropdownMenu>
