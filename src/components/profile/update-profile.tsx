@@ -1,5 +1,4 @@
-"use client";
-
+import React from "react";
 import { useForm } from "react-hook-form";
 import {
   Form,
@@ -10,63 +9,41 @@ import {
   FormMessage,
 } from "../ui/form";
 import { Input } from "../ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../ui/select";
-import { RoleUser, User } from "@prisma/client";
 import { Button } from "../ui/button";
-import { toast } from "sonner";
-import { zodResolver } from "@hookform/resolvers/zod";
-import { register } from "@/lib/action/auth.action";
-import {
-  createUserSchema,
-  TCreateUserSchema,
-  TUpdateUserSchema,
-  updateUserSchema,
-} from "@/lib/validator/user";
-import { updateUser } from "@/lib/action/user.action";
 import { Loader2 } from "lucide-react";
+import { User } from "@prisma/client";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { TUpdateUserSchema, updateUserSchema } from "@/lib/validator/user";
+import { updateUser } from "@/lib/action/user.action";
+import { toast } from "sonner";
 
-interface UserFormProps {
-  user?: User;
+interface IUpdateProfile {
+  user: User | null;
   onSuccess: () => void;
 }
 
-type FormValues = TCreateUserSchema | TUpdateUserSchema;
-
-export function UserForm({ user, onSuccess }: UserFormProps) {
-  const isEditMode = !!user;
-
-  const form = useForm<FormValues>({
-    resolver: zodResolver(isEditMode ? updateUserSchema : createUserSchema),
+const UpdateProfile = ({ user, onSuccess }: IUpdateProfile) => {
+  const form = useForm<TUpdateUserSchema>({
+    resolver: zodResolver(updateUserSchema),
     defaultValues: {
       name: user?.name || "",
       email: user?.email || "",
-      phone: user?.phone || "",
-      role: user?.role || RoleUser.mahasiswa,
       department: user?.department || undefined,
       nip: user?.nip || "",
       nim: user?.nim || "",
       major: user?.major || "",
       college: user?.college || "",
       password: "",
+      academicYear: user?.academicYear || "",
+      role: user?.role,
     },
   });
 
-  const onSubmit = async (data: FormValues) => {
-    let result;
-    if (isEditMode) {
-      result = await updateUser({
-        userId: user.id,
-        values: data as TUpdateUserSchema,
-      });
-    } else {
-      result = await register(data as TCreateUserSchema);
-    }
+  const onSubmit = async (data: TUpdateUserSchema) => {
+    const result = await updateUser({
+      userId: user?.id || "",
+      values: data,
+    });
 
     if (result.success) {
       toast.success(result.message);
@@ -111,50 +88,6 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
           )}
         />
 
-        <FormField
-          name="password"
-          control={form.control}
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Password</FormLabel>
-              <FormControl>
-                <Input
-                  placeholder={
-                    isEditMode ? "Isi untuk mengubah password" : "Password"
-                  }
-                  type="text"
-                  {...field}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
-        <FormField
-          control={form.control}
-          name="role"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Role</FormLabel>
-              <Select onValueChange={field.onChange} defaultValue={field.value}>
-                <FormControl>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Pilih role" />
-                  </SelectTrigger>
-                </FormControl>
-                <SelectContent>
-                  <SelectItem value={RoleUser.mahasiswa}>Mahasiswa</SelectItem>
-                  <SelectItem value={RoleUser.dosen}>Dosen</SelectItem>
-                  <SelectItem value={RoleUser.staff}>Staff</SelectItem>
-                  <SelectItem value={RoleUser.admin}>Admin</SelectItem>
-                </SelectContent>
-              </Select>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-
         {user?.role === "dosen" && (
           <FormField
             control={form.control}
@@ -169,6 +102,55 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
               </FormItem>
             )}
           />
+        )}
+
+        <FormField
+          name="password"
+          control={form.control}
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Password</FormLabel>
+              <FormControl>
+                <Input
+                  placeholder="Isi untuk mengubah password"
+                  type="text"
+                  {...field}
+                />
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+
+        {user?.role !== "mahasiswa" && (
+          <>
+            <FormField
+              control={form.control}
+              name="department"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Department</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Department" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="position"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Jabatan</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Jabatan" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
         )}
 
         {user?.role === "mahasiswa" && (
@@ -189,12 +171,12 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
 
             <FormField
               control={form.control}
-              name="major"
+              name="college"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Major</FormLabel>
+                  <FormLabel>Fakultas</FormLabel>
                   <FormControl>
-                    <Input placeholder="Major" {...field} />
+                    <Input placeholder="Fakultas" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -203,12 +185,26 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
 
             <FormField
               control={form.control}
-              name="college"
+              name="major"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>College</FormLabel>
+                  <FormLabel>Program Studi</FormLabel>
                   <FormControl>
-                    <Input placeholder="College" {...field} />
+                    <Input placeholder="Program Studi" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="academicYear"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Angkatan</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Angkatan" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -225,10 +221,12 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
             {form.formState.isSubmitting && (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
             )}
-            {isEditMode ? "Simpan Perubahan" : "Tambah Pengguna"}
+            Simpan Perubahan
           </Button>
         </div>
       </form>
     </Form>
   );
-}
+};
+
+export default UpdateProfile;

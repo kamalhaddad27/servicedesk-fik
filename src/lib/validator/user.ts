@@ -12,7 +12,20 @@ export const createUserSchema = z.object({
   nim: z.string().optional(),
   major: z.string().optional(),
   college: z.string().optional(),
+  academicYear: z.string().optional(),
+  position: z.string().optional(),
 });
+
+export const updatePasswordSchema = z
+  .object({
+    currentPassword: z.string().min(6, "Password saat ini wajib diisi."),
+    newPassword: z.string().min(6, "Password baru minimal 6 karakter."),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Konfirmasi password tidak cocok.",
+    path: ["confirmPassword"],
+  });
 
 export const updateUserSchema = z.object({
   name: z.string().min(3, "Nama wajib diisi"),
@@ -24,6 +37,8 @@ export const updateUserSchema = z.object({
   nim: z.string().optional(),
   major: z.string().optional(),
   college: z.string().optional(),
+  academicYear: z.string().optional(),
+  position: z.string().optional(),
 
   password: z
     .string()
@@ -32,5 +47,6 @@ export const updateUserSchema = z.object({
     .or(z.literal("")),
 });
 
+export type TUpdatePasswordSchema = z.infer<typeof updatePasswordSchema>;
 export type TUpdateUserSchema = z.infer<typeof updateUserSchema>;
 export type TCreateUserSchema = z.infer<typeof createUserSchema>;

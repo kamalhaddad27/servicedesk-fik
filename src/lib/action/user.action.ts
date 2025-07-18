@@ -13,29 +13,20 @@ const JWT_SECRET = process.env.JWT_SECRET!;
 
 // GET PROFILE ACTION
 export async function getProfile(): Promise<User | null> {
-  // 1. Ambil token dari cookie
   const token = (await cookies()).get("session_token")?.value;
 
   if (!token) {
-    return null; // Tidak ada sesi
+    return null;
   }
 
   try {
-    // 2. Verifikasi token
     const decoded = jwt.verify(token, JWT_SECRET) as { id: string };
 
-    // 3. Ambil data user terbaru dari database
     const user = await prisma.user.findUnique({
       where: { id: decoded.id },
     });
 
-    if (user) {
-      // Hapus password dari objek sebelum dikirim ke client
-      const { password, ...userWithoutPassword } = user;
-      return userWithoutPassword as User;
-    }
-
-    return null;
+    return user;
   } catch (error) {
     // Token tidak valid atau error lain
     console.error("GET_PROFILE_ERROR:", error);
@@ -168,10 +159,6 @@ export async function updateUser({
   values: TUpdateUserSchema;
 }) {
   try {
-    const admin = await getProfile();
-    if (!admin || admin.role !== "admin")
-      throw new Error("Hanya admin yang bisa mengedit pengguna.");
-
     const dataToUpdate: Prisma.UserUpdateInput = {
       name: values.name,
       email: values.email,
@@ -182,6 +169,7 @@ export async function updateUser({
       nim: values.nim,
       major: values.major,
       college: values.college,
+      academicYear: values.academicYear,
     };
 
     // Jika password baru diisi, hash dan sertakan dalam data update
@@ -195,6 +183,7 @@ export async function updateUser({
     });
 
     revalidatePath("/users");
+    revalidatePath("/profile");
     revalidatePath(`/users/${userId}`);
 
     return { success: true, message: "Data pengguna berhasil diperbarui." };

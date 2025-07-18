@@ -5,7 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
-import { useNotifications } from "@/hooks/use-notification";
+// import { useNotifications } from "@/hooks/use-notification";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -52,7 +52,7 @@ export function Navbar({
 }: NavbarProps) {
   const router = useRouter();
   const { user } = useSession();
-  const { unreadCount } = useNotifications();
+  // const { unreadCount } = useNotifications();
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const notificationRef = useRef<HTMLDivElement>(null);
@@ -182,7 +182,7 @@ export function Navbar({
       {/* Right side actions */}
       <div className="ml-auto flex items-center gap-2">
         {/* Notifications */}
-        <div className="relative" ref={notificationRef}>
+        {/* <div className="relative" ref={notificationRef}>
           <Button
             variant="ghost"
             size="icon"
@@ -223,7 +223,7 @@ export function Navbar({
               </motion.div>
             )}
           </AnimatePresence>
-        </div>
+        </div> */}
 
         {/* User Menu */}
         <DropdownMenu>

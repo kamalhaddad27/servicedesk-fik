@@ -212,9 +212,9 @@ export function AdminDashboard({ stats }: { stats: IAdminDashboard }) {
                 </Link>
               </Button>
               <Button asChild variant="outline" className="justify-start">
-                <Link href="/settings">
+                <Link href="/categories">
                   <Settings className="mr-2 h-4 w-4" />
-                  Pengaturan Sistem
+                  Kelola Kategori
                 </Link>
               </Button>
             </div>

@@ -18,23 +18,6 @@ export function formatDate(
   return format(dateObj, formatStr, { locale: id });
 }
 
-// Format relative time (e.g., "5 minutes ago")
-export function formatRelativeTime(date: Date | string): string {
-  const dateObj = typeof date === "string" ? new Date(date) : date;
-  return formatDistanceToNow(dateObj, { addSuffix: true, locale: id });
-}
-
-// Format file size
-export function formatFileSize(bytes: number): string {
-  if (bytes === 0) return "0 Bytes";
-
-  const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
-  const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-  return `${parseFloat((bytes / Math.pow(k, i)).toFixed(2))} ${sizes[i]}`;
-}
-
 // Generate ticket badge color based on status
 export function getTicketStatusColor(status: StatusTicket) {
   switch (status) {
@@ -78,27 +61,3 @@ export const getRoleBadgeColor = (role: RoleUser) => {
       return "bg-sky-100 text-sky-800";
   }
 };
-
-// Truncate text with ellipsis
-export function truncateText(text: string, maxLength: number): string {
-  if (text.length <= maxLength) return text;
-  return `${text.substring(0, maxLength)}...`;
-}
-
-// Get initials from name
-export function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .toUpperCase()
-    .substring(0, 2);
-}
-
-// Check if user has permission
-export function hasPermission(
-  userRole: string,
-  requiredRoles: string[]
-): boolean {
-  return requiredRoles.includes(userRole);
-}
