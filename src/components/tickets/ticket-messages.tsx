@@ -5,9 +5,6 @@ import type React from "react";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import { motion } from "framer-motion";
-import { useTickets } from "@/hooks/use-ticket";
 import { Button } from "@/components/ui/button";
 import {
   Form,
@@ -17,12 +14,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
-import { Checkbox } from "@/components/ui/checkbox"; // Import the proper Checkbox component
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
-import { formatDate, formatRelativeTime } from "@/lib/utils";
-import { AlertCircle, EyeOff, Paperclip, Send, Upload, X } from "lucide-react";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import type { MessageFormValues } from "@/types";
+import { Checkbox } from "@/components/ui/checkbox";
+import { EyeOff, Send } from "lucide-react";
 import { useSession } from "@/context/SessionContext";
 import { RoleUser, TicketMessage } from "@prisma/client";
 import {

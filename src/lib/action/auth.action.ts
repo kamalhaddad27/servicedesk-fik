@@ -34,7 +34,7 @@ export async function register(values: TRegisterSchema) {
       data: {
         name: values.name,
         email: values.email,
-        role: values.role || RoleUser.user,
+        role: values.role || RoleUser.mahasiswa,
         password: hashedPassword,
       },
     });

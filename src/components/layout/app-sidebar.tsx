@@ -9,13 +9,11 @@ import {
   LayoutDashboard,
   Ticket,
   Users,
-  Settings,
   FileText,
   PlusCircle,
   HelpCircle,
   LogOut,
   ChevronDown,
-  ClipboardList,
   Book,
   Bell,
   Database,
@@ -25,9 +23,9 @@ import {
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { UserRole } from "@/types";
 import { useSession } from "@/context/SessionContext";
 import { logout } from "@/lib/action/auth.action";
+import { RoleUser } from "@prisma/client";
 
 // Animation variants
 const itemVariants: Variants = {
@@ -56,7 +54,7 @@ const iconVariants = {
 
 interface SidebarProps {
   isOpen: boolean;
-  userRole?: UserRole;
+  userRole?: RoleUser;
 }
 
 export function Sidebar({ isOpen, userRole }: SidebarProps) {
@@ -122,7 +120,10 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
             color: "text-primary-400",
           },
           {
-            name: userRole === "user" ? "Tiket Saya" : "Semua Tiket",
+            name:
+              userRole === "dosen" || userRole === "mahasiswa"
+                ? "Tiket Saya"
+                : "Semua Tiket",
             href: "/tickets",
             icon: <FileText className="h-4 w-4" />,
             color: "text-primary-600",
@@ -154,7 +155,35 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
 
     // Role-specific items
     switch (userRole) {
-      case "user":
+      case "dosen":
+        return {
+          main: [common.dashboard],
+          groups: [
+            common.tickets,
+            {
+              name: "Layanan",
+              icon: <Layers className="h-4 w-4" />,
+              color: "text-green-500",
+              subItems: [
+                {
+                  name: "Panduan Layanan",
+                  href: "/help/guides",
+                  icon: <Book className="h-4 w-4" />,
+                  color: "text-green-500",
+                },
+                {
+                  name: "Status Layanan",
+                  href: "/service-status",
+                  icon: <Bell className="h-4 w-4" />,
+                  color: "text-green-600",
+                },
+              ],
+            },
+            common.help,
+          ],
+        };
+
+      case "mahasiswa":
         return {
           main: [common.dashboard],
           groups: [

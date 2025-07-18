@@ -68,9 +68,11 @@ function TicketsPageClient() {
   }, [assignment, categoryId, page, priority, query, searchParams, status]);
 
   const pageTitle =
-    currentUser?.role === "user" ? "Tiket Saya" : "Daftar Tiket";
+    currentUser?.role === "dosen" || currentUser?.role === "mahasiswa"
+      ? "Tiket Saya"
+      : "Daftar Tiket";
   const pageDescription =
-    currentUser?.role === "user"
+    currentUser?.role === "dosen" || currentUser?.role === "mahasiswa"
       ? "Lihat semua riwayat tiket yang pernah Anda buat."
       : "Kelola dan pantau semua tiket dalam sistem.";
 
@@ -78,7 +80,9 @@ function TicketsPageClient() {
     <div className="space-y-6">
       <PageTitle title={pageTitle} description={pageDescription} />
 
-      {currentUser?.role !== "user" && <TicketQuickFilters />}
+      {(currentUser?.role === "dosen" || currentUser?.role === "mahasiswa") && (
+        <TicketQuickFilters />
+      )}
 
       <TicketFilters />
 

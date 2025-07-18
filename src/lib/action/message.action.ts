@@ -15,7 +15,7 @@ export async function getTicketMessages(ticketId: string) {
     };
 
     // Jika pengguna adalah 'user', jangan tampilkan pesan internal
-    if (user.role === "user") {
+    if (user.role === "mahasiswa" || user.role === "dosen") {
       where.isInternal = false;
     }
 

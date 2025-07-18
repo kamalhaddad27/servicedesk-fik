@@ -18,14 +18,16 @@ export default async function DashboardPage() {
     adminStats = await getAdminDashboardStats();
   } else if (user.role === "staff") {
     staffStats = await getStaffDashboardStats();
-  } else if (user.role === "user") {
+  } else if (user.role === "dosen" || user.role === "mahasiswa") {
     userStats = await getUserDashboardStats();
   }
 
   // Render dashboard based on user role
   return (
     <div className="space-y-6">
-      {user.role === "user" && userStats && <UserDashboard stats={userStats} />}
+      {(user.role === "mahasiswa" || user.role === "dosen") && userStats && (
+        <UserDashboard stats={userStats} />
+      )}
       {user.role === "staff" && staffStats && (
         <StaffDashboard stats={staffStats} />
       )}

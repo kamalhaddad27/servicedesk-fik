@@ -8,7 +8,6 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { TUpdateUserSchema } from "../validator/user";
-import { responAction } from "./responseAction";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 

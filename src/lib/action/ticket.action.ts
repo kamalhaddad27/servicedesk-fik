@@ -53,7 +53,7 @@ export async function getTickets({
     }
 
     const where: Prisma.TicketWhereInput = {};
-    if (user.role === "user") {
+    if (user.role === "dosen" || user.role === "mahasiswa") {
       where.AND = [filterConditions, { userId: user.id }];
     } else if (user.role === "staff" && assignment !== "me") {
       where.AND = [

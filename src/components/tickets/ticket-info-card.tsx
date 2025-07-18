@@ -57,7 +57,8 @@ export function TicketInfoCard({
         <CardTitle className="text-sm font-medium">Informasi Tiket</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
-        {currentUser?.role !== "user" && (
+        {(currentUser?.role === "dosen" ||
+          currentUser?.role === "mahasiswa") && (
           <>
             <div>
               <h3 className="text-xs font-medium text-muted-foreground mb-1">

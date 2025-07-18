@@ -181,51 +181,6 @@ export function Navbar({
 
       {/* Right side actions */}
       <div className="ml-auto flex items-center gap-2">
-        {/* Search */}
-        {/* <div className="relative" ref={searchRef}>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setSearchOpen(!searchOpen)}
-            className="text-muted-foreground hover:text-foreground"
-          >
-            <Search className="h-5 w-5" />
-          </Button>
-
-          <AnimatePresence>
-            {searchOpen && (
-              <motion.div
-                initial={{
-                  opacity: 0,
-                  y: 10,
-                  width: isMobile ? "calc(100vw - 2rem)" : "20rem",
-                }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: 10 }}
-                transition={{ duration: 0.2 }}
-                className={cn(
-                  "fixed top-[var(--header-height)] right-0 p-3 bg-background border border-border shadow-lg rounded-md z-50",
-                  isMobile ? "left-0 mx-4 mt-2" : "mt-1 right-3 w-80"
-                )}
-              >
-                <form onSubmit={handleSearchSubmit} className="flex w-full">
-                  <Input
-                    type="search"
-                    placeholder="Cari tiket, pengguna, atau dokumen..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="flex-1"
-                    autoFocus
-                  />
-                  <Button type="submit" className="ml-2">
-                    Cari
-                  </Button>
-                </form>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div> */}
-
         {/* Notifications */}
         <div className="relative" ref={notificationRef}>
           <Button
@@ -295,12 +250,6 @@ export function Navbar({
               <Link href="/profile" className="flex items-center">
                 <User className="mr-2 h-4 w-4" />
                 <span>Profil</span>
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/settings" className="flex items-center">
-                <Settings className="mr-2 h-4 w-4" />
-                <span>Pengaturan</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />

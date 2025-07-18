@@ -25,7 +25,7 @@ export function TicketQuickFilters() {
   const searchParams = useSearchParams();
   const currentAssignment = searchParams.get("assignment");
 
-  if (!user || user.role === "user") return null; // Filter ini hanya untuk admin/staf
+  if (!user || user.role === "dosen" || user.role === "mahasiswa") return null; // Filter ini hanya untuk admin/staf
 
   const filters = [
     { label: "Semua", value: "" },

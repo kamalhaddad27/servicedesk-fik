@@ -53,7 +53,7 @@ export function UserInfoCard({ user }: UserInfoCardProps) {
                 {user._count.createdTickets}
               </span>
             </div>
-            {user.role !== "user" && (
+            {(user.role === "staff" || user.role === "admin") && (
               <div className="flex items-center justify-between">
                 <span>Tiket Ditangani</span>
                 <span className="font-semibold">

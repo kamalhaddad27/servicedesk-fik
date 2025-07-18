@@ -50,7 +50,8 @@ const UserFilter = () => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="all">Semua Role</SelectItem>
-            <SelectItem value={RoleUser.user}>User</SelectItem>
+            <SelectItem value={RoleUser.mahasiswa}>Mahasiswa</SelectItem>
+            <SelectItem value={RoleUser.dosen}>Dosen</SelectItem>
             <SelectItem value={RoleUser.staff}>Staff</SelectItem>
             <SelectItem value={RoleUser.admin}>Admin</SelectItem>
           </SelectContent>

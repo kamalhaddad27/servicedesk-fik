@@ -58,27 +58,36 @@ async function main() {
     },
   ];
 
-  // Data User Biasa (Mahasiswa dan dosen)
-  const usersToSeed = [
+  // Data mahasiswa
+  const mahasiswaToSeed = [
     {
       name: "Dian Mahasiswa",
       email: "dian.mahasiswa@student.university.ac.id",
       phone: "081200000004",
-      role: RoleUser.user,
+      role: RoleUser.mahasiswa,
       nim: "123456789",
       academicYear: "2022",
     },
+  ];
+
+  // DATA DOSEN
+  const dosenToSeed = [
     {
       name: "Joko Dosen",
       email: "Joko.Dosen@student.university.ac.id",
       phone: "081200000005",
-      role: RoleUser.user,
+      role: RoleUser.dosen,
       nip: "123456789",
     },
   ];
 
   // Gabungkan semua data menjadi satu array
-  const allUsers = [...adminsToSeed, ...staffToSeed, ...usersToSeed];
+  const allUsers = [
+    ...adminsToSeed,
+    ...staffToSeed,
+    ...mahasiswaToSeed,
+    ...dosenToSeed,
+  ];
 
   // Looping dan buat user menggunakan upsert
   for (const userData of allUsers) {
@@ -169,6 +178,9 @@ async function main() {
   const mahasiswaUser = await prisma.user.findUnique({
     where: { email: "dian.mahasiswa@student.university.ac.id" },
   });
+  const dosenUser = await prisma.user.findUnique({
+    where: { email: "Joko.Dosen@student.university.ac.id" },
+  });
 
   // Pastikan semua user, kategori, dan subkategori dibuat sebelum melanjutkan
   if (
@@ -176,6 +188,7 @@ async function main() {
     !staffTuUser ||
     !staffLabUser ||
     !adminUser ||
+    !dosenUser ||
     !softwareCategory ||
     !hardwareCategory ||
     !instalasiSubcategory ||
@@ -208,7 +221,7 @@ async function main() {
       priority: PriorityTicket.high,
       department: "Sarana & Prasarana",
       type: "Laporan Insiden",
-      userId: mahasiswaUser.id,
+      userId: dosenUser.id,
       assignedToId: staffTuUser.id,
       categoryId: hardwareCategory.id,
       subcategoryId: proyektorSubcategory.id,

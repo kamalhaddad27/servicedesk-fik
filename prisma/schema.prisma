@@ -10,7 +10,8 @@ datasource db {
 enum RoleUser {
   admin
   staff
-  user
+  mahasiswa
+  dosen
 }
 
 enum StatusTicket {

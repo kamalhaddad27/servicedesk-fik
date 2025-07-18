@@ -93,10 +93,11 @@ export function UserList() {
                           {user.role}
                         </Badge>
                       </div>
-                      {user.nim && user.nip && (
-                        <CardDescription>
-                          {user.nim ? `NIM: ${user.nim}` : `NIP: ${user.nip}`}
-                        </CardDescription>
+                      {user.role === "dosen" && (
+                        <CardDescription>NIP: {user.nip}</CardDescription>
+                      )}
+                      {user.role === "mahasiswa" && (
+                        <CardDescription>NIM: {user.nim}</CardDescription>
                       )}
                     </CardHeader>
                     <CardContent className="grid gap-2 text-sm md:grid-cols-2">

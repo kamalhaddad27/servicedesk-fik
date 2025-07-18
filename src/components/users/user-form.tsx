@@ -47,7 +47,7 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
       name: user?.name || "",
       email: user?.email || "",
       phone: user?.phone || "",
-      role: user?.role || RoleUser.user,
+      role: user?.role || RoleUser.mahasiswa,
       department: user?.department || undefined,
       nip: user?.nip || "",
       nim: user?.nim || "",
@@ -144,7 +144,8 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value={RoleUser.user}>User</SelectItem>
+                  <SelectItem value={RoleUser.mahasiswa}>Mahasiswa</SelectItem>
+                  <SelectItem value={RoleUser.dosen}>Dosen</SelectItem>
                   <SelectItem value={RoleUser.staff}>Staff</SelectItem>
                   <SelectItem value={RoleUser.admin}>Admin</SelectItem>
                 </SelectContent>
