@@ -1,16 +1,18 @@
 "use client";
 
 import { ReactNode, useState, useEffect } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Sidebar } from "./app-sidebar";
 import { Navbar } from "./navbar";
 import { MobileNav } from "./mobile-nav";
-import { useMobile } from "@/hooks/use-mobile";
 import { ToastProvider } from "@/providers/toast-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { motion, AnimatePresence } from "framer-motion";
 import { useSession } from "@/context/SessionContext";
 import { LoadingSpinner } from "../ui/loading-spinner";
+import { Button } from "../ui/button";
+import { toast } from "sonner";
+import { getUrgentTicketsForUser } from "@/lib/action/notification.action";
 
 type MainLayoutProps = {
   children: ReactNode;
@@ -18,6 +20,7 @@ type MainLayoutProps = {
 
 export function MainLayout({ children }: MainLayoutProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const [isMobile, setIsMobile] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
@@ -63,6 +66,43 @@ export function MainLayout({ children }: MainLayoutProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
+  useEffect(() => {
+    if (user && (user.role === "admin" || user.role === "staff")) {
+      const checkUrgentTickets = async () => {
+        const urgentTickets = await getUrgentTicketsForUser();
+
+        if (urgentTickets.length > 0) {
+          toast.warning(
+            `Anda memiliki ${urgentTickets.length} tiket darurat!`,
+            {
+              description:
+                "Beberapa tiket berprioritas tinggi memerlukan perhatian segera.",
+              duration: 10000,
+              action: (
+                <Button
+                  size="sm"
+                  className="text-nowrap"
+                  onClick={() => router.push("/tickets?priority=urgent")}
+                >
+                  Lihat Tiket
+                </Button>
+              ),
+            }
+          );
+        }
+      };
+
+      const initialCheckTimeout = setTimeout(checkUrgentTickets, 5000);
+
+      const intervalId = setInterval(checkUrgentTickets, 1000 * 60 * 60);
+
+      return () => {
+        clearTimeout(initialCheckTimeout);
+        clearInterval(intervalId);
+      };
+    }
+  }, [user, router]);
+
   const userRole = user?.role;
 
   if (isLoading) {
@@ -71,12 +111,7 @@ export function MainLayout({ children }: MainLayoutProps) {
   return (
     <TooltipProvider>
       <div className="layout-container">
-        <Navbar
-          className="navbar"
-          toggleSidebar={toggleSidebar}
-          userRole={userRole}
-          isMobile={isMobile}
-        />
+        <Navbar className="navbar" toggleSidebar={toggleSidebar} />
 
         <div className="layout-content">
           {/* Desktop Sidebar */}

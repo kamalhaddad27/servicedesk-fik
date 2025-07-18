@@ -3,7 +3,7 @@
 import prisma from "@/lib/prisma";
 import { getProfile } from "./user.action";
 import { revalidatePath } from "next/cache";
-import { NotificationType } from "@prisma/client";
+import { NotificationType, Prisma } from "@prisma/client";
 
 interface CreateNotificationPayload {
   userId: string;
@@ -86,5 +86,35 @@ export async function deleteNotification(notificationId: string) {
     revalidatePath("/");
   } catch (error) {
     console.error("DELETE_NOTIFICATION_ERROR:", error);
+  }
+}
+
+export async function getUrgentTicketsForUser() {
+  try {
+    const user = await getProfile();
+    if (!user || (user.role !== "admin" && user.role !== "staff")) {
+      return [];
+    }
+
+    const where: Prisma.TicketWhereInput = {
+      priority: "urgent",
+      status: { not: "done" },
+    };
+
+    if (user.role === "staff") {
+      where.assignedToId = user.id;
+    }
+
+    const tickets = await prisma.ticket.findMany({
+      where,
+      select: {
+        id: true,
+        subject: true,
+      },
+    });
+
+    return tickets;
+  } catch (error) {
+    return [];
   }
 }
