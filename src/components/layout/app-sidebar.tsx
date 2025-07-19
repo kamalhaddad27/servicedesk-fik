@@ -19,6 +19,7 @@ import {
   Database,
   Layers,
   BookOpen,
+  Settings,
 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -217,14 +218,21 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
           groups: [
             common.tickets,
             {
-              name: "Administrasi",
-              icon: <Database className="h-4 w-4" />,
+              name: "Pengaturan",
+              href: "/settings",
+              icon: <Settings className="h-4 w-4" />,
               color: "text-violet-500",
               subItems: [
                 {
                   name: "Pengguna",
-                  href: "/users",
+                  href: "/seetings/users",
                   icon: <Users className="h-4 w-4" />,
+                  color: "text-violet-400",
+                },
+                {
+                  name: "Kategori",
+                  href: "/settings/categories",
+                  icon: <Database className="h-4 w-4" />,
                   color: "text-violet-400",
                 },
               ],

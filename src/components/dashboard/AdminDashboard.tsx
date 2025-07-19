@@ -19,8 +19,8 @@ import {
   CheckCircle,
   BarChart3,
   Users,
-  Settings,
   TicketCheck,
+  Database,
 } from "lucide-react";
 import { useSession } from "@/context/SessionContext";
 import { PriorityTicket, StatusTicket, Ticket } from "@prisma/client";
@@ -213,7 +213,7 @@ export function AdminDashboard({ stats }: { stats: IAdminDashboard }) {
               </Button>
               <Button asChild variant="outline" className="justify-start">
                 <Link href="/categories">
-                  <Settings className="mr-2 h-4 w-4" />
+                  <Database className="mr-2 h-4 w-4" />
                   Kelola Kategori
                 </Link>
               </Button>

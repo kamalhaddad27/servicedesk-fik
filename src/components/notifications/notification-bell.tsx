@@ -19,6 +19,8 @@ export function NotificationBell() {
       });
     };
     fetchUnreadCount();
+    const interval = setInterval(fetchUnreadCount, 30000); // Cek setiap 30 detik
+    return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {

@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 
 export default function LoginPage() {
   return (
-    <div className="min-h-screen flex flex-col lg:flex-row bg-background">
+    <div className="h-screen flex flex-col lg:flex-row bg-background">
       <motion.div
         className="flex-1 flex flex-col justify-center items-center p-8 lg:p-12 bg-gradient-to-br from-primary-700 to-primary-900 order-first lg:order-last"
         initial={{ opacity: 0 }}
