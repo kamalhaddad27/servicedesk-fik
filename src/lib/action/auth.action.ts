@@ -7,7 +7,6 @@ import prisma from "@/lib/prisma";
 import { responAction } from "./responseAction";
 import { TLoginSchema, TRegisterSchema } from "@/lib/validator/auth";
 import { RoleUser } from "@prisma/client";
-import { getProfile } from "./user.action";
 import { revalidatePath } from "next/cache";
 
 const JWT_SECRET = process.env.JWT_SECRET!;
@@ -15,10 +14,6 @@ const JWT_SECRET = process.env.JWT_SECRET!;
 // REGISTER ACTION
 export async function register(values: TRegisterSchema) {
   try {
-    const admin = await getProfile();
-    if (!admin || admin.role !== "admin")
-      throw new Error("Hanya admin yang bisa membuat pengguna.");
-
     if (!values.password)
       throw new Error("Password wajib diisi untuk pengguna baru.");
 
