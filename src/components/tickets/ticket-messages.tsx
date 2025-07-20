@@ -103,7 +103,9 @@ export function TicketMessages({ ticketId }: TicketMessagesProps) {
       toast.success(result.message);
       setMessages((prev) => [...prev, result.data as MessageWithSender]);
       form.reset();
-      window.location.reload();
+      if (attachmentData !== null) {
+        window.location.reload();
+      }
     } else {
       toast.error(result?.message);
     }

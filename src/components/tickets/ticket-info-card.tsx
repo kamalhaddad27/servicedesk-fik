@@ -72,7 +72,6 @@ export function TicketInfoCard({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Semua Status</SelectItem>
                   <SelectItem value={StatusTicket.pending}>Pending</SelectItem>
                   <SelectItem value={StatusTicket.progress}>
                     In Progress
@@ -95,7 +94,6 @@ export function TicketInfoCard({
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Semua Prioritas</SelectItem>
                   <SelectItem value={PriorityTicket.low}>Low</SelectItem>
                   <SelectItem value={PriorityTicket.medium}>Medium</SelectItem>
                   <SelectItem value={PriorityTicket.high}>High</SelectItem>

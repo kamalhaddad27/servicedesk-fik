@@ -20,6 +20,7 @@ import {
   updateTicketDetails,
   UpdateTicketPayload,
 } from "@/lib/action/ticket-update.action";
+import { TicketQuickFilters } from "./ticket-quick-filters";
 
 type PartialAttachment = {
   id: string;

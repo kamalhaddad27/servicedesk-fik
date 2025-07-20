@@ -36,6 +36,7 @@ const UpdateProfile = ({ user, onSuccess }: IUpdateProfile) => {
       password: "",
       academicYear: user?.academicYear || "",
       role: user?.role,
+      position: user?.position || "",
     },
   });
 

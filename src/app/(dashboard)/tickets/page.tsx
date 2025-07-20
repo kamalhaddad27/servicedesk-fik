@@ -80,7 +80,7 @@ function TicketsPageClient() {
     <div className="space-y-6">
       <PageTitle title={pageTitle} description={pageDescription} />
 
-      {(currentUser?.role === "dosen" || currentUser?.role === "mahasiswa") && (
+      {(currentUser?.role === "admin" || currentUser?.role === "staff") && (
         <TicketQuickFilters />
       )}
 
