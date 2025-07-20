@@ -1,21 +1,41 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { motion } from "framer-motion"
-import Link from "next/link"
-import { Search, HelpCircle, FileText, MessageSquare, ExternalLink, ChevronRight, ArrowLeft } from "lucide-react"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion"
-import { Badge } from "@/components/ui/badge"
-import { cn } from "@/lib/utils"
-import { useRouter } from "next/navigation"
+import { useState } from "react";
+import { motion } from "framer-motion";
+import Link from "next/link";
+import {
+  Search,
+  HelpCircle,
+  FileText,
+  MessageSquare,
+  ExternalLink,
+  ChevronRight,
+  ArrowLeft,
+} from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion";
+import { Badge } from "@/components/ui/badge";
+import { cn } from "@/lib/utils";
+import { useRouter } from "next/navigation";
 
 export default function HelpPage() {
-  const [searchQuery, setSearchQuery] = useState("")
-  const { back } = useRouter()
+  const [searchQuery, setSearchQuery] = useState("");
+  const { back } = useRouter();
 
   // FAQ data
   const faqItems = [
@@ -44,7 +64,8 @@ export default function HelpPage() {
       category: "technical",
     },
     {
-      question: "Apa yang harus dilakukan jika tiket saya tidak kunjung ditanggapi?",
+      question:
+        "Apa yang harus dilakukan jika tiket saya tidak kunjung ditanggapi?",
       answer:
         "Jika tiket Anda belum ditanggapi dalam jangka waktu yang wajar, Anda dapat mengirim pesan pengingat di tiket tersebut atau menghubungi admin melalui halaman 'Kontak Support'.",
       category: "general",
@@ -67,54 +88,32 @@ export default function HelpPage() {
         "Anda dapat melihat semua tiket lama di halaman 'Tiket' dengan memfilter berdasarkan status 'completed' atau 'cancelled'. Anda juga dapat menggunakan fitur pencarian untuk menemukan tiket berdasarkan kata kunci.",
       category: "technical",
     },
-  ]
+  ];
 
   // Filter FAQ based on search query and active tab
   const filteredFaq = faqItems.filter((item) => {
     const matchesSearch =
       searchQuery === "" ||
       item.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.answer.toLowerCase().includes(searchQuery.toLowerCase())
+      item.answer.toLowerCase().includes(searchQuery.toLowerCase());
 
-    return matchesSearch
-  })
-
-  // Help guides
-  const helpGuides = [
-    {
-      title: "Panduan Pengguna",
-      description: "Panduan lengkap menggunakan Service Desk FIK",
-      icon: <FileText className="h-6 w-6" />,
-      href: "/help/guide",
-    },
-    {
-      title: "FAQ",
-      description: "Pertanyaan yang sering diajukan",
-      icon: <HelpCircle className="h-6 w-6" />,
-      href: "/help/faq",
-    },
-    {
-      title: "Kontak Support",
-      description: "Hubungi tim support kami",
-      icon: <MessageSquare className="h-6 w-6" />,
-      href: "/help/contact",
-    },
-  ]
+    return matchesSearch;
+  });
 
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-  <Button variant="outline" size="sm" onClick={() => back()}>
-    <ArrowLeft className="mr-2 h-4 w-4" />
-    Kembali
-  </Button>
-  <div>
-    <h1 className="text-2xl font-bold">Pusat Bantuan</h1>
-    <p className="text-sm text-muted-foreground">
-      Temukan jawaban untuk pertanyaan Anda
-    </p>
-  </div>
-</div>
+        <Button variant="outline" size="sm" onClick={() => back()}>
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Kembali
+        </Button>
+        <div>
+          <h1 className="text-2xl font-bold">Pusat Bantuan</h1>
+          <p className="text-sm text-muted-foreground">
+            Temukan jawaban untuk pertanyaan Anda
+          </p>
+        </div>
+      </div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -125,8 +124,12 @@ export default function HelpPage() {
         <div className="absolute inset-0 bg-gradient-to-r from-primary/20 to-primary-foreground/5 rounded-lg -z-10" />
         <Card className="border-none bg-transparent shadow-none">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl">Bagaimana kami dapat membantu Anda?</CardTitle>
-            <CardDescription>Cari jawaban atau telusuri kategori bantuan di bawah</CardDescription>
+            <CardTitle className="text-2xl">
+              Bagaimana kami dapat membantu Anda?
+            </CardTitle>
+            <CardDescription>
+              Cari jawaban atau telusuri kategori bantuan di bawah
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div className="flex w-full max-w-lg mx-auto items-center space-x-2">
@@ -146,39 +149,6 @@ export default function HelpPage() {
         </Card>
       </motion.div>
 
-      <div className="grid gap-6 md:grid-cols-3">
-        {helpGuides.map((guide, index) => (
-          <motion.div
-            key={guide.title}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: index * 0.1 }}
-          >
-            <Card className="h-full">
-              <CardHeader>
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary">
-                    {guide.icon}
-                  </div>
-                  <CardTitle>{guide.title}</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <CardDescription>{guide.description}</CardDescription>
-              </CardContent>
-              <CardFooter>
-                <Button variant="outline" asChild className="w-full">
-                  <Link href={guide.href}>
-                    Lihat
-                    <ChevronRight className="ml-2 h-4 w-4" />
-                  </Link>
-                </Button>
-              </CardFooter>
-            </Card>
-          </motion.div>
-        ))}
-      </div>
-
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -187,7 +157,9 @@ export default function HelpPage() {
         <Card>
           <CardHeader>
             <CardTitle>Pertanyaan yang Sering Diajukan</CardTitle>
-            <CardDescription>Jawaban untuk pertanyaan umum tentang Service Desk FIK</CardDescription>
+            <CardDescription>
+              Jawaban untuk pertanyaan umum tentang Service Desk FIK
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="all">
@@ -209,7 +181,7 @@ export default function HelpPage() {
                               "ml-2",
                               faq.category === "general"
                                 ? "bg-blue-100 text-blue-800 border-blue-200"
-                                : "bg-purple-100 text-purple-800 border-purple-200",
+                                : "bg-purple-100 text-purple-800 border-purple-200"
                             )}
                           >
                             {faq.category === "general" ? "Umum" : "Teknis"}
@@ -225,7 +197,9 @@ export default function HelpPage() {
                   <div className="flex flex-col items-center justify-center py-12 text-center">
                     <HelpCircle className="h-12 w-12 text-muted-foreground/50 mb-4" />
                     <h3 className="text-lg font-medium">Tidak ada hasil</h3>
-                    <p className="text-sm text-muted-foreground mt-1">Tidak ada FAQ yang cocok dengan pencarian Anda</p>
+                    <p className="text-sm text-muted-foreground mt-1">
+                      Tidak ada FAQ yang cocok dengan pencarian Anda
+                    </p>
                   </div>
                 )}
               </Accordion>
@@ -242,5 +216,5 @@ export default function HelpPage() {
         </Card>
       </motion.div>
     </div>
-  )
+  );
 }

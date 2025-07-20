@@ -115,6 +115,14 @@ export async function getTicketById(id: string) {
           orderBy: { createdAt: "asc" },
           include: {
             user: { select: { name: true, role: true } },
+            attachments: true,
+          },
+        },
+        attachments: {
+          select: {
+            id: true,
+            fileName: true,
+            fileUrl: true,
           },
         },
       },
@@ -202,7 +210,11 @@ export async function getAssignedTickets({
   }
 }
 
-export async function createTicket(values: TCreateTicketSchema) {
+export async function createTicket(
+  values: TCreateTicketSchema & {
+    attachment: { fileName: string; fileUrl: string } | null;
+  }
+) {
   try {
     const user = await getProfile();
     if (!user) throw new Error("Anda harus login untuk membuat tiket.");
@@ -218,6 +230,14 @@ export async function createTicket(values: TCreateTicketSchema) {
         categoryId: values.categoryId,
         subcategoryId: values.subcategoryId,
         status: "pending",
+        attachments: {
+          create: values.attachment
+            ? {
+                fileName: values.attachment.fileName,
+                fileUrl: values.attachment.fileUrl,
+              }
+            : undefined,
+        },
       },
     });
 

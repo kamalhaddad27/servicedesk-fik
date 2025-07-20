@@ -17,7 +17,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { RoleUser, User } from "@prisma/client";
+import { RoleUser, StaffDepartment, User } from "@prisma/client";
 import { Button } from "../ui/button";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -54,6 +54,7 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
       major: user?.major || "",
       college: user?.college || "",
       password: "",
+      position: user?.position || "",
     },
   });
 
@@ -169,6 +170,51 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
               </FormItem>
             )}
           />
+        )}
+
+        {user?.role !== "mahasiswa" && (
+          <>
+            <FormField
+              control={form.control}
+              name="department"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Department</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Pilih Department" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value={StaffDepartment.LAB}>LAB</SelectItem>
+                      <SelectItem value={StaffDepartment.TU}>TU</SelectItem>
+                      <SelectItem value={StaffDepartment.REKTORAT}>
+                        Rektorat
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="position"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Position</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Position" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </>
         )}
 
         {user?.role === "mahasiswa" && (

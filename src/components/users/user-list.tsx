@@ -131,7 +131,12 @@ export function UserList() {
                       </div>
                     </CardContent>
                     <CardFooter className="flex justify-end">
-                      <Link href={`/users/${user.id}`}>Lihat Detail</Link>
+                      <Link
+                        href={`/settings/users/${user.id}`}
+                        className="text-sm"
+                      >
+                        Lihat Detail
+                      </Link>
                     </CardFooter>
                   </Card>
                 </motion.div>

@@ -85,6 +85,7 @@ model Ticket {
   subcategory   Subcategory?   @relation(fields: [subcategoryId], references: [id])
 
   message       TicketMessage[]
+  attachments   Attachment[]
 }
 
 model TicketMessage {
@@ -98,6 +99,8 @@ model TicketMessage {
 
   ticket        Ticket    @relation(fields: [ticketId], references: [id])
   user          User      @relation(fields: [userId], references: [id])
+
+  attachments   Attachment[]
 }
 
 model Category {
@@ -132,4 +135,16 @@ model Notification {
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
   @@index([userId])
+}
+
+model Attachment {
+  id        String    @id @default(cuid())
+  fileName  String
+  fileUrl   String
+  ticketId  String?   // Terhubung ke Tiket
+  messageId String?   // Terhubung ke Pesan
+  createdAt DateTime  @default(now())
+
+  ticket  Ticket?          @relation(fields: [ticketId], references: [id])
+  message TicketMessage?   @relation(fields: [messageId], references: [id])
 }

@@ -21,12 +21,22 @@ import {
   UpdateTicketPayload,
 } from "@/lib/action/ticket-update.action";
 
+type PartialAttachment = {
+  id: string;
+  fileName: string;
+  fileUrl: string;
+};
+
 export type FullTicket = Ticket & {
   user: { name: string | null; email: string | null };
   assignedTo: { name: string | null; email: string | null } | null;
-  message: (TicketMessage & { user: { name: string | null; role: string } })[];
+  message: (TicketMessage & {
+    user: { name: string | null; role: string };
+    attachments: PartialAttachment[];
+  })[];
   category: { name: string };
   subcategory: { name: string };
+  attachments: PartialAttachment[];
 };
 
 export function TicketDetail({ ticketId }: { ticketId: string }) {

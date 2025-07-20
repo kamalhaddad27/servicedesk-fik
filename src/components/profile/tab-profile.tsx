@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { TabsContent } from "../ui/tabs";
 import {
   Card,
@@ -29,13 +29,39 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import UpdateProfile from "./update-profile";
+import { ImageUpload } from "../ui/image-upload";
+import { getProfile } from "@/lib/action/user.action";
+import { updateProfileImage } from "@/lib/action/profile.action";
+import { toast } from "sonner";
+import { LoadingSpinner } from "../ui/loading-spinner";
 
 interface ITabProfile {
-  dataUser: User | null;
+  user: User | null;
 }
 
-const TabProfile = ({ dataUser }: ITabProfile) => {
+const TabProfile = ({ user }: ITabProfile) => {
+  const [dataUser, setDataUser] = useState<User | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // Untuk menonaktifkan tombol saat update
+
+  useEffect(() => {
+    getProfile().then((user) => setDataUser(user));
+  }, []);
+
+  const handleUploadComplete = async (url: string) => {
+    setIsSubmitting(true);
+    const result = await updateProfileImage(url);
+    if (result.success) {
+      toast.success(result.message);
+      // Perbarui state lokal untuk menampilkan gambar baru secara instan
+      setDataUser((prev) => (prev ? { ...prev, image: url } : null));
+    } else {
+      toast.error(result.message);
+    }
+    setIsSubmitting(false);
+  };
+
+  if (!dataUser) return <LoadingSpinner />;
 
   return (
     <TabsContent value="profile" className="space-y-6">
@@ -45,28 +71,12 @@ const TabProfile = ({ dataUser }: ITabProfile) => {
             <CardTitle className="text-lg">Foto Profil</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center justify-center pt-6 pb-4">
-            <Button
-              size="icon"
-              className="rounded-full bg-primary hover:bg-primary-600"
-              disabled
-            >
-              <Camera className="h-4 w-4" />
-              <span className="sr-only">Upload photo</span>
-            </Button>
-            <div className="text-center">
-              <h3 className="font-medium text-lg">{dataUser?.name}</h3>
-              <p className="text-sm text-muted-foreground">{dataUser?.role}</p>
-            </div>
+            <ImageUpload
+              currentImageUrl={user?.image}
+              onUploadComplete={handleUploadComplete}
+              isSubmitting={isSubmitting}
+            />
           </CardContent>
-          <CardFooter className="flex justify-center border-t border-primary-100 bg-primary-50/50 p-3">
-            <Button
-              variant="outline"
-              className="w-full border-primary-200 text-primary hover:bg-primary-50"
-              disabled
-            >
-              Ganti Foto
-            </Button>
-          </CardFooter>
         </Card>
 
         <Card className="md:col-span-2">
@@ -92,7 +102,7 @@ const TabProfile = ({ dataUser }: ITabProfile) => {
                     </DialogDescription>
                   </DialogHeader>
                   <UpdateProfile
-                    user={dataUser}
+                    user={user}
                     onSuccess={() => setIsEditOpen(false)}
                   />
                 </DialogContent>
@@ -106,24 +116,24 @@ const TabProfile = ({ dataUser }: ITabProfile) => {
               </p>
               <p className="flex items-center gap-2 mt-1">
                 <UserIcon className="h-4 w-4 text-primary" />
-                <span>{dataUser?.name}</span>
+                <span>{user?.name}</span>
               </p>
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">Email</p>
               <p className="flex items-center flex-wrap gap-2 mt-1">
                 <Mail className="h-4 w-4 text-primary" />
-                <span>{dataUser?.email}</span>
+                <span>{user?.email}</span>
               </p>
             </div>
-            {dataUser?.role !== "mahasiswa" && (
+            {user?.role !== "mahasiswa" && (
               <div>
                 <p className="text-sm font-medium text-muted-foreground">
                   Departemen
                 </p>
                 <p className="flex items-center gap-2 mt-1">
                   <Building className="h-4 w-4 text-primary" />
-                  <span>{dataUser?.department || "-"}</span>
+                  <span>{user?.department || "-"}</span>
                 </p>
               </div>
             )}
@@ -131,10 +141,10 @@ const TabProfile = ({ dataUser }: ITabProfile) => {
               <p className="text-sm font-medium text-muted-foreground">Peran</p>
               <p className="flex items-center gap-2 mt-1">
                 <Award className="h-4 w-4 text-primary" />
-                <span>{dataUser?.role}</span>
+                <span>{user?.role}</span>
               </p>
             </div>
-            {dataUser?.role === "mahasiswa" && (
+            {user?.role === "mahasiswa" && (
               <>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
@@ -142,7 +152,7 @@ const TabProfile = ({ dataUser }: ITabProfile) => {
                   </p>
                   <p className="flex items-center gap-2 mt-1">
                     <Calendar className="h-4 w-4 text-primary" />
-                    <span>{dataUser?.college || "-"}</span>
+                    <span>{user?.college || "-"}</span>
                   </p>
                 </div>
                 <div>
@@ -151,7 +161,7 @@ const TabProfile = ({ dataUser }: ITabProfile) => {
                   </p>
                   <p className="flex items-center gap-2 mt-1">
                     <BookOpen className="h-4 w-4 text-primary" />
-                    <span>{dataUser?.major || "-"}</span>
+                    <span>{user?.major || "-"}</span>
                   </p>
                 </div>
                 <div>
@@ -160,7 +170,7 @@ const TabProfile = ({ dataUser }: ITabProfile) => {
                   </p>
                   <p className="flex items-center gap-2 mt-1">
                     <BookOpen className="h-4 w-4 text-primary" />
-                    <span>{dataUser?.nim || "-"}</span>
+                    <span>{user?.nim || "-"}</span>
                   </p>
                 </div>
                 <div>
@@ -169,13 +179,13 @@ const TabProfile = ({ dataUser }: ITabProfile) => {
                   </p>
                   <p className="flex items-center gap-2 mt-1">
                     <Calendar className="h-4 w-4 text-primary" />
-                    <span>{dataUser?.academicYear || "-"}</span>
+                    <span>{user?.academicYear || "-"}</span>
                   </p>
                 </div>
               </>
             )}
 
-            {dataUser?.role === "dosen" && (
+            {user?.role === "dosen" && (
               <>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
@@ -183,7 +193,7 @@ const TabProfile = ({ dataUser }: ITabProfile) => {
                   </p>
                   <p className="flex items-center gap-2 mt-1">
                     <BookOpen className="h-4 w-4 text-primary" />
-                    <span>{dataUser?.nip || "-"}</span>
+                    <span>{user?.nip || "-"}</span>
                   </p>
                 </div>
                 <div>
@@ -192,7 +202,7 @@ const TabProfile = ({ dataUser }: ITabProfile) => {
                   </p>
                   <p className="flex items-center gap-2 mt-1">
                     <Award className="h-4 w-4 text-primary" />
-                    <span>{dataUser?.position || "-"}</span>
+                    <span>{user?.position || "-"}</span>
                   </p>
                 </div>
               </>

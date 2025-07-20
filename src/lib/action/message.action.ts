@@ -6,6 +6,13 @@ import { getProfile } from "./user.action";
 import { Prisma } from "@prisma/client";
 import { createNotification } from "./notification.action";
 
+interface AddMessagePayload {
+  ticketId: string;
+  message: string;
+  isInternal: boolean;
+  attachment: { fileName: string; fileUrl: string } | null;
+}
+
 export async function getTicketMessages(ticketId: string) {
   try {
     const user = await getProfile();
@@ -24,9 +31,9 @@ export async function getTicketMessages(ticketId: string) {
       where,
       include: {
         user: {
-          // Ambil info pengirim pesan
           select: { name: true, role: true },
         },
+        attachments: true,
       },
       orderBy: {
         createdAt: "asc",
@@ -47,16 +54,11 @@ export async function getTicketMessages(ticketId: string) {
   }
 }
 
-interface AddMessagePayload {
-  ticketId: string;
-  message: string;
-  isInternal: boolean;
-}
-
 export async function addTicketMessage({
   ticketId,
   message,
   isInternal,
+  attachment,
 }: AddMessagePayload) {
   try {
     const user = await getProfile();
@@ -74,6 +76,14 @@ export async function addTicketMessage({
         userId: user.id,
         message,
         isInternal,
+        attachments: {
+          create: attachment
+            ? {
+                fileName: attachment.fileName,
+                fileUrl: attachment.fileUrl,
+              }
+            : undefined,
+        },
       },
     });
 

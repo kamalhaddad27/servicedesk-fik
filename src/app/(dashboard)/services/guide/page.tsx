@@ -1,17 +1,21 @@
-import { Metadata } from "next"
-import Link from "next/link"
-import Image from "next/image"
-import { ChevronLeft, FileText, Ticket, User, Settings, BarChart3 } from 'lucide-react'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+"use client";
 
-export const metadata: Metadata = {
-  title: "Panduan Pengguna - Service Desk FIK",
-  description: "Panduan lengkap penggunaan Service Desk FIK UPNVJ",
-}
+import Link from "next/link";
+import { ChevronLeft, Ticket, User, Settings, BarChart3 } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useRouter } from "next/navigation";
 
 export default function GuidePage() {
+  const router = useRouter();
+
   const guides = [
     {
       id: "tickets",
@@ -23,21 +27,26 @@ export default function GuidePage() {
           title: "Membuat Tiket Baru",
           content: (
             <div className="space-y-4">
-              <p>
-                Untuk membuat tiket baru, ikuti langkah-langkah berikut:
-              </p>
+              <p>Untuk membuat tiket baru, ikuti langkah-langkah berikut:</p>
               <ol className="list-decimal pl-5 space-y-2">
-                <li>Klik menu <strong>Tiket</strong> di sidebar</li>
-                <li>Pilih <strong>Buat Tiket</strong></li>
+                <li>
+                  Klik menu <strong>Tiket</strong> di sidebar
+                </li>
+                <li>
+                  Pilih <strong>Buat Tiket</strong>
+                </li>
                 <li>Isi formulir dengan detail permasalahan Anda</li>
                 <li>Pilih kategori yang sesuai dengan permasalahan</li>
                 <li>Tambahkan lampiran jika diperlukan</li>
-                <li>Klik tombol <strong>Kirim Tiket</strong></li>
+                <li>
+                  Klik tombol <strong>Kirim Tiket</strong>
+                </li>
               </ol>
               <div className="bg-muted p-4 rounded-md">
                 <p className="text-sm font-medium">Tip:</p>
                 <p className="text-sm text-muted-foreground">
-                  Semakin detail informasi yang Anda berikan, semakin cepat permasalahan Anda dapat diselesaikan.
+                  Semakin detail informasi yang Anda berikan, semakin cepat
+                  permasalahan Anda dapat diselesaikan.
                 </p>
               </div>
             </div>
@@ -51,18 +60,39 @@ export default function GuidePage() {
                 Anda dapat melacak status tiket yang telah dibuat dengan cara:
               </p>
               <ol className="list-decimal pl-5 space-y-2">
-                <li>Klik menu <strong>Tiket</strong> di sidebar</li>
-                <li>Pilih <strong>Semua Tiket</strong></li>
+                <li>
+                  Klik menu <strong>Tiket</strong> di sidebar
+                </li>
+                <li>
+                  Pilih <strong>Semua Tiket</strong>
+                </li>
                 <li>Cari tiket yang ingin dilacak</li>
                 <li>Klik pada tiket untuk melihat detail dan status terkini</li>
               </ol>
               <p>Status tiket dapat berupa:</p>
               <ul className="list-disc pl-5 space-y-1">
-                <li><span className="text-warning font-medium">Pending</span> - Tiket telah dibuat dan menunggu ditinjau</li>
-                <li><span className="text-info font-medium">Disposisi</span> - Tiket telah ditinjau dan diteruskan ke petugas terkait</li>
-                <li><span className="text-primary font-medium">In Progress</span> - Tiket sedang dalam proses penanganan</li>
-                <li><span className="text-success font-medium">Completed</span> - Permasalahan telah diselesaikan</li>
-                <li><span className="text-destructive font-medium">Cancelled</span> - Tiket dibatalkan</li>
+                <li>
+                  <span className="text-warning font-medium">Pending</span> -
+                  Tiket telah dibuat dan menunggu ditinjau
+                </li>
+                <li>
+                  <span className="text-info font-medium">Disposisi</span> -
+                  Tiket telah ditinjau dan diteruskan ke petugas terkait
+                </li>
+                <li>
+                  <span className="text-primary font-medium">In Progress</span>{" "}
+                  - Tiket sedang dalam proses penanganan
+                </li>
+                <li>
+                  <span className="text-success font-medium">Completed</span> -
+                  Permasalahan telah diselesaikan
+                </li>
+                <li>
+                  <span className="text-destructive font-medium">
+                    Cancelled
+                  </span>{" "}
+                  - Tiket dibatalkan
+                </li>
               </ul>
             </div>
           ),
@@ -72,18 +102,22 @@ export default function GuidePage() {
           content: (
             <div className="space-y-4">
               <p>
-                Anda dapat menambahkan komentar atau informasi tambahan pada tiket yang sudah dibuat:
+                Anda dapat menambahkan komentar atau informasi tambahan pada
+                tiket yang sudah dibuat:
               </p>
               <ol className="list-decimal pl-5 space-y-2">
                 <li>Buka detail tiket yang ingin dikomentari</li>
                 <li>Scroll ke bagian bawah halaman</li>
                 <li>Tulis komentar Anda pada kotak yang tersedia</li>
-                <li>Klik tombol <strong>Kirim Komentar</strong></li>
+                <li>
+                  Klik tombol <strong>Kirim Komentar</strong>
+                </li>
               </ol>
               <div className="bg-muted p-4 rounded-md">
                 <p className="text-sm font-medium">Catatan:</p>
                 <p className="text-sm text-muted-foreground">
-                  Semua komentar akan terlihat oleh petugas yang menangani tiket Anda.
+                  Semua komentar akan terlihat oleh petugas yang menangani tiket
+                  Anda.
                 </p>
               </div>
             </div>
@@ -101,15 +135,19 @@ export default function GuidePage() {
           title: "Mengubah Informasi Profil",
           content: (
             <div className="space-y-4">
-              <p>
-                Untuk mengubah informasi profil Anda:
-              </p>
+              <p>Untuk mengubah informasi profil Anda:</p>
               <ol className="list-decimal pl-5 space-y-2">
                 <li>Klik avatar Anda di pojok kanan atas</li>
-                <li>Pilih <strong>Profil</strong></li>
-                <li>Klik tombol <strong>Edit Profil</strong></li>
+                <li>
+                  Pilih <strong>Profil</strong>
+                </li>
+                <li>
+                  Klik tombol <strong>Edit Profil</strong>
+                </li>
                 <li>Ubah informasi yang diinginkan</li>
-                <li>Klik tombol <strong>Simpan Perubahan</strong></li>
+                <li>
+                  Klik tombol <strong>Simpan Perubahan</strong>
+                </li>
               </ol>
             </div>
           ),
@@ -118,22 +156,27 @@ export default function GuidePage() {
           title: "Mengubah Password",
           content: (
             <div className="space-y-4">
-              <p>
-                Untuk mengubah password akun Anda:
-              </p>
+              <p>Untuk mengubah password akun Anda:</p>
               <ol className="list-decimal pl-5 space-y-2">
                 <li>Klik avatar Anda di pojok kanan atas</li>
-                <li>Pilih <strong>Profil</strong></li>
-                <li>Klik tab <strong>Keamanan</strong></li>
+                <li>
+                  Pilih <strong>Profil</strong>
+                </li>
+                <li>
+                  Klik tab <strong>Keamanan</strong>
+                </li>
                 <li>Masukkan password lama Anda</li>
                 <li>Masukkan password baru</li>
                 <li>Konfirmasi password baru</li>
-                <li>Klik tombol <strong>Ubah Password</strong></li>
+                <li>
+                  Klik tombol <strong>Ubah Password</strong>
+                </li>
               </ol>
               <div className="bg-muted p-4 rounded-md">
                 <p className="text-sm font-medium">Tip Keamanan:</p>
                 <p className="text-sm text-muted-foreground">
-                  Gunakan kombinasi huruf besar, huruf kecil, angka, dan simbol untuk membuat password yang kuat.
+                  Gunakan kombinasi huruf besar, huruf kecil, angka, dan simbol
+                  untuk membuat password yang kuat.
                 </p>
               </div>
             </div>
@@ -151,17 +194,20 @@ export default function GuidePage() {
           title: "Melihat Laporan",
           content: (
             <div className="space-y-4">
-              <p>
-                Untuk melihat laporan dan analitik:
-              </p>
+              <p>Untuk melihat laporan dan analitik:</p>
               <ol className="list-decimal pl-5 space-y-2">
-                <li>Klik menu <strong>Laporan</strong> di sidebar</li>
+                <li>
+                  Klik menu <strong>Laporan</strong> di sidebar
+                </li>
                 <li>Pilih jenis laporan yang ingin dilihat</li>
                 <li>Sesuaikan filter dan rentang waktu jika diperlukan</li>
-                <li>Klik tombol <strong>Terapkan Filter</strong></li>
+                <li>
+                  Klik tombol <strong>Terapkan Filter</strong>
+                </li>
               </ol>
               <p>
-                Fitur ini hanya tersedia untuk pengguna dengan peran Admin dan Executive.
+                Fitur ini hanya tersedia untuk pengguna dengan peran Admin dan
+                Executive.
               </p>
             </div>
           ),
@@ -170,14 +216,16 @@ export default function GuidePage() {
           title: "Mengekspor Laporan",
           content: (
             <div className="space-y-4">
-              <p>
-                Untuk mengekspor laporan ke format Excel atau PDF:
-              </p>
+              <p>Untuk mengekspor laporan ke format Excel atau PDF:</p>
               <ol className="list-decimal pl-5 space-y-2">
                 <li>Buka laporan yang ingin diekspor</li>
-                <li>Klik tombol <strong>Ekspor</strong> di pojok kanan atas</li>
+                <li>
+                  Klik tombol <strong>Ekspor</strong> di pojok kanan atas
+                </li>
                 <li>Pilih format yang diinginkan (Excel atau PDF)</li>
-                <li>Klik <strong>Unduh</strong></li>
+                <li>
+                  Klik <strong>Unduh</strong>
+                </li>
               </ol>
             </div>
           ),
@@ -194,15 +242,19 @@ export default function GuidePage() {
           title: "Mengatur Notifikasi",
           content: (
             <div className="space-y-4">
-              <p>
-                Untuk mengatur preferensi notifikasi:
-              </p>
+              <p>Untuk mengatur preferensi notifikasi:</p>
               <ol className="list-decimal pl-5 space-y-2">
                 <li>Klik avatar Anda di pojok kanan atas</li>
-                <li>Pilih <strong>Pengaturan</strong></li>
-                <li>Klik tab <strong>Notifikasi</strong></li>
+                <li>
+                  Pilih <strong>Pengaturan</strong>
+                </li>
+                <li>
+                  Klik tab <strong>Notifikasi</strong>
+                </li>
                 <li>Sesuaikan pengaturan notifikasi sesuai preferensi Anda</li>
-                <li>Klik tombol <strong>Simpan Perubahan</strong></li>
+                <li>
+                  Klik tombol <strong>Simpan Perubahan</strong>
+                </li>
               </ol>
             </div>
           ),
@@ -211,44 +263,59 @@ export default function GuidePage() {
           title: "Mengatur Tampilan",
           content: (
             <div className="space-y-4">
-              <p>
-                Untuk menyesuaikan tampilan aplikasi:
-              </p>
+              <p>Untuk menyesuaikan tampilan aplikasi:</p>
               <ol className="list-decimal pl-5 space-y-2">
                 <li>Klik avatar Anda di pojok kanan atas</li>
-                <li>Pilih <strong>Pengaturan</strong></li>
-                <li>Klik tab <strong>Tampilan</strong></li>
-                <li>Sesuaikan tema, ukuran font, dan preferensi tampilan lainnya</li>
-                <li>Klik tombol <strong>Simpan Perubahan</strong></li>
+                <li>
+                  Pilih <strong>Pengaturan</strong>
+                </li>
+                <li>
+                  Klik tab <strong>Tampilan</strong>
+                </li>
+                <li>
+                  Sesuaikan tema, ukuran font, dan preferensi tampilan lainnya
+                </li>
+                <li>
+                  Klik tombol <strong>Simpan Perubahan</strong>
+                </li>
               </ol>
             </div>
           ),
         },
       ],
     },
-  ]
+  ];
 
   return (
-    <div className="container mx-auto py-6 space-y-6">
+    <div className="container mx-auto space-y-6">
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="sm" asChild className="text-primary hover:bg-primary-50 hover:text-primary-700">
-          <Link href="/help">
+        <Button
+          variant="ghost"
+          size="sm"
+          asChild
+          className="text-primary hover:bg-primary-50 hover:text-primary-700"
+        >
+          <Button variant={"ghost"} onClick={() => router.back()}>
             <ChevronLeft className="h-4 w-4 mr-1" />
-            Kembali ke Bantuan
-          </Link>
+            Kembali
+          </Button>
         </Button>
       </div>
 
       <div className="flex flex-col space-y-2">
         <h1 className="text-3xl font-bold tracking-tight">Panduan Pengguna</h1>
         <p className="text-muted-foreground">
-          Pelajari cara menggunakan fitur-fitur Service Desk FIK dengan panduan lengkap berikut
+          Pelajari cara menggunakan fitur-fitur Service Desk FIK dengan panduan
+          lengkap berikut
         </p>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         {guides.map((guide) => (
-          <Card key={guide.id} className="overflow-hidden transition-all hover:shadow-md">
+          <Card
+            key={guide.id}
+            className="overflow-hidden transition-all hover:shadow-md"
+          >
             <CardHeader className="bg-primary-50 border-b border-primary-100">
               <div className="flex items-center gap-3">
                 {guide.icon}
@@ -256,7 +323,9 @@ export default function GuidePage() {
               </div>
             </CardHeader>
             <CardContent className="pt-4">
-              <CardDescription className="text-sm text-foreground/80">{guide.description}</CardDescription>
+              <CardDescription className="text-sm text-foreground/80">
+                {guide.description}
+              </CardDescription>
             </CardContent>
           </Card>
         ))}
@@ -265,14 +334,22 @@ export default function GuidePage() {
       <Tabs defaultValue="tickets" className="w-full">
         <TabsList className="w-full justify-start overflow-auto py-2 mb-4">
           {guides.map((guide) => (
-            <TabsTrigger key={guide.id} value={guide.id} className="flex items-center gap-2">
+            <TabsTrigger
+              key={guide.id}
+              value={guide.id}
+              className="flex items-center gap-2"
+            >
               {guide.icon}
               <span>{guide.title}</span>
             </TabsTrigger>
           ))}
         </TabsList>
         {guides.map((guide) => (
-          <TabsContent key={guide.id} value={guide.id} className="border rounded-lg p-6">
+          <TabsContent
+            key={guide.id}
+            value={guide.id}
+            className="border rounded-lg p-6"
+          >
             <div className="space-y-6">
               <div className="flex items-center gap-3 mb-4">
                 {guide.icon}
@@ -283,8 +360,12 @@ export default function GuidePage() {
               <div className="space-y-8 mt-6">
                 {guide.sections.map((section, index) => (
                   <div key={index} className="space-y-4">
-                    <h3 className="text-xl font-semibold text-primary-700">{section.title}</h3>
-                    <div className="pl-4 border-l-2 border-primary-200">{section.content}</div>
+                    <h3 className="text-xl font-semibold text-primary-700">
+                      {section.title}
+                    </h3>
+                    <div className="pl-4 border-l-2 border-primary-200">
+                      {section.content}
+                    </div>
                   </div>
                 ))}
               </div>
@@ -296,14 +377,18 @@ export default function GuidePage() {
       <div className="bg-primary-50 rounded-lg p-6 border border-primary-100">
         <div className="flex flex-col md:flex-row items-center justify-between gap-4">
           <div>
-            <h2 className="text-xl font-bold text-primary-700">Masih memiliki pertanyaan?</h2>
-            <p className="text-muted-foreground">Hubungi tim dukungan kami untuk bantuan lebih lanjut</p>
+            <h2 className="text-xl font-bold text-primary-700">
+              Masih memiliki pertanyaan?
+            </h2>
+            <p className="text-muted-foreground">
+              Hubungi tim dukungan kami untuk bantuan lebih lanjut
+            </p>
           </div>
           <Button asChild className="bg-primary hover:bg-primary-600">
-            <Link href="/help">Hubungi Kami</Link>
+            <Link href="/services/help">Hubungi Kami</Link>
           </Button>
         </div>
       </div>
     </div>
-  )
+  );
 }

@@ -42,7 +42,7 @@ export default function ProfilePage() {
           </TabsTrigger>
         </TabsList>
 
-        <TabProfile dataUser={dataUser} />
+        <TabProfile user={dataUser} />
 
         <TabKeamanan />
       </Tabs>

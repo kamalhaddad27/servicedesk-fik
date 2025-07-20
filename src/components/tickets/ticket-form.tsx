@@ -31,12 +31,15 @@ import { Category, PriorityTicket, Subcategory } from "@prisma/client";
 import { getCategoriesWithSubcategories } from "@/lib/action/category.action";
 import { createTicket } from "@/lib/action/ticket.action";
 import { toast } from "sonner";
+import { FilePicker } from "../ui/file-uploader.tsx";
+import { getSignature } from "@/lib/action/upload.action";
 
 type CategoryWithSubcategories = Category & {
   subcategories: Subcategory[];
 };
 
 export function TicketForm() {
+  const [fileToUpload, setFileToUpload] = useState<File | null>(null);
   const [categories, setCategories] = useState<CategoryWithSubcategories[]>([]);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
 
@@ -72,7 +75,38 @@ export function TicketForm() {
   }, [selectedCategoryId, categories, form]);
 
   const onSubmit = async (values: TCreateTicketSchema) => {
-    const result = await createTicket(values);
+    let attachmentData: { fileName: string; fileUrl: string } | null = null;
+
+    if (fileToUpload) {
+      try {
+        const { timestamp, signature } = await getSignature();
+        const formData = new FormData();
+        formData.append("file", fileToUpload);
+        formData.append("api_key", process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY!);
+        formData.append("signature", signature);
+        formData.append("timestamp", timestamp.toString());
+
+        const endpoint = `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/auto/upload`;
+        const response = await fetch(endpoint, {
+          method: "POST",
+          body: formData,
+        });
+        const data = await response.json();
+
+        if (!data.secure_url) throw new Error("Upload ke Cloudinary gagal.");
+
+        attachmentData = {
+          fileName: fileToUpload.name,
+          fileUrl: data.secure_url,
+        };
+      } catch (error) {
+        toast.error("Gagal mengupload lampiran.");
+        return;
+      }
+    }
+
+    const finalValues = { ...values, attachment: attachmentData };
+    const result = await createTicket(finalValues);
     if (result.success.status) {
       toast.error(result.success.message);
       form.reset();
@@ -280,6 +314,13 @@ export function TicketForm() {
               </FormItem>
             )}
           />
+
+          <div>
+            <FormLabel>Lampiran (Opsional)</FormLabel>
+            <div className="mt-2">
+              <FilePicker file={fileToUpload} onFileChange={setFileToUpload} />
+            </div>
+          </div>
 
           <Button
             type="submit"

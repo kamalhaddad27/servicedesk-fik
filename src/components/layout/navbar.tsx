@@ -1,14 +1,10 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
-// import { useNotifications } from "@/hooks/use-notification";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -17,23 +13,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { NotificationList } from "@/components/notifications/notification-list";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import {
-  Bell,
-  LogOut,
-  Settings,
-  User,
-  Search,
-  HelpCircle,
-  Calendar,
-  PlusCircle,
-  Menu,
-  X,
-  FileText,
-  BarChart3,
-  Ticket,
-} from "lucide-react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { LogOut, User, Menu } from "lucide-react";
 import { useSession } from "@/context/SessionContext";
 import { logout } from "@/lib/action/auth.action";
 import { NotificationBell } from "../notifications/notification-bell";
@@ -111,7 +92,8 @@ export function Navbar({ className, toggleSidebar }: NavbarProps) {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="ghost" size="icon" className="rounded-full">
-              <Avatar className="h-8 w-8 border border-primary-100">
+              <Avatar className="h-8 w-8">
+                <AvatarImage src={user?.image ?? ""} />
                 <AvatarFallback className="bg-primary-50 text-primary-700">
                   {user?.name?.charAt(0) || "U"}
                 </AvatarFallback>

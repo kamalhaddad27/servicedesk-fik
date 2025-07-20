@@ -21,7 +21,7 @@ import {
   BookOpen,
   Settings,
 } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useSession } from "@/context/SessionContext";
@@ -134,19 +134,25 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
 
       // Help & Support section
       help: {
-        name: "Bantuan",
-        icon: <HelpCircle className="h-4 w-4" />,
-        color: "text-amber-500",
+        name: "Layanan",
+        icon: <Layers className="h-4 w-4" />,
+        color: "text-green-500",
         subItems: [
           {
+            name: "Bantuan",
+            href: "/services/help",
+            icon: <HelpCircle className="h-4 w-4" />,
+            color: "text-amber-400",
+          },
+          {
             name: "Panduan Pengguna",
-            href: "/help/guide",
+            href: "/services/guide",
             icon: <BookOpen className="h-4 w-4" />,
             color: "text-amber-400",
           },
           {
             name: "FAQ",
-            href: "/help/contact",
+            href: "/services/contact",
             icon: <HelpCircle className="h-4 w-4" />,
             color: "text-amber-500",
           },
@@ -156,62 +162,6 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
 
     // Role-specific items
     switch (userRole) {
-      case "dosen":
-        return {
-          main: [common.dashboard],
-          groups: [
-            common.tickets,
-            {
-              name: "Layanan",
-              icon: <Layers className="h-4 w-4" />,
-              color: "text-green-500",
-              subItems: [
-                {
-                  name: "Panduan Layanan",
-                  href: "/help/guides",
-                  icon: <Book className="h-4 w-4" />,
-                  color: "text-green-500",
-                },
-                {
-                  name: "Status Layanan",
-                  href: "/service-status",
-                  icon: <Bell className="h-4 w-4" />,
-                  color: "text-green-600",
-                },
-              ],
-            },
-            common.help,
-          ],
-        };
-
-      case "mahasiswa":
-        return {
-          main: [common.dashboard],
-          groups: [
-            common.tickets,
-            {
-              name: "Layanan",
-              icon: <Layers className="h-4 w-4" />,
-              color: "text-green-500",
-              subItems: [
-                {
-                  name: "Panduan Layanan",
-                  href: "/help/guides",
-                  icon: <Book className="h-4 w-4" />,
-                  color: "text-green-500",
-                },
-                {
-                  name: "Status Layanan",
-                  href: "/service-status",
-                  icon: <Bell className="h-4 w-4" />,
-                  color: "text-green-600",
-                },
-              ],
-            },
-            common.help,
-          ],
-        };
-
       case "admin":
         return {
           main: [common.dashboard],
@@ -225,7 +175,7 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
               subItems: [
                 {
                   name: "Pengguna",
-                  href: "/seetings/users",
+                  href: "/settings/users",
                   icon: <Users className="h-4 w-4" />,
                   color: "text-violet-400",
                 },
@@ -413,9 +363,8 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
                   "bg-white/50 backdrop-blur-sm"
                 )}
               >
-                <Avatar
-                  className={cn("h-8 w-8 border border-blue-200 bg-blue-50")}
-                >
+                <Avatar className={cn("h-8 w-8 bg-blue-50")}>
+                  <AvatarImage src={user?.image ?? ""} />
                   <AvatarFallback className="text-blue-700">
                     {user?.name?.charAt(0) || "U"}
                   </AvatarFallback>

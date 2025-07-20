@@ -1,8 +1,8 @@
 "use client";
 
-import { User } from "@/types";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { cn } from "@/lib/utils";
+import { User } from "@prisma/client";
 
 interface UserAvatarProps {
   user: User | undefined;
@@ -34,12 +34,20 @@ export function UserAvatar({
   // Get color scheme based on user role
   const getRoleTheme = () => {
     switch (user.role) {
-      case "user":
+      case "dosen":
         return {
           border: "border-blue-200",
           bg: "bg-blue-50",
           text: "text-blue-700",
           badge: "bg-blue-500",
+        };
+
+      case "mahasiswa":
+        return {
+          border: "border-sky-200",
+          bg: "bg-sky-50",
+          text: "text-sky-700",
+          badge: "bg-sky-500",
         };
 
       case "admin":

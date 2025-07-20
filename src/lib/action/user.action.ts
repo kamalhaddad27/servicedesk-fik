@@ -170,6 +170,7 @@ export async function updateUser({
       major: values.major,
       college: values.college,
       academicYear: values.academicYear,
+      position: values.position,
     };
 
     // Jika password baru diisi, hash dan sertakan dalam data update

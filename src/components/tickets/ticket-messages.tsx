@@ -15,20 +15,22 @@ import {
 } from "@/components/ui/form";
 import { Textarea } from "@/components/ui/textarea";
 import { Checkbox } from "@/components/ui/checkbox";
-import { EyeOff, Send } from "lucide-react";
+import { EyeOff, FileText, Send } from "lucide-react";
 import { useSession } from "@/context/SessionContext";
-import { RoleUser, TicketMessage } from "@prisma/client";
+import { Attachment, RoleUser, TicketMessage } from "@prisma/client";
 import {
   addTicketMessage,
   getTicketMessages,
 } from "@/lib/action/message.action";
 import { toast } from "sonner";
 import { messageSchema, TMassageSchema } from "@/lib/validator/message";
+import { FilePicker } from "../ui/file-uploader.tsx";
+import Image from "next/image.js";
+import { getSignature } from "@/lib/action/upload.action";
 
-// Form schema
-// Tipe untuk pesan yang sudah digabung dengan info pengirim
 type MessageWithSender = TicketMessage & {
   user: { name: string | null; role: RoleUser };
+  attachments: Attachment[];
 };
 
 interface TicketMessagesProps {
@@ -39,6 +41,7 @@ export function TicketMessages({ ticketId }: TicketMessagesProps) {
   const { user: currentUser } = useSession();
   const [messages, setMessages] = useState<MessageWithSender[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [fileToUpload, setFileToUpload] = useState<File | null>(null);
 
   const form = useForm({
     resolver: zodResolver(messageSchema),
@@ -57,20 +60,52 @@ export function TicketMessages({ ticketId }: TicketMessagesProps) {
     fetchMessages();
   }, [ticketId]);
 
-  // Handler untuk submit form
   const onSubmit = async (values: TMassageSchema) => {
-    const result = await addTicketMessage({
+    let attachmentData: { fileName: string; fileUrl: string } | null = null;
+    if (fileToUpload) {
+      try {
+        const { timestamp, signature } = await getSignature();
+        const formData = new FormData();
+        formData.append("file", fileToUpload);
+        formData.append("api_key", process.env.NEXT_PUBLIC_CLOUDINARY_API_KEY!);
+        formData.append("signature", signature);
+        formData.append("timestamp", timestamp.toString());
+
+        const endpoint = `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/auto/upload`;
+        const response = await fetch(endpoint, {
+          method: "POST",
+          body: formData,
+        });
+        const data = await response.json();
+
+        if (!data.secure_url) throw new Error("Upload ke Cloudinary gagal.");
+
+        attachmentData = {
+          fileName: fileToUpload.name,
+          fileUrl: data.secure_url,
+        };
+      } catch (error) {
+        toast.error("Gagal mengupload lampiran.");
+        return;
+      }
+    }
+
+    const finalValues = {
       ticketId,
       message: values.message,
       isInternal: values.isInternal,
-    });
+      attachment: attachmentData,
+    };
 
-    if (result.success && result.data) {
+    const result = await addTicketMessage(finalValues);
+
+    if (result?.success && result.data) {
       toast.success(result.message);
       setMessages((prev) => [...prev, result.data as MessageWithSender]);
       form.reset();
+      window.location.reload();
     } else {
-      toast.error(result.message);
+      toast.error(result?.message);
     }
   };
 
@@ -115,6 +150,39 @@ export function TicketMessages({ ticketId }: TicketMessagesProps) {
                   )}
                 </div>
                 <p className="whitespace-pre-wrap text-sm">{message.message}</p>
+                {message.attachments && message.attachments.length > 0 && (
+                  <div className="mt-2 space-y-2">
+                    {message.attachments.map((attachment) => {
+                      const isImage = /\.(jpg|jpeg|png|gif)$/i.test(
+                        attachment.fileName
+                      );
+                      return (
+                        <a
+                          key={attachment.id}
+                          href={attachment.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex items-center gap-2 p-2 text-xs border rounded-md hover:bg-background"
+                        >
+                          {isImage ? (
+                            <Image
+                              src={attachment.fileUrl}
+                              alt={attachment.fileName}
+                              width={24}
+                              height={24}
+                              className="h-6 w-6 rounded-sm object-cover"
+                            />
+                          ) : (
+                            <FileText className="h-4 w-4" />
+                          )}
+                          <span className="font-medium">
+                            {attachment.fileName}
+                          </span>
+                        </a>
+                      );
+                    })}
+                  </div>
+                )}
                 <p
                   className={`text-xs mt-2 opacity-70 ${
                     message.userId === currentUser?.id
@@ -167,6 +235,8 @@ export function TicketMessages({ ticketId }: TicketMessagesProps) {
                 )}
               />
             )}
+
+            <FilePicker file={fileToUpload} onFileChange={setFileToUpload} />
             <div className="flex justify-end">
               <Button type="submit" disabled={form.formState.isSubmitting}>
                 <Send className="mr-2 h-4 w-4" />

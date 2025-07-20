@@ -65,3 +65,20 @@ export async function updatePassword(values: TUpdatePasswordSchema) {
     return { success: false, message: "Terjadi kesalahan pada server." };
   }
 }
+
+export async function updateProfileImage(imageUrl: string) {
+  try {
+    const user = await getProfile();
+    if (!user) throw new Error("Anda harus login.");
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { image: imageUrl },
+    });
+
+    revalidatePath("/profile");
+    return { success: true, message: "Foto profil berhasil diperbarui." };
+  } catch (error: any) {
+    return { success: false, message: error.message };
+  }
+}
