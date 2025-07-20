@@ -123,7 +123,7 @@ const UpdateProfile = ({ user, onSuccess }: IUpdateProfile) => {
           )}
         />
 
-        {user?.role !== "mahasiswa" && (
+        {user?.role === "dosen" && (
           <>
             <FormField
               control={form.control}
