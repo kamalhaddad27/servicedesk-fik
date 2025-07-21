@@ -205,14 +205,6 @@ export default function HelpPage() {
               </Accordion>
             </Tabs>
           </CardContent>
-          <CardFooter>
-            <Button variant="outline" asChild className="w-full">
-              <Link href="/help/faq">
-                Lihat Semua FAQ
-                <ExternalLink className="ml-2 h-4 w-4" />
-              </Link>
-            </Button>
-          </CardFooter>
         </Card>
       </motion.div>
     </div>

@@ -206,13 +206,13 @@ export function AdminDashboard({ stats }: { stats: IAdminDashboard }) {
                 </Link>
               </Button>
               <Button asChild variant="outline" className="justify-start">
-                <Link href="/users">
+                <Link href="/settings/users">
                   <Users className="mr-2 h-4 w-4" />
                   Kelola Pengguna
                 </Link>
               </Button>
               <Button asChild variant="outline" className="justify-start">
-                <Link href="/categories">
+                <Link href="/settings/categories">
                   <Database className="mr-2 h-4 w-4" />
                   Kelola Kategori
                 </Link>

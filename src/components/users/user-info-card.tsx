@@ -64,11 +64,6 @@ export function UserInfoCard({ user }: UserInfoCardProps) {
           </div>
         </div>
       </CardContent>
-      <CardFooter>
-        <Button variant="outline" className="w-full" asChild>
-          <a href={`mailto:${user.email}`}>Kirim Email</a>
-        </Button>
-      </CardFooter>
     </Card>
   );
 }

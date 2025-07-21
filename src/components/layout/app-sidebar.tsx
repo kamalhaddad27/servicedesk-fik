@@ -150,12 +150,6 @@ export function Sidebar({ isOpen, userRole }: SidebarProps) {
             icon: <BookOpen className="h-4 w-4" />,
             color: "text-amber-400",
           },
-          {
-            name: "FAQ",
-            href: "/services/contact",
-            icon: <HelpCircle className="h-4 w-4" />,
-            color: "text-amber-500",
-          },
         ],
       },
     };

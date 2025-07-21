@@ -59,7 +59,7 @@ export function UserDashboard({ stats }: { stats: IUserDashboard }) {
           description="Butuh bantuan? Ajukan tiket dan kami akan segera membantu Anda."
         />
         <Button asChild>
-          <Link href="/tickets/new">
+          <Link href="/tickets/create">
             <PlusCircle className="mr-2 h-4 w-4" />
             Buat Tiket Baru
           </Link>

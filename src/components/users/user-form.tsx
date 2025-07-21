@@ -172,35 +172,9 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
           />
         )}
 
-        {user?.role !== "mahasiswa" && (
+        {user?.role === "dosen" && (
           <>
-            <FormField
-              control={form.control}
-              name="department"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Department</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Pilih Department" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value={StaffDepartment.LAB}>LAB</SelectItem>
-                      <SelectItem value={StaffDepartment.TU}>TU</SelectItem>
-                      <SelectItem value={StaffDepartment.REKTORAT}>
-                        Rektorat
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+            
             <FormField
               control={form.control}
               name="position"
@@ -238,28 +212,15 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
               name="major"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Major</FormLabel>
+                  <FormLabel>prodi</FormLabel>
                   <FormControl>
-                    <Input placeholder="Major" {...field} />
+                    <Input placeholder="prodi anda" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="college"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>College</FormLabel>
-                  <FormControl>
-                    <Input placeholder="College" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
           </>
         )}
 

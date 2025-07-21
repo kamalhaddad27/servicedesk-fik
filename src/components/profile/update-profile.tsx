@@ -170,19 +170,6 @@ const UpdateProfile = ({ user, onSuccess }: IUpdateProfile) => {
               )}
             />
 
-            <FormField
-              control={form.control}
-              name="college"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Fakultas</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Fakultas" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
 
             <FormField
               control={form.control}
