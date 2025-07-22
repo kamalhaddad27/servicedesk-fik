@@ -64,28 +64,28 @@ export function UserProfileCard({ user }: UserProfileCardProps) {
                 </div>
               </div>
 
-              {user.role !== "mahasiswa" && (
+              {user.role === "dosen" && (
                 <div>
-                  <h3 className="text-sm font-medium mb-2">
-                    Departemen & Jabatan
-                  </h3>
-                  <div className="space-y-2">
-                    <div className="flex items-center text-sm">
-                      <Building className="mr-2 h-4 w-4 text-muted-foreground" />
-                      <span>{user.department || "-"}</span>
-                    </div>
-                    {user.position && (
-                      <div className="flex items-center text-sm">
-                        <Briefcase className="mr-2 h-4 w-4 text-muted-foreground" />
-                        <span>{user.position}</span>
-                      </div>
-                    )}
+                  <h3 className="text-sm font-medium mb-2">Jabatan</h3>
+                  <div className="flex items-center text-sm">
+                    <Briefcase className="mr-2 h-4 w-4 text-muted-foreground" />
+                    <span>{user.position}</span>
+                  </div>
+                </div>
+              )}
+
+              {user.role === "staff" && (
+                <div>
+                  <h3 className="text-sm font-medium mb-2">Departemen</h3>
+                  <div className="flex items-center text-sm">
+                    <Building className="mr-2 h-4 w-4 text-muted-foreground" />
+                    <span>{user.department || "-"}</span>
                   </div>
                 </div>
               )}
 
               {user.role === "mahasiswa" && (
-                <div className="md:col-span-2">
+                <div>
                   <h3 className="text-sm font-medium mb-2">
                     Informasi Akademik
                   </h3>

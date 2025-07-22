@@ -156,16 +156,30 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
           )}
         />
 
-        {user?.role === "dosen" && (
+        {user?.role === "staff" && (
           <FormField
             control={form.control}
-            name="nip"
+            name="department"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>NIP</FormLabel>
-                <FormControl>
-                  <Input placeholder="NIP" {...field} />
-                </FormControl>
+                <FormLabel>Department</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Pilih department" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value={StaffDepartment.LAB}>LAB</SelectItem>
+                    <SelectItem value={StaffDepartment.REKTORAT}>
+                      REKTORAT
+                    </SelectItem>
+                    <SelectItem value={StaffDepartment.TU}>TU</SelectItem>
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}
@@ -174,7 +188,19 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
 
         {user?.role === "dosen" && (
           <>
-            
+            <FormField
+              control={form.control}
+              name="nip"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>NIP</FormLabel>
+                  <FormControl>
+                    <Input placeholder="NIP" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
             <FormField
               control={form.control}
               name="position"
@@ -220,7 +246,6 @@ export function UserForm({ user, onSuccess }: UserFormProps) {
                 </FormItem>
               )}
             />
-
           </>
         )}
 

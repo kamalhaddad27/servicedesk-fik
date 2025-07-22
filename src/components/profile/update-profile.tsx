@@ -11,11 +11,18 @@ import {
 import { Input } from "../ui/input";
 import { Button } from "../ui/button";
 import { Loader2 } from "lucide-react";
-import { User } from "@prisma/client";
+import { StaffDepartment, User } from "@prisma/client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { TUpdateUserSchema, updateUserSchema } from "@/lib/validator/user";
 import { updateUser } from "@/lib/action/user.action";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../ui/select";
 
 interface IUpdateProfile {
   user: User | null;
@@ -123,6 +130,36 @@ const UpdateProfile = ({ user, onSuccess }: IUpdateProfile) => {
           )}
         />
 
+        {user?.role === "staff" && (
+          <FormField
+            control={form.control}
+            name="department"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Department</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Pilih department" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value={StaffDepartment.LAB}>LAB</SelectItem>
+                    <SelectItem value={StaffDepartment.REKTORAT}>
+                      REKTORAT
+                    </SelectItem>
+                    <SelectItem value={StaffDepartment.TU}>TU</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+        )}
+
         {user?.role === "dosen" && (
           <>
             <FormField
@@ -169,7 +206,6 @@ const UpdateProfile = ({ user, onSuccess }: IUpdateProfile) => {
                 </FormItem>
               )}
             />
-
 
             <FormField
               control={form.control}
