@@ -34,7 +34,10 @@ export async function updateTicketDetails({
   payload: UpdateTicketPayload;
 }) {
   try {
-    await checkPermission(ticketId); // Cek izin
+    const { user: updater, ticket: originalTicket } = await checkPermission(
+      ticketId
+    );
+    if (!originalTicket) throw new Error("Tiket tidak ditemukan.");
 
     const updatedTicket = await prisma.ticket.update({
       where: { id: ticketId },
@@ -56,6 +59,43 @@ export async function updateTicketDetails({
         url: `/tickets/${ticketId}`,
         type: "TICKET",
       });
+    }
+
+    if (originalTicket.userId !== updater.id) {
+      let notifMessage = "";
+      let notifTitle = "Tiket Anda Diperbarui";
+
+      if (payload.status && payload.status !== originalTicket.status) {
+        notifMessage = `Status tiket "${originalTicket.subject.substring(
+          0,
+          20
+        )}..." diubah menjadi ${payload.status}.`;
+      } else if (
+        payload.priority &&
+        payload.priority !== originalTicket.priority
+      ) {
+        notifMessage = `Prioritas tiket "${originalTicket.subject.substring(
+          0,
+          20
+        )}..." diubah menjadi ${payload.priority}.`;
+      } else if (
+        payload.assignedToId &&
+        payload.assignedToId !== originalTicket.assignedToId
+      ) {
+        notifTitle = "Tiket Anda Sedang Diproses";
+        notifMessage = `Tiket Anda telah ditugaskan kepada staf untuk ditangani.`;
+      }
+
+      // Kirim notifikasi jika ada pesan yang relevan
+      if (notifMessage) {
+        await createNotification({
+          userId: originalTicket.userId,
+          title: notifTitle,
+          message: notifMessage,
+          url: `/tickets/${ticketId}`,
+          type: "TICKET",
+        });
+      }
     }
 
     revalidatePath(`/tickets/${ticketId}`);
