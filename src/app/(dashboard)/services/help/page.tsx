@@ -48,13 +48,13 @@ export default function HelpPage() {
     {
       question: "Berapa lama waktu penyelesaian tiket?",
       answer:
-        "Waktu penyelesaian tiket bervariasi tergantung prioritas dan kompleksitas masalah. Tiket prioritas rendah biasanya diselesaikan dalam 3 hari kerja, prioritas sedang dalam 2 hari kerja, prioritas tinggi dalam 1 hari kerja, dan prioritas urgent dalam 4 jam.",
+        "Waktu penyelesaian tiket bervariasi tergantung prioritas dan kompleksitas masalah, semakin mudah masalah yang dilaporkan maka akan semakin cepat selesai atau jika semakin sulit permasalahan yang dilaporkan makan semakin lama waktu yang digunakan untuk menyelesaikannya.",
       category: "general",
     },
     {
       question: "Bagaimana cara melacak status tiket saya?",
       answer:
-        "Anda dapat melacak status tiket di halaman 'Tiket'. Klik pada tiket untuk melihat detail dan riwayat aktivitas. Status tiket akan ditampilkan sebagai 'pending', 'in-progress', 'completed', atau 'cancelled'.",
+        "Anda dapat melacak status tiket di halaman 'Tiket'. Klik pada tiket untuk melihat detail dan riwayat aktivitas. Status tiket akan ditampilkan sebagai 'pending', 'in-progress', 'completed', atau 'cancelled' dan juga admin dapat mengirim pesan proses dari tiket itu sampai mana.",
       category: "general",
     },
     {
@@ -67,7 +67,7 @@ export default function HelpPage() {
       question:
         "Apa yang harus dilakukan jika tiket saya tidak kunjung ditanggapi?",
       answer:
-        "Jika tiket Anda belum ditanggapi dalam jangka waktu yang wajar, Anda dapat mengirim pesan pengingat di tiket tersebut atau menghubungi admin melalui halaman 'Kontak Support'.",
+        "Jika tiket Anda belum ditanggapi itu hal yang wajar karena admin banyak mengurus tiket lain, tetap bersabar menunggu sampai tiket diproses oleh admin maupun teknisi'.",
       category: "general",
     },
     {
@@ -77,9 +77,9 @@ export default function HelpPage() {
       category: "technical",
     },
     {
-      question: "Apakah saya akan mendapat notifikasi saat tiket diperbarui?",
+      question: "Apakah saya akan mendapat notifikasi saat tiket diselesaikan?",
       answer:
-        "Ya, Anda akan menerima notifikasi di aplikasi dan email (jika diaktifkan) setiap kali ada pembaruan pada tiket Anda, termasuk komentar baru, perubahan status, atau penyelesaian tiket.",
+        "Ya, Anda akan menerima notifikasi di website ini yang ada pada lonceng dibagian kanan atas.",
       category: "technical",
     },
     {
@@ -163,11 +163,6 @@ export default function HelpPage() {
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="all">
-              <TabsList className="mb-4">
-                <TabsTrigger value="all">Semua</TabsTrigger>
-                <TabsTrigger value="general">Umum</TabsTrigger>
-                <TabsTrigger value="technical">Teknis</TabsTrigger>
-              </TabsList>
               <Accordion type="single" collapsible className="w-full">
                 {filteredFaq.length > 0 ? (
                   filteredFaq.map((faq, index) => (

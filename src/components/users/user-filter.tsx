@@ -57,23 +57,6 @@ const UserFilter = () => {
           </SelectContent>
         </Select>
 
-        <Select
-          value={searchParams.get("department") || "all"}
-          onValueChange={(value) => handleFilterChange("department", value)}
-        >
-          <SelectTrigger className="h-9 w-auto">
-            <SelectValue placeholder="Departemen" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Semua Departemen</SelectItem>
-            <SelectItem value="informatika">Informatika</SelectItem>
-            <SelectItem value="sistem_informasi">Sistem Informasi</SelectItem>
-            <SelectItem value="teknik_komputer">Teknik Komputer</SelectItem>
-            <SelectItem value="akademik">Akademik</SelectItem>
-            <SelectItem value="keuangan">Keuangan</SelectItem>
-          </SelectContent>
-        </Select>
-
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
             <Button>

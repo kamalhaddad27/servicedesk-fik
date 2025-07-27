@@ -49,7 +49,7 @@ export function MobileNav({ className, userRole }: MobileNavProps) {
     },
     {
       name: "Bantuan",
-      href: "/help",
+      href: "/services/help",
       icon: <HelpCircle className="h-5 w-5" />,
       roles: ["mahasiswa", "staff", "admin"],
     },
