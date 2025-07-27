@@ -184,106 +184,6 @@ export default function GuidePage() {
         },
       ],
     },
-    {
-      id: "reports",
-      title: "Laporan & Analitik",
-      icon: <BarChart3 className="h-5 w-5 text-primary" />,
-      description: "Panduan untuk mengakses dan menggunakan fitur laporan",
-      sections: [
-        {
-          title: "Melihat Laporan",
-          content: (
-            <div className="space-y-4">
-              <p>Untuk melihat laporan dan analitik:</p>
-              <ol className="list-decimal pl-5 space-y-2">
-                <li>
-                  Klik menu <strong>Laporan</strong> di sidebar
-                </li>
-                <li>Pilih jenis laporan yang ingin dilihat</li>
-                <li>Sesuaikan filter dan rentang waktu jika diperlukan</li>
-                <li>
-                  Klik tombol <strong>Terapkan Filter</strong>
-                </li>
-              </ol>
-              <p>
-                Fitur ini hanya tersedia untuk pengguna dengan peran Admin dan
-                Executive.
-              </p>
-            </div>
-          ),
-        },
-        {
-          title: "Mengekspor Laporan",
-          content: (
-            <div className="space-y-4">
-              <p>Untuk mengekspor laporan ke format Excel atau PDF:</p>
-              <ol className="list-decimal pl-5 space-y-2">
-                <li>Buka laporan yang ingin diekspor</li>
-                <li>
-                  Klik tombol <strong>Ekspor</strong> di pojok kanan atas
-                </li>
-                <li>Pilih format yang diinginkan (Excel atau PDF)</li>
-                <li>
-                  Klik <strong>Unduh</strong>
-                </li>
-              </ol>
-            </div>
-          ),
-        },
-      ],
-    },
-    {
-      id: "settings",
-      title: "Pengaturan Sistem",
-      icon: <Settings className="h-5 w-5 text-primary" />,
-      description: "Panduan untuk mengonfigurasi pengaturan sistem",
-      sections: [
-        {
-          title: "Mengatur Notifikasi",
-          content: (
-            <div className="space-y-4">
-              <p>Untuk mengatur preferensi notifikasi:</p>
-              <ol className="list-decimal pl-5 space-y-2">
-                <li>Klik avatar Anda di pojok kanan atas</li>
-                <li>
-                  Pilih <strong>Pengaturan</strong>
-                </li>
-                <li>
-                  Klik tab <strong>Notifikasi</strong>
-                </li>
-                <li>Sesuaikan pengaturan notifikasi sesuai preferensi Anda</li>
-                <li>
-                  Klik tombol <strong>Simpan Perubahan</strong>
-                </li>
-              </ol>
-            </div>
-          ),
-        },
-        {
-          title: "Mengatur Tampilan",
-          content: (
-            <div className="space-y-4">
-              <p>Untuk menyesuaikan tampilan aplikasi:</p>
-              <ol className="list-decimal pl-5 space-y-2">
-                <li>Klik avatar Anda di pojok kanan atas</li>
-                <li>
-                  Pilih <strong>Pengaturan</strong>
-                </li>
-                <li>
-                  Klik tab <strong>Tampilan</strong>
-                </li>
-                <li>
-                  Sesuaikan tema, ukuran font, dan preferensi tampilan lainnya
-                </li>
-                <li>
-                  Klik tombol <strong>Simpan Perubahan</strong>
-                </li>
-              </ol>
-            </div>
-          ),
-        },
-      ],
-    },
   ];
 
   return (
@@ -373,22 +273,6 @@ export default function GuidePage() {
           </TabsContent>
         ))}
       </Tabs>
-
-      <div className="bg-primary-50 rounded-lg p-6 border border-primary-100">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4">
-          <div>
-            <h2 className="text-xl font-bold text-primary-700">
-              Masih memiliki pertanyaan?
-            </h2>
-            <p className="text-muted-foreground">
-              Hubungi tim dukungan kami untuk bantuan lebih lanjut
-            </p>
-          </div>
-          <Button asChild className="bg-primary hover:bg-primary-600">
-            <Link href="/services/help">Hubungi Kami</Link>
-          </Button>
-        </div>
-      </div>
     </div>
   );
 }

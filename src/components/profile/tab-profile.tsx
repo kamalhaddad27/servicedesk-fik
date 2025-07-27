@@ -148,15 +148,6 @@ const TabProfile = ({ user }: ITabProfile) => {
               <>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
-                    Fakultas
-                  </p>
-                  <p className="flex items-center gap-2 mt-1">
-                    <Calendar className="h-4 w-4 text-primary" />
-                    <span>{user?.college || "-"}</span>
-                  </p>
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-muted-foreground">
                     Program Studi
                   </p>
                   <p className="flex items-center gap-2 mt-1">
