@@ -76,10 +76,6 @@ export default function GuidePage() {
                   Tiket telah dibuat dan menunggu ditinjau
                 </li>
                 <li>
-                  <span className="text-info font-medium">Disposisi</span> -
-                  Tiket telah ditinjau dan diteruskan ke petugas terkait
-                </li>
-                <li>
                   <span className="text-primary font-medium">In Progress</span>{" "}
                   - Tiket sedang dalam proses penanganan
                 </li>
