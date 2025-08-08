@@ -88,25 +88,27 @@ const TabProfile = ({ user }: ITabProfile) => {
                 </div>
                 <CardDescription>Detail informasi profil Anda</CardDescription>
               </div>
-              <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-                <DialogTrigger asChild>
-                  <Button>
-                    <Edit className="mr-2 h-4 w-4" /> Edit
-                  </Button>
-                </DialogTrigger>
-                <DialogContent>
-                  <DialogHeader>
-                    <DialogTitle>Edit Profile</DialogTitle>
-                    <DialogDescription>
-                      Perbarui detail diri anda
-                    </DialogDescription>
-                  </DialogHeader>
-                  <UpdateProfile
-                    user={user}
-                    onSuccess={() => setIsEditOpen(false)}
-                  />
-                </DialogContent>
-              </Dialog>
+              {user?.role !== "mahasiswa" && (
+                <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+                  <DialogTrigger asChild>
+                    <Button>
+                      <Edit className="mr-2 h-4 w-4" /> Edit
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Edit Profile</DialogTitle>
+                      <DialogDescription>
+                        Perbarui detail diri anda
+                      </DialogDescription>
+                    </DialogHeader>
+                    <UpdateProfile
+                      user={user}
+                      onSuccess={() => setIsEditOpen(false)}
+                    />
+                  </DialogContent>
+                </Dialog>
+              )}
             </div>
           </CardHeader>
           <CardContent className="pt-6 space-y-6 grid md:grid-cols-2">
