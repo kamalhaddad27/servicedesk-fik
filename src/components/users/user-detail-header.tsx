@@ -50,52 +50,54 @@ export function UserDetailHeader({ user }: { user: User }) {
         Kembali
       </Button>
 
-      <div className="flex items-center gap-2">
-        {/* Dialog Edit */}
-        <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
-          <DialogTrigger asChild>
-            <Button variant="outline" size="sm">
-              <Edit className="mr-2 h-4 w-4" /> Edit
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Edit Pengguna</DialogTitle>
-              <DialogDescription>
-                Perbarui detail untuk {user.name}.
-              </DialogDescription>
-            </DialogHeader>
-            <UserForm user={user} onSuccess={() => setIsEditOpen(false)} />
-          </DialogContent>
-        </Dialog>
+      {user.role !== "mahasiswa" && (
+        <div className="flex items-center gap-2">
+          {/* Dialog Edit */}
+          <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
+            <DialogTrigger asChild>
+              <Button variant="outline" size="sm">
+                <Edit className="mr-2 h-4 w-4" /> Edit
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Edit Pengguna</DialogTitle>
+                <DialogDescription>
+                  Perbarui detail untuk {user.name}.
+                </DialogDescription>
+              </DialogHeader>
+              <UserForm user={user} onSuccess={() => setIsEditOpen(false)} />
+            </DialogContent>
+          </Dialog>
 
-        {/* Dialog Konfirmasi Hapus */}
-        <AlertDialog>
-          <AlertDialogTrigger asChild>
-            <Button variant="destructive" size="sm">
-              <Trash2 className="mr-2 h-4 w-4" /> Hapus
-            </Button>
-          </AlertDialogTrigger>
-          <AlertDialogContent>
-            <AlertDialogHeader>
-              <AlertDialogTitle>Anda Yakin?</AlertDialogTitle>
-              <AlertDialogDescription>
-                Tindakan ini tidak bisa dibatalkan. Ini akan menghapus pengguna
-                secara permanen.
-              </AlertDialogDescription>
-            </AlertDialogHeader>
-            <AlertDialogFooter>
-              <AlertDialogCancel>Batal</AlertDialogCancel>
-              <AlertDialogAction
-                onClick={handleDelete}
-                className="bg-red-600 hover:bg-red-700"
-              >
-                Ya, Hapus
-              </AlertDialogAction>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialog>
-      </div>
+          {/* Dialog Konfirmasi Hapus */}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="destructive" size="sm">
+                <Trash2 className="mr-2 h-4 w-4" /> Hapus
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Anda Yakin?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Tindakan ini tidak bisa dibatalkan. Ini akan menghapus
+                  pengguna secara permanen.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Batal</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={handleDelete}
+                  className="bg-red-600 hover:bg-red-700"
+                >
+                  Ya, Hapus
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+        </div>
+      )}
     </div>
   );
 }

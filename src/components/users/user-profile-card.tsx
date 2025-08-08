@@ -84,7 +84,7 @@ export function UserProfileCard({ user }: UserProfileCardProps) {
                 </div>
               )}
 
-              {user.role === "mahasiswa" && (
+              {/* {user.role === "mahasiswa" && (
                 <div>
                   <h3 className="text-sm font-medium mb-2">
                     Informasi Akademik
@@ -104,7 +104,7 @@ export function UserProfileCard({ user }: UserProfileCardProps) {
                     </div>
                   </div>
                 </div>
-              )}
+              )} */}
             </div>
           </TabsContent>
 

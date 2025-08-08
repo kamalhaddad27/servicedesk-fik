@@ -37,11 +37,11 @@ export default function LoginPage() {
 
   const onSubmit = async (data: TLoginSchema) => {
     const result = await login(data);
-    if (result.success.status) {
-      toast.success(result.success.message);
+    if (result.success) {
+      toast.success(result.message);
       window.location.href = "/dashboard";
     } else {
-      toast.error(result.error.message);
+      toast.error(result.message);
     }
   };
 
@@ -53,9 +53,9 @@ export default function LoginPage() {
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel>Email / NIM</FormLabel>
               <FormControl>
-                <Input type="email" placeholder="Email" {...field} />
+                <Input placeholder="Email atau NIM" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>

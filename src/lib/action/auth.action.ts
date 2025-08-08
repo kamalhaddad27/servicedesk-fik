@@ -44,52 +44,87 @@ export async function register(values: TRegisterSchema) {
 // LOGIN ACTION (Dengan Cookie)
 export async function login(values: TLoginSchema) {
   try {
-    const user = await prisma.user.findUnique({
-      where: { email: values.email },
-    });
+    const { email: username, password } = values;
+    const isMahasiswaLogin = /^\d+$/.test(username);
 
-    if (!user) {
-      return responAction({
-        statusError: true,
-        messageError: "Email atau password salah.",
+    if (isMahasiswaLogin) {
+      // --- ALUR LOGIN MAHASISWA ---
+      const basicAuth = Buffer.from(
+        `${process.env.UPNVJ_BASIC_AUTH_USERNAME}:${process.env.UPNVJ_BASIC_AUTH_PASSWORD}`
+      ).toString("base64");
+      const response = await fetch(process.env.UPNVJ_API_URL!, {
+        method: "POST",
+        headers: {
+          Authorization: `Basic ${basicAuth}`,
+          [process.env.UPNVJ_API_KEY_NAME!]: process.env.UPNVJ_API_KEY_SECRET!,
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: new URLSearchParams({ username, password }),
       });
-    }
+      if (!response.ok)
+        throw new Error("Gagal terhubung ke server autentikasi.");
 
-    const isPasswordValid = await bcrypt.compare(
-      values.password,
-      user.password
-    );
-    if (!isPasswordValid) {
-      return responAction({
-        statusError: true,
-        messageError: "Email atau password salah.",
+      const result = await response.json();
+
+      // --- PERBAIKAN DI SINI ---
+      if (result.success !== true) {
+        // Cek properti 'success'
+        throw new Error(result.message || "NIM atau Password salah.");
+      }
+
+      let user = await prisma.user.findUnique({ where: { nim: username } });
+      if (!user) {
+        user = await prisma.user.create({
+          data: {
+            name: result.data.nama,
+            email: `${username}@mahasiswa.upnvj.ac.id`,
+            nim: username,
+            role: RoleUser.mahasiswa,
+            password: await bcrypt.hash(password, 10),
+          },
+        });
+      }
+
+      const token = jwt.sign(
+        { id: user.id, role: user.role, name: user.name, nim: user.nim },
+        JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+      (await cookies()).set("session_token", token, {
+        // httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 60 * 60 * 24 * 7,
+        path: "/",
       });
+
+      return { success: true, message: "Login sebagai mahasiswa berhasil!" };
+    } else {
+      // --- ALUR LOGIN LAMA (ADMIN/STAFF/DOSEN) ---
+      const user = await prisma.user.findUnique({ where: { email: username } });
+      if (!user || user.role === "mahasiswa")
+        throw new Error("Email atau password salah.");
+
+      const isPasswordValid = await bcrypt.compare(password, user.password);
+      if (!isPasswordValid) throw new Error("Email atau password salah.");
+
+      const token = jwt.sign(
+        { id: user.id, role: user.role, name: user.name },
+        JWT_SECRET,
+        { expiresIn: "7d" }
+      );
+      (await cookies()).set("session_token", token, {
+        // httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        maxAge: 60 * 60 * 24 * 7,
+        path: "/",
+      });
+
+      return { success: true, message: "Login berhasil!" };
     }
-
-    // Buat JWT Token
-    const token = jwt.sign(
-      { id: user.id, role: user.role, name: user.name },
-      JWT_SECRET,
-      { expiresIn: "7d" } // Token berlaku selama 7 hari
-    );
-
-    // Simpan token di HTTP-Only Cookie
-    (await cookies()).set("session_token", token, {
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 60 * 60 * 24 * 7, // 7 hari
-      path: "/",
-    });
-
-    return responAction({
-      statusSuccess: true,
-      messageSuccess: "Login berhasil!",
-    });
-  } catch (error) {
+  } catch (error: any) {
     console.error("LOGIN_ERROR:", error);
-    return responAction({
-      statusError: true,
-      messageError: "Terjadi kesalahan internal.",
-    });
+
+    return { success: false, message: error.message || "Terjadi kesalahan." };
   }
 }
 

@@ -42,7 +42,7 @@ interface ITabProfile {
 const TabProfile = ({ user }: ITabProfile) => {
   const [dataUser, setDataUser] = useState<User | null>(null);
   const [isEditOpen, setIsEditOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false); // Untuk menonaktifkan tombol saat update
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     getProfile().then((user) => setDataUser(user));
@@ -53,7 +53,7 @@ const TabProfile = ({ user }: ITabProfile) => {
     const result = await updateProfileImage(url);
     if (result.success) {
       toast.success(result.message);
-      // Perbarui state lokal untuk menampilkan gambar baru secara instan
+
       setDataUser((prev) => (prev ? { ...prev, image: url } : null));
     } else {
       toast.error(result.message);
@@ -144,7 +144,7 @@ const TabProfile = ({ user }: ITabProfile) => {
                 <span>{user?.role}</span>
               </p>
             </div>
-            {user?.role === "mahasiswa" && (
+            {/* {user?.role === "mahasiswa" && (
               <>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">
@@ -174,7 +174,7 @@ const TabProfile = ({ user }: ITabProfile) => {
                   </p>
                 </div>
               </>
-            )}
+            )} */}
 
             {user?.role === "dosen" && (
               <>

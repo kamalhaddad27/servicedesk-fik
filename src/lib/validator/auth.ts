@@ -2,13 +2,8 @@ import { RoleUser } from "@prisma/client";
 import { z } from "zod";
 
 export const loginSchema = z.object({
-  email: z.string().email({
-    message: "Format email tidak valid",
-  }),
-  password: z
-    .string()
-    .min(6, { message: "Minimal karakter password adalah 6 karakter" })
-    .max(50, { message: "Maksimal karakter password adalah 50" }),
+  email: z.string().min(1, { message: "Username/Email tidak boleh kosong." }),
+  password: z.string().min(1, { message: "Password tidak boleh kosong." }),
 });
 
 export const registerSchema = z.object({
