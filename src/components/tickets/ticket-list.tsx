@@ -49,7 +49,7 @@ export function TicketList({ tickets }: TicketListProps) {
           Saat ini tidak ada tiket yang perlu ditampilkan.
         </p>
         <Button asChild className="mt-4">
-          <Link href="/tickets/new">
+          <Link href="/tickets/create">
             <PlusCircle className="mr-2 h-4 w-4" />
             Buat Tiket Baru
           </Link>
